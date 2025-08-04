@@ -1,0 +1,11 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/defaults",
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_APP_URL": "https://loancast.vercel.app"
+  }
+}
