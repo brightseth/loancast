@@ -133,10 +133,8 @@ Borrower: Please repay to maintain your reputation.
 Community: This affects the borrower's credit score.`
 
   // Create warning cast as quote cast of original loan
-  const cast = await createLoanCast(
-    'system-signer', // Would need a system signer
-    0, 0, new Date(), warningText
-  )
+  // Mock cast for warning - in production would use actual createLoanCast
+  const cast = { hash: `warning-${Date.now()}` }
 
   return cast
 }
@@ -168,10 +166,8 @@ Original due: ${new Date(loan.due_ts).toLocaleDateString()}
 
 This impacts the borrower's ability to get future loans.`
 
-  await createLoanCast(
-    'system-signer',
-    0, 0, new Date(), defaultText
-  )
+  // Mock final cast - in production would use actual createLoanCast
+  console.log('Would post default cast:', defaultText)
 }
 
 async function updateBorrowerReputation(borrowerFid: number, isRepaid: boolean) {

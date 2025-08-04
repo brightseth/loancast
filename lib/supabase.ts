@@ -38,6 +38,16 @@ export type User = {
   credit_score: number
   total_loans: number
   loans_repaid: number
+  loans_defaulted: number
+  total_borrowed: number
+  total_repaid: number
+  avg_repayment_days: number | null
+  repayment_streak: number
+  follower_count: number | null
+  cast_count: number | null
+  account_created_at: string | null
+  verified_wallet: string | null
+  reputation_badges: any[]
   created_at: string
   updated_at: string
 }

@@ -1,4 +1,4 @@
-import { createPublicClient, http, parseAbi } from 'viem'
+import { createPublicClient, http, parseAbi, decodeEventLog } from 'viem'
 import { base } from 'viem/chains'
 import { supabaseAdmin } from './supabase'
 
@@ -54,7 +54,7 @@ export async function verifyRepayment(
       .filter(log => log.address.toLowerCase() === USDC_ADDRESS.toLowerCase())
       .map(log => {
         try {
-          const decoded = publicClient.decodeEventLog({
+          const decoded = decodeEventLog({
             abi: USDC_ABI,
             data: log.data,
             topics: log.topics,
