@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
+import { AuthButton } from '../components/AuthButton'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -40,28 +41,51 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
-          <div className="min-h-screen bg-gray-50">
+          <div className="min-h-screen bg-zinc-50">
             <nav className="bg-white shadow-sm border-b">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16">
-                  <div className="flex items-center">
-                    <a href="/" className="text-2xl font-bold text-farcaster">
+                <div className="flex justify-between items-center h-16 md:justify-between">
+                  <div className="flex items-center md:flex-1">
+                    <a href="/" className="text-2xl font-bold text-[#6936F5] md:flex-shrink-0">
                       LoanCast
                     </a>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <a href="/loans" className="text-gray-700 hover:text-farcaster">
+                  
+                  {/* Desktop nav */}
+                  <div className="hidden md:flex items-center space-x-4">
+                    <a href="/loans" className="text-gray-700 hover:text-[#6936F5]">
                       My Loans
                     </a>
-                    <a href="/explore" className="text-gray-700 hover:text-farcaster">
+                    <a href="/explore" className="text-gray-700 hover:text-[#6936F5]">
                       Explore
                     </a>
-                    <div id="auth-button"></div>
+                    <a href="/admin" className="text-gray-500 hover:text-[#6936F5] text-sm">
+                      Admin
+                    </a>
+                    <AuthButton />
                   </div>
+
+                  {/* Mobile hamburger */}
+                  <div className="md:hidden">
+                    <AuthButton />
+                  </div>
+                </div>
+
+                {/* Mobile nav menu - you can expand this later */}
+                <div className="md:hidden border-t border-gray-200 pt-2 pb-3 space-y-1">
+                  <a href="/loans" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
+                    My Loans
+                  </a>
+                  <a href="/explore" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
+                    Explore
+                  </a>
+                  <a href="/admin" className="block px-3 py-2 text-sm font-medium text-gray-500 hover:text-[#6936F5]">
+                    Admin
+                  </a>
                 </div>
               </div>
             </nav>
-            <main>{children}</main>
+            <main className="bg-white">{children}</main>
           </div>
         </Providers>
       </body>

@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { Loan } from '@/lib/supabase'
-import { format, formatDistanceToNow, isPast } from 'date-fns'
+import { format, formatDistanceToNow, isPast, addDays } from 'date-fns'
 import Link from 'next/link'
+import { CountdownTimer } from '@/components/CountdownTimer'
 
 export default function LoanDetail() {
   const { id } = useParams()
@@ -50,7 +51,7 @@ export default function LoanDetail() {
           <p className="text-gray-600 mb-8">The loan you're looking for doesn't exist.</p>
           <Link
             href="/loans"
-            className="bg-farcaster text-white px-4 py-2 rounded-lg hover:bg-farcaster-dark transition"
+            className="bg-[#6936F5] text-white px-4 py-2 rounded-lg hover:bg-[#5929cc] transition"
           >
             Back to My Loans
           </Link>
@@ -64,9 +65,9 @@ export default function LoanDetail() {
   const apr = loan.yield_bps / 100
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-screen-md mx-auto p-4 py-12">
       <div className="mb-6">
-        <Link href="/loans" className="text-farcaster hover:underline">
+        <Link href="/loans" className="text-[#6936F5] hover:underline">
           ← Back to My Loans
         </Link>
       </div>
@@ -84,15 +85,27 @@ export default function LoanDetail() {
           <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
             loan.status === 'open' 
               ? isOverdue 
-                ? 'bg-red-100 text-red-800' 
-                : 'bg-yellow-100 text-yellow-800'
+                ? '🔴 bg-red-100 text-red-800' 
+                : '🟡 bg-yellow-100 text-yellow-800'
               : loan.status === 'repaid'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
+                ? '🟢 bg-green-100 text-green-800'
+                : '🔴 bg-red-100 text-red-800'
           }`}>
-            {loan.status === 'open' && isOverdue ? 'Overdue' : loan.status.toUpperCase()}
+            {loan.status === 'open' && isOverdue ? '🔴 Overdue' : loan.status === 'open' ? '🟡 Open' : loan.status === 'repaid' ? '🟢 Repaid' : '🔴 Default'}
           </span>
         </div>
+
+        {loan.status === 'open' && !isOverdue && (
+          <div className="mb-8 p-6 bg-gradient-to-r from-[#6936F5]/10 to-purple-100 rounded-lg">
+            <CountdownTimer 
+              endTime={addDays(new Date(loan.created_at), 1)} 
+              className="mb-4"
+            />
+            <p className="text-center text-sm text-gray-600">
+              🗓️ Auction ends 24 hours after posting
+            </p>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-8">
           <div>
@@ -161,7 +174,7 @@ export default function LoanDetail() {
                         href={`https://basescan.org/tx/${loan.tx_repay}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-farcaster hover:underline"
+                        className="text-sm text-[#6936F5] hover:underline"
                       >
                         View Transaction
                       </a>
@@ -193,7 +206,7 @@ export default function LoanDetail() {
             <h2 className="text-lg font-semibold mb-4">Actions</h2>
             <Link
               href={`/loans/${loan.id}/repay`}
-              className="bg-farcaster text-white px-6 py-3 rounded-lg font-medium hover:bg-farcaster-dark transition"
+              className="bg-[#6936F5] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#5929cc] transition"
             >
               Mark as Repaid
             </Link>

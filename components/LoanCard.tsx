@@ -3,6 +3,8 @@
 import { Loan } from '@/lib/supabase'
 import { format, formatDistanceToNow, isPast } from 'date-fns'
 import Link from 'next/link'
+import { CountdownChip } from './CountdownChip'
+import { DropdownMenu } from './DropdownMenu'
 
 interface LoanCardProps {
   loan: Loan
@@ -13,71 +15,106 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
   const dueDate = new Date(loan.due_ts)
   const isOverdue = isPast(dueDate) && loan.status === 'open'
   
-  const getStatusColor = () => {
+  // Generate a loan number from the ID (first 6 chars for display)
+  const loanNumber = `#${loan.id.slice(0, 6).toUpperCase()}`
+  
+  const getStatusColors = () => {
+    const now = new Date()
+    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+    const isDueSoon = dueDate <= threeDaysFromNow && loan.status === 'open'
+    
     switch (loan.status) {
       case 'open':
-        return isOverdue ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+        if (isOverdue) return { ribbon: 'border-l-4 border-red-500', pill: 'bg-red-100 text-red-800' }
+        if (isDueSoon) return { ribbon: 'border-l-4 border-yellow-500', pill: 'bg-yellow-100 text-yellow-800' }
+        return { ribbon: 'border-l-4 border-green-500', pill: 'bg-green-100 text-green-800' }
       case 'repaid':
-        return 'bg-green-100 text-green-800'
+        return { ribbon: 'border-l-4 border-green-500', pill: 'bg-green-100 text-green-800' }
       case 'default':
-        return 'bg-red-100 text-red-800'
+        return { ribbon: 'border-l-4 border-red-500', pill: 'bg-red-100 text-red-800' }
       default:
-        return 'bg-gray-100 text-gray-800'
+        return { ribbon: '', pill: 'bg-gray-100 text-gray-800' }
     }
   }
 
   const getStatusText = () => {
-    if (loan.status === 'open' && isOverdue) {
-      return 'Overdue'
-    }
+    const now = new Date()
+    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+    const isDueSoon = dueDate <= threeDaysFromNow && loan.status === 'open'
+    
+    if (loan.status === 'open' && isOverdue) return 'Default'
+    if (loan.status === 'open' && isDueSoon) return `Due <3d`
+    if (loan.status === 'open') return 'Open'
     return loan.status.charAt(0).toUpperCase() + loan.status.slice(1)
   }
 
+  const colors = getStatusColors()
+  
   return (
-    <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+    <div className={`bg-white rounded-xl shadow-sm p-6 hover:shadow-lg transition ${colors.ribbon}`}>
       <div className="flex justify-between items-start mb-4">
         <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-mono text-gray-500">LoanCast {loanNumber}</span>
+          </div>
           <h3 className="text-lg font-semibold">
-            ${loan.repay_usdc?.toFixed(2) || '0.00'} USDC
+            ${loan.repay_usdc?.toFixed(0) || '0'} USDC
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-700">
             {loan.yield_bps / 100}% APR
           </p>
         </div>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor()}`}>
-          {getStatusText()}
-        </span>
+        <div className="flex items-center space-x-2">
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors.pill}`}>
+            {getStatusText()}
+          </span>
+          {loan.status === 'open' && userRole === 'borrower' && (
+            <DropdownMenu
+              items={[
+                {
+                  label: 'Mark as Repaid',
+                  onClick: () => window.location.href = `/loans/${loan.id}/repay`,
+                  className: 'text-[#6936F5]'
+                },
+                {
+                  label: 'View Details',
+                  onClick: () => window.location.href = `/loans/${loan.id}`,
+                },
+              ]}
+            />
+          )}
+        </div>
       </div>
 
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-gray-600">Due Date:</span>
-          <span className="font-medium">
-            {format(dueDate, 'MMM dd, yyyy')}
+          <span className="text-gray-700">Due Date:</span>
+          <div className="text-right">
+            <div className="font-medium">
+              {format(dueDate, 'MMM dd, yyyy')}
+            </div>
             {loan.status === 'open' && (
-              <span className="text-gray-500 ml-1">
-                ({formatDistanceToNow(dueDate, { addSuffix: true })})
-              </span>
+              <CountdownChip dueDate={dueDate} className="mt-1" />
             )}
-          </span>
+          </div>
         </div>
 
         {loan.gross_usdc && (
           <div className="flex justify-between">
-            <span className="text-gray-600">Amount Funded:</span>
+            <span className="text-gray-700">Amount Funded:</span>
             <span className="font-medium">${loan.gross_usdc.toFixed(2)}</span>
           </div>
         )}
 
         <div className="flex justify-between items-center">
-          <span className="text-gray-600">Farcaster Cast:</span>
+          <span className="text-gray-700">Farcaster Cast:</span>
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500">#{loan.cast_hash.slice(2, 8)}</span>
             <a
               href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-farcaster hover:underline text-sm font-medium"
+              className="text-[#6936F5] hover:underline text-sm font-medium"
             >
               View Cast →
             </a>
@@ -85,14 +122,6 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
         </div>
       </div>
 
-      {loan.status === 'open' && userRole === 'borrower' && (
-        <Link
-          href={`/loans/${loan.id}/repay`}
-          className="mt-4 block w-full text-center bg-farcaster text-white py-2 rounded-md font-medium hover:bg-farcaster-dark transition"
-        >
-          Mark as Repaid
-        </Link>
-      )}
     </div>
   )
 }

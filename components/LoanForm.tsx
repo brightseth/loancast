@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { addDays, format } from 'date-fns'
+import { useState } from 'react'
 
 const loanSchema = z.object({
   amount: z
@@ -24,6 +25,8 @@ interface LoanFormProps {
 }
 
 export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
+  const [castCopied, setCastCopied] = useState(false)
+  
   const {
     register,
     handleSubmit,
@@ -43,25 +46,51 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
   
   // Fixed 2% monthly rate (24% APR)
   const monthlyRate = 0.02
+  const farcasterFee = amount * 0.10 // 10% Farcaster fee
+  const netAmount = amount - farcasterFee // Borrower receives this amount
   const totalInterest = amount * monthlyRate * durationMonths
-  const repayAmount = amount + totalInterest
+  const repayAmount = amount + totalInterest // Borrower pays back full amount + interest
   const dueDate = addDays(new Date(), durationMonths * 30)
+
+  const castText = `🏦 LOANCAST REQUEST
+
+🟢 Gross: $${amount?.toFixed(0) || '0'} USDC
+💰 Net: $${netAmount?.toFixed(0) || '0'} USDC
+📈 Yield: 2% monthly (24% APR)
+💸 Repay: $${repayAmount.toFixed(0)} 
+📅 Due: ${format(dueDate, 'M/d/yyyy')}
+
+Fixed rate social lending on Farcaster.
+Powered by @loancast`
+
+  const copyCastText = async () => {
+    try {
+      await navigator.clipboard.writeText(castText)
+      setCastCopied(true)
+      setTimeout(() => setCastCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-        <h3 className="font-medium text-amber-900 mb-2">⚠️ Trust-Based Lending</h3>
-        <p className="text-sm text-amber-800">
-          LoanCast operates on social reputation. There is no escrow or collateral. 
-          Your loan request will become a public cast on Farcaster, and repayment 
-          relies on maintaining your social reputation.
-        </p>
+      <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
+        <div className="flex items-center space-x-2">
+          <span className="text-lg text-amber-600">⚠️</span>
+          <div>
+            <h3 className="font-medium text-amber-900">Trust-Based Lending</h3>
+            <p className="text-sm text-amber-800">
+              Social reputation only. No escrow or collateral.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-white p-6 rounded-xl shadow-sm">
       <div>
         <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-          Loan Amount (USDC)
+          Max borrow (USDC)
         </label>
         <div className="mt-1 relative rounded-md shadow-sm">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -69,16 +98,21 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
           </div>
           <input
             type="number"
-            step="0.01"
+            step="1"
             min="10"
             max="5000"
             {...register('amount', { 
               valueAsNumber: true,
-              setValueAs: (v) => v === '' ? undefined : Number(v)
+              setValueAs: (v) => v === '' ? undefined : Math.floor(Number(v))
             })}
-            className="focus:ring-farcaster focus:border-farcaster block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
-            placeholder="100.00"
+            className="focus:ring-[#6936F5] focus:border-[#6936F5] block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md"
+            placeholder="100"
           />
+        </div>
+        <div className="mt-2 p-2 bg-blue-50 rounded text-sm">
+          <div className="text-blue-700">
+            <span className="text-lg">💰</span> You receive: <span className="font-medium">${netAmount.toFixed(0)}</span> after 10% fee
+          </div>
         </div>
         {errors.amount && (
           <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
@@ -87,17 +121,23 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Interest Rate
+          Lender yield (30 days, %)
         </label>
         <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-900">Fixed Monthly Rate</p>
-              <p className="text-xs text-gray-600">2% per month (24% APR)</p>
+              <p className="text-xs text-gray-600">2% monthly = 24% annual</p>
             </div>
             <div className="text-right">
-              <p className="text-lg font-bold text-farcaster">2%</p>
+              <p className="text-lg font-bold text-[#6936F5]">2%</p>
               <p className="text-xs text-gray-500">monthly</p>
+            </div>
+          </div>
+          <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-700">
+            <span className="text-lg">💰</span> Monthly yield: {amount > 0 ? `$${(amount * 0.02).toFixed(0)}` : '$0'} per month
+            <div className="mt-1 text-blue-600">
+              <span className="text-lg">📊</span> Helper: 2% monthly ≈ 24% APR
             </div>
           </div>
         </div>
@@ -105,11 +145,11 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Loan Term
+          Repay by (date)
         </label>
         
-        {/* Month Selection Buttons */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* Month Selection - Responsive */}
+        <div className="md:grid md:grid-cols-3 md:gap-3 flex gap-2 overflow-x-auto pb-2 md:pb-0">
           {[
             { months: 1, label: '1 Month', days: 30 },
             { months: 2, label: '2 Months', days: 60 }, 
@@ -119,9 +159,9 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
               key={months}
               type="button"
               onClick={() => setValue('duration_months', months)}
-              className={`px-4 py-3 text-sm font-medium border rounded-md transition ${
+              className={`flex-shrink-0 px-4 py-3 text-sm font-medium border rounded-md transition min-w-[120px] md:min-w-0 ${
                 durationMonths === months
-                  ? 'bg-farcaster text-white border-farcaster'
+                  ? 'bg-[#6936F5] text-white border-[#6936F5]'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
@@ -144,22 +184,24 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
-        <h3 className="text-sm font-medium text-blue-900 mb-2">📱 Your Farcaster Cast Preview</h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-blue-900"><span className="text-lg">📱</span> Your Farcaster Cast Preview</h3>
+          <button
+            type="button"
+            onClick={copyCastText}
+            className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded transition"
+            aria-label="Copy cast text to clipboard"
+          >
+            {castCopied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
         <div className="bg-white rounded-lg p-3 border border-blue-200">
           <div className="text-sm font-mono whitespace-pre-line text-gray-800">
-{`🏦 LOANCAST REQUEST
-
-Amount: $${amount?.toFixed(2) || '0.00'} USDC
-Rate: 2% monthly (24% APR)
-Repay: $${repayAmount.toFixed(2)}
-Due: ${format(dueDate, 'M/d/yyyy')}
-
-Fixed rate social lending on Farcaster.
-Powered by @loancast`}
+            {castText}
           </div>
         </div>
         <p className="text-xs text-blue-700 mt-2">
-          ✨ This cast will be posted to Farcaster as a collectible that lenders can bid on
+          <span className="text-lg">✨</span> Posted as collectible cast for lenders to bid
         </p>
       </div>
 
@@ -167,24 +209,32 @@ Powered by @loancast`}
         <h3 className="text-sm font-medium text-gray-900 mb-2">Loan Summary</h3>
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-600">Loan Amount:</span>
-            <span className="font-medium">${amount?.toFixed(2) || '0.00'}</span>
+            <span className="text-gray-600">🟢 Loan Request:</span>
+            <span className="font-medium">${amount?.toFixed(0) || '0'}</span>
+          </div>
+          <div className="flex justify-between text-red-600">
+            <span>🏛️ Farcaster Fee (10%):</span>
+            <span className="font-medium">-${farcasterFee.toFixed(0)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Interest (2% × {durationMonths} month{durationMonths !== 1 ? 's' : ''}):</span>
-            <span className="font-medium">${totalInterest.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between font-bold">
-            <span>Total Repayment:</span>
-            <span>${repayAmount.toFixed(2)}</span>
+            <span className="text-gray-600">💰 You Receive:</span>
+            <span className="font-medium text-green-600">${netAmount.toFixed(0)}</span>
           </div>
           <div className="flex justify-between pt-2 border-t">
-            <span className="text-gray-600">Due Date:</span>
+            <span className="text-gray-600">📈 Interest (2% × {durationMonths} month{durationMonths !== 1 ? 's' : ''}):</span>
+            <span className="font-medium">${totalInterest.toFixed(0)}</span>
+          </div>
+          <div className="flex justify-between font-bold text-red-600">
+            <span>💸 You Repay:</span>
+            <span>${repayAmount.toFixed(0)}</span>
+          </div>
+          <div className="flex justify-between pt-2 border-t">
+            <span className="text-gray-600">📅 Due Date:</span>
             <span className="font-medium">{format(dueDate, 'MMM dd, yyyy')}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Effective APR:</span>
-            <span className="font-medium text-farcaster">24%</span>
+            <span className="text-gray-600">📊 Annual Rate:</span>
+            <span className="font-medium text-[#6936F5]">24%</span>
           </div>
         </div>
       </div>
@@ -192,9 +242,9 @@ Powered by @loancast`}
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-farcaster text-white py-2 px-4 rounded-md font-medium hover:bg-farcaster-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-[#6936F5] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#5929cc] transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isSubmitting ? 'Creating Loan...' : 'Create LoanCast'}
+        {isSubmitting ? 'Posting...' : 'Post LoanCast'}
       </button>
       </div>
     </form>

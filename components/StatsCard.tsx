@@ -78,25 +78,6 @@ export function StatsCard() {
         </div>
       </div>
 
-      <div className="mt-6 pt-4 border-t">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">Success by Category</h3>
-        <div className="space-y-2">
-          {Object.entries(stats.categories || {}).map(([category, data]: [string, any]) => (
-            <div key={category} className="flex items-center justify-between">
-              <span className="text-sm capitalize text-gray-600">{category}</span>
-              <div className="flex items-center gap-2">
-                <div className="w-24 bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-green-500 h-2 rounded-full"
-                    style={{ width: `${data.repaymentRate}%` }}
-                  />
-                </div>
-                <span className="text-xs font-medium">{data.repaymentRate}%</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
       <div className="mt-4 pt-4 border-t">
         <div className="flex justify-between items-center text-sm">

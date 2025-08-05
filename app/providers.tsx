@@ -6,6 +6,7 @@ interface User {
   fid: number
   displayName: string
   pfpUrl?: string
+  verifiedWallet?: string
 }
 
 interface AuthContextType {
@@ -35,14 +36,24 @@ export function Providers({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async () => {
-    // Mock login for development
-    const mockUser = {
-      fid: 12345,
-      displayName: 'Test User',
-      pfpUrl: 'https://via.placeholder.com/64'
+    // Check if we have Neynar API key for real auth
+    if (process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID) {
+      // Open Neynar Sign In With Farcaster
+      const clientId = process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID
+      const redirectUri = `${window.location.origin}/api/auth/callback`
+      
+      window.location.href = `https://app.neynar.com/login?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`
+    } else {
+      // Mock login for development
+      const mockUser = {
+        fid: 12345,
+        displayName: 'Test User',
+        pfpUrl: 'https://i.pravatar.cc/64?img=1',
+        verifiedWallet: '0x0196F2aB8b1d12345a06e5123456789abcdef123'
+      }
+      setUser(mockUser)
+      localStorage.setItem('user', JSON.stringify(mockUser))
     }
-    setUser(mockUser)
-    localStorage.setItem('user', JSON.stringify(mockUser))
   }
 
   const logout = () => {

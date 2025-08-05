@@ -9,9 +9,26 @@ export async function POST(request: NextRequest) {
     console.log('=== LOAN CREATION START ===')
     
     const body = await request.json()
-    console.log('Request body:', body)
+    console.log('Request body:', JSON.stringify(body, null, 2))
     
     const { amount, duration_months, borrower_fid, signer_uuid } = body
+
+    // Validate all required fields
+    if (!amount || amount < 10) {
+      console.log('Invalid amount:', amount)
+      return NextResponse.json(
+        { error: 'Amount must be at least $10' },
+        { status: 400 }
+      )
+    }
+
+    if (!duration_months || duration_months < 1 || duration_months > 3) {
+      console.log('Invalid duration_months:', duration_months)
+      return NextResponse.json(
+        { error: 'Duration must be 1-3 months' },
+        { status: 400 }
+      )
+    }
 
     if (!borrower_fid) {
       console.log('Missing borrower_fid')

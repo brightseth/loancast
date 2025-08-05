@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loan } from '@/lib/supabase'
 import { CheckCircle, XCircle, Loader, AlertCircle } from 'lucide-react'
+import { RepaymentCastComposer } from './RepaymentCastComposer'
 
 interface RepaymentModalProps {
   loan: Loan
@@ -17,6 +18,8 @@ export function RepaymentModal({ loan, lenderAddress, onClose }: RepaymentModalP
   const [verifying, setVerifying] = useState(false)
   const [verification, setVerification] = useState<any>(null)
   const [error, setError] = useState('')
+  const [showCastComposer, setShowCastComposer] = useState(false)
+  const [castPosted, setCastPosted] = useState(false)
 
   const handleVerify = async () => {
     if (!txHash) {
@@ -46,10 +49,8 @@ export function RepaymentModal({ loan, lenderAddress, onClose }: RepaymentModalP
           body: JSON.stringify({ tx_hash: txHash }),
         })
 
-        setTimeout(() => {
-          router.push('/loans')
-          router.refresh()
-        }, 3000)
+        // Show cast composer after verification
+        setShowCastComposer(true)
       } else {
         setError(result.error || 'Verification failed. Please check the transaction.')
       }
@@ -71,7 +72,7 @@ export function RepaymentModal({ loan, lenderAddress, onClose }: RepaymentModalP
               <h3 className="font-medium text-blue-900 mb-2">Repayment Instructions</h3>
               <ol className="text-sm text-blue-800 space-y-1">
                 <li>1. Send ${loan.repay_usdc?.toFixed(2)} USDC to the lender</li>
-                <li>2. Lender address: <code className="text-xs bg-blue-100 px-1 rounded">{lenderAddress}</code></li>
+                <li>2. Lender address: <code className="text-xs bg-blue-100 px-1 rounded">{lenderAddress.slice(0, 6)}…{lenderAddress.slice(-4)}</code></li>
                 <li>3. Enter the transaction hash below</li>
               </ol>
             </div>
@@ -111,7 +112,7 @@ export function RepaymentModal({ loan, lenderAddress, onClose }: RepaymentModalP
               <button
                 onClick={handleVerify}
                 disabled={verifying || !txHash}
-                className="flex-1 bg-farcaster text-white py-2 px-4 rounded-md font-medium hover:bg-farcaster-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 bg-[#6936F5] text-white py-2 px-4 rounded-md font-medium hover:bg-[#5929cc] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {verifying ? (
                   <>
@@ -134,7 +135,7 @@ export function RepaymentModal({ loan, lenderAddress, onClose }: RepaymentModalP
         ) : (
           <div className="text-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Repayment Verified!</h3>
+            <h3 className="text-lg font-semibold mb-2">Repayment Verified</h3>
             <p className="text-gray-600 mb-4">
               Transaction confirmed on Base blockchain
             </p>
@@ -153,15 +154,44 @@ export function RepaymentModal({ loan, lenderAddress, onClose }: RepaymentModalP
                   href={`https://basescan.org/tx/${verification.txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-farcaster hover:underline text-xs"
+                  className="text-[#6936F5] hover:underline text-xs"
                 >
                   {verification.txHash.slice(0, 10)}...
                 </a>
               </div>
             </div>
-            <p className="text-sm text-gray-500 mt-4">
-              Redirecting to your loans...
-            </p>
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium text-gray-900">Share Success</h4>
+                <span className="text-xs text-gray-500">Optional</span>
+              </div>
+              
+              <button
+                onClick={() => {
+                  const text = `✅ Repaid $${loan.repay_usdc?.toFixed(0)} USDC loan on time via LoanCast.\n\nBuilding reputation on-chain. Social lending works.\n\n/loancast`
+                  const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`
+                  window.open(warpcastUrl, '_blank')
+                  setCastPosted(true)
+                  setTimeout(() => {
+                    router.push('/loans')
+                    router.refresh()
+                  }, 1000)
+                }}
+                className="w-full bg-[#6936F5] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5929cc] transition mb-2"
+              >
+                Quote-cast repayment
+              </button>
+              
+              <button
+                onClick={() => {
+                  router.push('/loans')
+                  router.refresh()
+                }}
+                className="w-full text-gray-500 py-1 px-4 rounded-lg font-medium hover:text-gray-700 transition text-sm"
+              >
+                Skip for now
+              </button>
+            </div>
           </div>
         )}
       </div>

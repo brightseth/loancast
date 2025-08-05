@@ -2,75 +2,69 @@
 
 import { useAuth } from './providers'
 import Link from 'next/link'
+import { ActivityFeed } from '@/components/ActivityFeed'
 
 export default function Home() {
   const { user, login } = useAuth()
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-screen-md mx-auto p-4 py-12">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Social Lending on Farcaster
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          Borrow from friends with one cast.
         </h1>
-        <p className="text-xl text-gray-600 mb-8">
-          Make raising and tracking social-credit loans one tap
+        <p className="text-lg text-gray-600 mb-3">
+          Post → auction → repay. No contracts, no permission.
         </p>
         
+        {/* Stats pill */}
+        <div className="flex justify-center mb-8">
+          <span className="text-sm bg-zinc-100 px-3 py-1 rounded-full">
+            <span className="text-lg">🟢</span> 100% on-time · $789 funded
+          </span>
+        </div>
+        
+        {/* Single CTA */}
         {!user ? (
           <button
             onClick={login}
-            className="bg-farcaster text-white px-6 py-3 rounded-lg font-medium hover:bg-farcaster-dark transition"
+            className="bg-[#6936F5] hover:bg-[#5733d9] text-white rounded-full px-6 py-3 font-medium transition"
           >
-            Sign in with Farcaster
+            Start a LoanCast
           </button>
         ) : (
-          <div className="space-y-4">
-            <p className="text-gray-700">Welcome back, {user.displayName}!</p>
-            <div className="flex justify-center space-x-4">
-              <Link
-                href="/loans/new"
-                className="bg-farcaster text-white px-6 py-3 rounded-lg font-medium hover:bg-farcaster-dark transition"
-              >
-                Create Loan Request
-              </Link>
-              <Link
-                href="/loans"
-                className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition"
-              >
-                My Loans
-              </Link>
-            </div>
-          </div>
+          <Link
+            href="/loans/new"
+            className="inline-block bg-[#6936F5] hover:bg-[#5733d9] text-white rounded-full px-6 py-3 font-medium transition"
+          >
+            Start a LoanCast
+          </Link>
         )}
       </div>
 
-      <div className="mt-16 grid md:grid-cols-3 gap-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="font-bold text-lg mb-2">1. Request a Loan</h3>
-          <p className="text-gray-600">
-            Fill out a simple form with amount and term length
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="font-bold text-lg mb-2">2. Cast Goes Live</h3>
-          <p className="text-gray-600">
-            Your loan request becomes a collectible cast on Farcaster
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="font-bold text-lg mb-2">3. Track & Repay</h3>
-          <p className="text-gray-600">
-            Monitor your loan status and mark as repaid when complete
-          </p>
-        </div>
+      {/* Inline steps strip */}
+      <div className="flex justify-between text-xs md:text-sm bg-zinc-100 rounded-xl py-2 px-4 mt-6 max-w-xl mx-auto">
+        <div className="flex-1 text-center"><span className="text-lg">①</span> Post cast</div>
+        <div className="flex-1 text-center border-l border-zinc-300"><span className="text-lg">②</span> Highest bid = loan</div>
+        <div className="flex-1 text-center border-l border-zinc-300"><span className="text-lg">③</span> Repay +2%</div>
+      </div>
+      
+      {/* Permissionless tag */}
+      <p className="text-zinc-500 text-xs mt-2 text-center">
+        <span className="text-lg">🔓</span> No KYC · No contracts · Powered by your Farcaster handle
+      </p>
+
+      {/* Live Activity Feed */}
+      <div className="mt-16 max-w-2xl mx-auto">
+        <ActivityFeed />
       </div>
 
       {/* Sample Cast Preview */}
       <div className="mt-16 max-w-2xl mx-auto">
         <h2 className="text-2xl font-bold text-center mb-8">Example LoanCast</h2>
-        <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-farcaster">
+        <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#6936F5]">
           <div className="flex items-start gap-3 mb-4">
-            <div className="w-10 h-10 bg-farcaster rounded-full flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 bg-[#6936F5] rounded-full flex items-center justify-center text-white font-bold">
               LC
             </div>
             <div>
@@ -98,7 +92,7 @@ Powered by @loancast`}
           </div>
         </div>
         <p className="text-center text-gray-600 mt-4">
-          This is how your loan request appears on Farcaster as a collectible cast
+          Collectible loan casts
         </p>
       </div>
     </div>

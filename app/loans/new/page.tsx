@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/providers'
 import { LoanForm } from '@/components/LoanForm'
+import { LoanSuccess } from '@/components/LoanSuccess'
 
 export default function NewLoan() {
   const router = useRouter()
   const { user } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [createdLoan, setCreatedLoan] = useState<any>(null)
 
   if (!user) {
     return (
@@ -36,9 +38,7 @@ export default function NewLoan() {
 
       if (response.ok) {
         const loan = await response.json()
-        // Show success message and redirect to loans list
-        alert('Loan created successfully!')
-        router.push('/loans')
+        setCreatedLoan(loan)
       } else {
         throw new Error('Failed to create loan')
       }
@@ -50,9 +50,20 @@ export default function NewLoan() {
     }
   }
 
+  if (createdLoan) {
+    return (
+      <div className="max-w-screen-md mx-auto p-4 py-12">
+        <LoanSuccess 
+          loan={createdLoan} 
+          onNewLoan={() => setCreatedLoan(null)}
+        />
+      </div>
+    )
+  }
+
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Create Loan Request</h1>
+    <div className="max-w-screen-md mx-auto p-4 py-12">
+      <h1 className="text-3xl font-bold mb-8">New LoanCast</h1>
       <LoanForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
     </div>
   )
