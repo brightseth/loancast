@@ -10,6 +10,7 @@ export default function MyLoans() {
   const { user } = useAuth()
   const [loans, setLoans] = useState<Loan[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'borrower' | 'lender' | 'watching'>('borrower')
 
   // Load saved tab from localStorage on mount
@@ -33,6 +34,7 @@ export default function MyLoans() {
 
   const fetchLoans = async () => {
     setLoading(true)
+    setError(null)
     try {
       let params = ''
       if (activeTab === 'borrower') {
@@ -45,10 +47,22 @@ export default function MyLoans() {
       }
       
       const response = await fetch(`/api/loans?${params}`)
+      
+      if (!response.ok) {
+        console.error('Loans API error:', response.status, response.statusText)
+        const errorText = await response.text()
+        console.error('Error details:', errorText)
+        setError(`Failed to load loans: ${response.status} ${response.statusText}`)
+        setLoans([])
+        return
+      }
+      
       const data = await response.json()
+      console.log('Loans data received:', data)
       setLoans(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error fetching loans:', error)
+      setError('Network error while loading loans')
       setLoans([])
     } finally {
       setLoading(false)
@@ -60,6 +74,32 @@ export default function MyLoans() {
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <p className="text-yellow-800">Please sign in to view your loans.</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-12 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-farcaster mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading your loans...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <h3 className="text-red-800 font-medium mb-2">Error loading loans</h3>
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={fetchLoans}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     )
