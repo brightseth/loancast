@@ -10,14 +10,14 @@ interface ExploreCardProps {
 export function ExploreCard({ loan }: ExploreCardProps) {
   const dueDate = new Date(loan.due_ts)
   const apr = loan.yield_bps / 100
-  const isFunded = loan.lender_fid !== null
-  const loanNumber = `#${loan.id.slice(0, 6).toUpperCase()}`
+  const isFunded = loan.status === 'funded'
+  const loanNumber = loan.loan_number ? `LOANCAST-${loan.loan_number.toString().padStart(3, '0')}` : `#${loan.id.slice(0, 6).toUpperCase()}`
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <p className="text-xs font-mono text-gray-500 mb-1">LoanCast {loanNumber}</p>
+          <p className="text-xs font-mono text-gray-500 mb-1">{loanNumber}</p>
           <h3 className="text-2xl font-bold text-gray-900">
             ${loan.repay_usdc?.toFixed(2) || '0.00'}
           </h3>

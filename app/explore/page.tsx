@@ -17,13 +17,14 @@ export default function Explore() {
   const fetchLoans = async () => {
     setLoading(true)
     try {
-      const params = filter === 'active' ? 'status=open' : ''
-      const response = await fetch(`/api/loans/open${params ? '?' + params : ''}`)
+      const response = await fetch('/api/loans/list')
       const data = await response.json()
       
       let filteredData = data || []
-      if (filter === 'funded') {
-        filteredData = (data || []).filter((loan: Loan) => loan.lender_fid !== null)
+      if (filter === 'active') {
+        filteredData = (data || []).filter((loan: Loan) => loan.status === 'open')
+      } else if (filter === 'funded') {
+        filteredData = (data || []).filter((loan: Loan) => loan.status === 'funded')
       }
       
       setLoans(filteredData)
