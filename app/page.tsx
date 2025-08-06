@@ -40,8 +40,8 @@ export default function Home() {
           </h1>
           
           <p className="text-xl text-zinc-600 mb-8 max-w-md mx-auto lg:mx-0">
-            No banks. No credit checks. No collateral.
-            Just post what you need.
+            No banks. No credit checks.<br />
+            No collateral. Just post what you need.
           </p>
           
           {/* Single CTA */}
