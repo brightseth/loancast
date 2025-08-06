@@ -4,6 +4,7 @@ import './globals.css'
 import { Providers } from './providers'
 import { AuthButton } from '../components/AuthButton'
 import { Analytics } from '@vercel/analytics/react'
+import { ErrorBoundary } from '../components/ErrorBoundary'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -41,8 +42,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>
-          <div className="min-h-screen bg-zinc-50">
+        <ErrorBoundary>
+          <Providers>
+            <div className="min-h-screen bg-zinc-50">
             <nav className="bg-white shadow-sm border-b">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16 md:justify-between">
@@ -103,8 +105,9 @@ export default function RootLayout({
                 </p>
               </div>
             </footer>
-          </div>
-        </Providers>
+            </div>
+          </Providers>
+        </ErrorBoundary>
         <Analytics />
       </body>
     </html>

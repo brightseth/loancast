@@ -142,6 +142,24 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
             </a>
           </div>
         </div>
+
+        {/* Profile Links */}
+        <div className="flex justify-between items-center pt-3 border-t">
+          <a
+            href={`/profile/${loan.borrower_fid}`}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-farcaster transition"
+          >
+            👤 Borrower Profile
+          </a>
+          {loan.lender_fid && (
+            <a
+              href={`/profile/${loan.lender_fid}`}
+              className="flex items-center gap-2 text-sm text-gray-600 hover:text-farcaster transition"
+            >
+              💰 Lender Profile
+            </a>
+          )}
+        </div>
       </div>
 
     </div>

@@ -81,14 +81,23 @@ export function ExploreCard({ loan }: ExploreCardProps) {
             • 2% monthly • Due {format(dueDate, 'M/d')}
           </div>
         </div>
-        <a
-          href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full bg-farcaster text-white py-2 px-4 rounded-md font-medium hover:bg-farcaster-dark transition text-center block"
-        >
-          {isFunded ? 'View Cast on Warpcast' : 'Bid on Cast'}
-        </a>
+        <div className="flex gap-2">
+          <a
+            href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 bg-farcaster text-white py-2 px-4 rounded-md font-medium hover:bg-farcaster-dark transition text-center block"
+          >
+            {isFunded ? 'View Cast' : 'Bid on Cast'}
+          </a>
+          <a
+            href={`/profile/${loan.borrower_fid}`}
+            className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition text-center"
+            title="View borrower profile"
+          >
+            👤
+          </a>
+        </div>
       </div>
     </div>
   )

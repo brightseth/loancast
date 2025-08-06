@@ -4,9 +4,11 @@ import { createLoanCast } from '@/lib/neynar'
 import { postCast, formatLoanCast } from '@/lib/neynar-post'
 import { addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
+import { withErrorHandling, createApiError } from '@/lib/error-handler'
+import * as Sentry from '@sentry/nextjs'
 
 export async function POST(request: NextRequest) {
-  try {
+  return withErrorHandling(async () => {
     console.log('=== LOAN CREATION START ===')
     
     const body = await request.json()
@@ -14,29 +16,28 @@ export async function POST(request: NextRequest) {
     
     const { amount, duration_months, borrower_fid, signer_uuid } = body
 
+    // Add Sentry context for this loan creation
+    Sentry.setContext('loan_creation', {
+      amount,
+      duration_months,
+      borrower_fid,
+      has_signer: !!signer_uuid
+    })
+
     // Validate all required fields
     if (!amount || amount < 10) {
       console.log('Invalid amount:', amount)
-      return NextResponse.json(
-        { error: 'Amount must be at least $10' },
-        { status: 400 }
-      )
+      throw createApiError('Amount must be at least $10', 400, 'INVALID_AMOUNT')
     }
 
     if (!duration_months || duration_months < 1 || duration_months > 3) {
       console.log('Invalid duration_months:', duration_months)
-      return NextResponse.json(
-        { error: 'Duration must be 1-3 months' },
-        { status: 400 }
-      )
+      throw createApiError('Duration must be 1-3 months', 400, 'INVALID_DURATION')
     }
 
     if (!borrower_fid) {
       console.log('Missing borrower_fid')
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
+      throw createApiError('Authentication required', 401, 'AUTH_REQUIRED')
     }
 
     // Fixed 2% monthly rate for all early loans
@@ -54,10 +55,7 @@ export async function POST(request: NextRequest) {
     
     if (counterError) {
       console.error('Error getting loan number:', counterError)
-      return NextResponse.json(
-        { error: 'Failed to generate loan number', details: counterError.message },
-        { status: 500 }
-      )
+      throw createApiError(`Failed to generate loan number: ${counterError.message}`, 500, 'LOAN_NUMBER_ERROR')
     }
     
     const loanNumber = loanNumberResult
@@ -98,10 +96,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Supabase error details:', error)
-      return NextResponse.json(
-        { error: 'Database error', details: error.message },
-        { status: 500 }
-      )
+      throw createApiError(`Database error: ${error.message}`, 500, 'DATABASE_ERROR')
     }
 
     console.log('Loan created successfully:', loan)
@@ -146,21 +141,21 @@ export async function POST(request: NextRequest) {
     }
     
     return NextResponse.json(loan)
-  } catch (error) {
-    console.error('Unexpected error in POST /api/loans:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    )
-  }
+  }, { endpoint: 'POST /api/loans' })
 }
 
 export async function GET(request: NextRequest) {
-  try {
+  return withErrorHandling(async () => {
     const searchParams = request.nextUrl.searchParams
     const borrowerFid = searchParams.get('borrower_fid')
     const lenderFid = searchParams.get('lender_fid')
     const status = searchParams.get('status')
+
+    Sentry.setContext('loan_query', {
+      borrowerFid,
+      lenderFid,
+      status
+    })
 
     let query = supabaseAdmin.from('loans').select('*')
 
@@ -178,18 +173,9 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching loans:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch loans' },
-        { status: 500 }
-      )
+      throw createApiError(`Failed to fetch loans: ${error.message}`, 500, 'FETCH_ERROR')
     }
 
     return NextResponse.json(loans)
-  } catch (error) {
-    console.error('Error in GET /api/loans:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+  }, { endpoint: 'GET /api/loans' })
 }

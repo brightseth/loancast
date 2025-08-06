@@ -9,10 +9,47 @@ export default function Explore() {
   const [loans, setLoans] = useState<Loan[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'funded'>('active')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [minAmount, setMinAmount] = useState('')
+  const [maxAmount, setMaxAmount] = useState('')
+  const [duration, setDuration] = useState<string>('')
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
   useEffect(() => {
     fetchLoans()
   }, [filter])
+
+  const filteredLoans = loans.filter(loan => {
+    // Search term filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase()
+      const loanNumber = `#${loan.id.slice(0, 6).toUpperCase()}`
+      if (!loanNumber.toLowerCase().includes(searchLower) && 
+          !loan.repay_usdc?.toString().includes(searchTerm)) {
+        return false
+      }
+    }
+
+    // Amount filters
+    if (minAmount && loan.repay_usdc && loan.repay_usdc < parseFloat(minAmount)) {
+      return false
+    }
+    if (maxAmount && loan.repay_usdc && loan.repay_usdc > parseFloat(maxAmount)) {
+      return false
+    }
+
+    // Duration filter - calculate from dates
+    if (duration) {
+      const startDate = new Date(loan.start_ts)
+      const dueDate = new Date(loan.due_ts)
+      const diffMonths = Math.round((dueDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
+      if (diffMonths.toString() !== duration) {
+        return false
+      }
+    }
+
+    return true
+  })
 
   const fetchLoans = async () => {
     setLoading(true)
@@ -53,7 +90,74 @@ export default function Explore() {
         <StatsCard />
       </div>
 
-      <div className="flex space-x-2 mb-6">
+      {/* Search and Filter Section */}
+      <div className="mb-6 space-y-4">
+        {/* Search Bar */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by loan number or amount..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-farcaster focus:border-transparent"
+          />
+          <svg className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+
+        {/* Advanced Filters Toggle */}
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="text-sm text-farcaster hover:text-purple-700 flex items-center gap-1"
+        >
+          Advanced Filters
+          <svg className={`h-4 w-4 transform transition-transform ${showAdvanced ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {/* Advanced Filters */}
+        {showAdvanced && (
+          <div className="bg-gray-50 p-4 rounded-lg grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Min Amount</label>
+              <input
+                type="number"
+                placeholder="$0"
+                value={minAmount}
+                onChange={(e) => setMinAmount(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-farcaster focus:border-farcaster"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Max Amount</label>
+              <input
+                type="number"
+                placeholder="$5000"
+                value={maxAmount}
+                onChange={(e) => setMaxAmount(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-farcaster focus:border-farcaster"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+              <select
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-farcaster focus:border-farcaster"
+              >
+                <option value="">All durations</option>
+                <option value="1">1 month</option>
+                <option value="2">2 months</option>
+                <option value="3">3 months</option>
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mb-6">
         <button
           onClick={() => setFilter('active')}
           className={`px-4 py-2 rounded-lg font-medium ${
@@ -86,19 +190,58 @@ export default function Explore() {
         </button>
       </div>
 
+      {/* Results Counter */}
+      {!loading && (
+        <div className="mb-4 text-sm text-gray-600">
+          Showing {filteredLoans.length} of {loans.length} loans
+          {(searchTerm || minAmount || maxAmount || duration) && (
+            <button
+              onClick={() => {
+                setSearchTerm('')
+                setMinAmount('')
+                setMaxAmount('')
+                setDuration('')
+                setShowAdvanced(false)
+              }}
+              className="ml-2 text-farcaster hover:text-purple-700 underline"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+      )}
+
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-farcaster"></div>
         </div>
-      ) : loans.length > 0 ? (
+      ) : filteredLoans.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loans.map(loan => (
+          {filteredLoans.map(loan => (
             <ExploreCard key={loan.id} loan={loan} />
           ))}
         </div>
       ) : (
         <div className="text-center py-12">
-          <p className="text-gray-600">No loans found matching your filter.</p>
+          <p className="text-gray-600">
+            {searchTerm || minAmount || maxAmount || duration 
+              ? 'No loans found matching your search criteria.' 
+              : 'No loans found matching your filter.'}
+          </p>
+          {(searchTerm || minAmount || maxAmount || duration) && (
+            <button
+              onClick={() => {
+                setSearchTerm('')
+                setMinAmount('')
+                setMaxAmount('')
+                setDuration('')
+                setShowAdvanced(false)
+              }}
+              className="mt-2 text-farcaster hover:text-purple-700 underline"
+            >
+              Clear search filters
+            </button>
+          )}
         </div>
       )}
     </div>
