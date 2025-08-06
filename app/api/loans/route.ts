@@ -5,9 +5,14 @@ import { postCast, formatLoanCast } from '@/lib/neynar-post'
 import { addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
 import { withErrorHandling, createApiError } from '@/lib/error-handler'
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
 import * as Sentry from '@sentry/nextjs'
 
 export async function POST(request: NextRequest) {
+  // Check rate limit first
+  const { result, response } = await withRateLimit(request, rateLimiters.loanCreation)
+  if (response) return response
+
   return withErrorHandling(async () => {
     console.log('=== LOAN CREATION START ===')
     
@@ -145,6 +150,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  // Check rate limit first
+  const { result, response } = await withRateLimit(request, rateLimiters.api)
+  if (response) return response
+
   return withErrorHandling(async () => {
     const searchParams = request.nextUrl.searchParams
     const borrowerFid = searchParams.get('borrower_fid')

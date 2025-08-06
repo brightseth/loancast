@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserByFid } from '@/lib/neynar'
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { fid: string } }
 ) {
+  // Check rate limit first - use api limiter for profile lookups
+  const { result, response } = await withRateLimit(request, rateLimiters.api)
+  if (response) return response
+
   try {
     const fid = parseInt(params.fid)
     

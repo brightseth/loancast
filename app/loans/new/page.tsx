@@ -1,16 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/app/providers'
 import { LoanForm } from '@/components/LoanForm'
 import { LoanSuccess } from '@/components/LoanSuccess'
+import { useAnalytics } from '@/lib/analytics'
 
 export default function NewLoan() {
   const router = useRouter()
   const { user } = useAuth()
+  const analytics = useAnalytics()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdLoan, setCreatedLoan] = useState<any>(null)
+
+  useEffect(() => {
+    analytics.featureUsed('Loan Creation Page Viewed')
+  }, [])
 
   if (!user) {
     return (
@@ -24,6 +30,8 @@ export default function NewLoan() {
 
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true)
+    analytics.formStarted('Loan Creation')
+    
     try {
       const response = await fetch('/api/loans', {
         method: 'POST',
@@ -40,11 +48,29 @@ export default function NewLoan() {
       if (response.ok) {
         const loan = await response.json()
         setCreatedLoan(loan)
+        
+        // Track successful loan creation
+        analytics.loanCreated({
+          loanId: loan.id,
+          amount: Number(data.amount),
+          duration: Number(data.duration_months),
+          apr: Number(data.apr || 24), // Default 2% monthly = 24% annual
+          borrowerFid: user.fid.toString(),
+        })
+        analytics.formCompleted('Loan Creation')
+        
       } else {
         throw new Error('Failed to create loan')
       }
     } catch (error) {
       console.error('Error creating loan:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      analytics.errorOccurred({
+        message: errorMessage,
+        page: '/loans/new',
+        userId: user.fid.toString(),
+      })
+      analytics.formAbandoned('Loan Creation', 'submission_error')
       alert('Failed to create loan. Please try again.')
     } finally {
       setIsSubmitting(false)

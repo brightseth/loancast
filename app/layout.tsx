@@ -69,20 +69,26 @@ export default function RootLayout({
                   </div>
 
                   {/* Mobile hamburger */}
-                  <div className="md:hidden">
+                  <div className="md:hidden flex items-center space-x-2">
                     <AuthButton />
                   </div>
                 </div>
 
-                {/* Mobile nav menu - you can expand this later */}
-                <div className="md:hidden border-t border-gray-200 pt-2 pb-3 space-y-1">
-                  <a href="/loans" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
+                {/* Mobile nav menu with better touch targets */}
+                <div className="md:hidden border-t border-gray-200 pt-3 pb-4 space-y-1 bg-gray-50">
+                  <a 
+                    href="/loans/new" 
+                    className="block mx-3 px-4 py-3 text-center bg-[#6936F5] text-white font-medium rounded-lg hover:bg-purple-700 transition"
+                  >
+                    Create Loan
+                  </a>
+                  <a href="/loans" className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-[#6936F5] hover:bg-white rounded-lg mx-3 transition">
                     My Loans
                   </a>
-                  <a href="/dashboard/lending" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
+                  <a href="/dashboard/lending" className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-[#6936F5] hover:bg-white rounded-lg mx-3 transition">
                     Lending
                   </a>
-                  <a href="/explore" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
+                  <a href="/explore" className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-[#6936F5] hover:bg-white rounded-lg mx-3 transition">
                     Explore
                   </a>
                 </div>
@@ -93,16 +99,23 @@ export default function RootLayout({
             {/* Fun compliance footer */}
             <footer className="bg-zinc-50 border-t border-zinc-200 py-6 px-4">
               <div className="max-w-4xl mx-auto text-center">
-                <p className="text-xs text-zinc-600 mb-2">
+                <p className="text-xs sm:text-sm text-zinc-600 mb-2 leading-relaxed">
                   <span className="text-sm">💫</span> LoanCast facilitates trust-based loans between friends—no securities, no interest on deposits, just social reputation.
                 </p>
-                <p className="text-xs text-zinc-500">
-                  USDC is fully backed by <a href="https://www.centre.io/usdc" target="_blank" rel="noopener" className="text-[#6936F5] hover:underline">Circle</a> • 
-                  Not FDIC insured • 
-                  <a href="/faq" className="text-[#6936F5] hover:underline">FAQ</a> • 
-                  Loans based on social trust, not credit scores • 
-                  <span className="text-sm">🎭</span> Built for the vibes
-                </p>
+                <div className="text-xs text-zinc-500 space-y-1 sm:space-y-0">
+                  <div className="flex flex-wrap justify-center items-center gap-1 sm:gap-2">
+                    <span>USDC is fully backed by <a href="https://www.centre.io/usdc" target="_blank" rel="noopener" className="text-[#6936F5] hover:underline">Circle</a></span>
+                    <span className="hidden sm:inline">•</span>
+                    <span>Not FDIC insured</span>
+                    <span className="hidden sm:inline">•</span>
+                    <a href="/faq" className="text-[#6936F5] hover:underline">FAQ</a>
+                  </div>
+                  <div className="sm:mt-1">
+                    <span>Loans based on social trust, not credit scores</span>
+                    <span className="ml-1 text-sm">🎭</span>
+                    <span className="ml-1">Built for the vibes</span>
+                  </div>
+                </div>
               </div>
             </footer>
             </div>

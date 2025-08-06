@@ -1,6 +1,8 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { AnalyticsProvider } from '@/components/AnalyticsProvider'
+import { analytics } from '@/lib/analytics'
 
 declare global {
   interface Window {
@@ -64,6 +66,13 @@ export function Providers({ children }: { children: ReactNode }) {
           parsedUser.fid = Number(parsedUser.fid)
         }
         setUser(parsedUser)
+        
+        // Identify user for analytics
+        analytics.identify(parsedUser.fid.toString(), {
+          display_name: parsedUser.displayName,
+          verified_wallet: parsedUser.verifiedWallet,
+          has_signer: !!parsedUser.signerUuid,
+        })
       }
     }
   }, [])
@@ -101,6 +110,16 @@ export function Providers({ children }: { children: ReactNode }) {
         }
         setUser(user)
         localStorage.setItem('user', JSON.stringify(user))
+        
+        // Identify user for analytics
+        analytics.identify(user.fid.toString(), {
+          display_name: user.displayName,
+          verified_wallet: user.verifiedWallet,
+          has_signer: !!user.signerUuid,
+          login_method: 'neynar'
+        })
+        analytics.track('User Logged In', { method: 'neynar' })
+        
         document.body.removeChild(siwn)
       }
       
@@ -126,17 +145,28 @@ export function Providers({ children }: { children: ReactNode }) {
       }
       setUser(mockUser)
       localStorage.setItem('user', JSON.stringify(mockUser))
+      
+      // Identify user for analytics
+      analytics.identify(mockUser.fid.toString(), {
+        display_name: mockUser.displayName,
+        verified_wallet: mockUser.verifiedWallet,
+        login_method: 'mock'
+      })
+      analytics.track('User Logged In', { method: 'mock' })
     }
   }
 
   const logout = () => {
+    analytics.track('User Logged Out')
     localStorage.removeItem('user')
     setUser(null)
   }
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
+      <AnalyticsProvider>
+        {children}
+      </AnalyticsProvider>
     </AuthContext.Provider>
   )
 }

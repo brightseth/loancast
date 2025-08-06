@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Loan } from '@/lib/supabase'
 import { ExploreCard } from '@/components/ExploreCard'
 import { StatsCard } from '@/components/StatsCard'
+import { useAnalytics } from '@/lib/analytics'
 
 export default function Explore() {
+  const analytics = useAnalytics()
   const [loans, setLoans] = useState<Loan[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'funded'>('active')
@@ -18,6 +20,10 @@ export default function Explore() {
   useEffect(() => {
     fetchLoans()
   }, [filter])
+
+  useEffect(() => {
+    analytics.featureUsed('Explore Page Viewed')
+  }, [])
 
   const filteredLoans = loans.filter(loan => {
     // Search term filter
@@ -50,6 +56,23 @@ export default function Explore() {
 
     return true
   })
+
+  // Track search when filters change
+  const activeFilters = useMemo(() => {
+    const filters: Record<string, any> = {}
+    if (searchTerm) filters.searchTerm = searchTerm
+    if (minAmount) filters.minAmount = minAmount
+    if (maxAmount) filters.maxAmount = maxAmount
+    if (duration) filters.duration = duration
+    if (filter !== 'active') filters.status = filter
+    return filters
+  }, [searchTerm, minAmount, maxAmount, duration, filter])
+
+  useEffect(() => {
+    if (Object.keys(activeFilters).length > 0) {
+      analytics.searchPerformed(searchTerm, activeFilters, filteredLoans.length)
+    }
+  }, [activeFilters, filteredLoans.length])
 
   const fetchLoans = async () => {
     setLoading(true)
@@ -157,20 +180,20 @@ export default function Explore() {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6 justify-center sm:justify-start">
         <button
           onClick={() => setFilter('active')}
-          className={`px-4 py-2 rounded-lg font-medium ${
+          className={`px-3 py-2 sm:px-4 rounded-lg font-medium text-sm ${
             filter === 'active'
               ? 'bg-farcaster text-white'
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
-          Active Loans
+          Active
         </button>
         <button
           onClick={() => setFilter('funded')}
-          className={`px-4 py-2 rounded-lg font-medium ${
+          className={`px-3 py-2 sm:px-4 rounded-lg font-medium text-sm ${
             filter === 'funded'
               ? 'bg-farcaster text-white'
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -180,7 +203,7 @@ export default function Explore() {
         </button>
         <button
           onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg font-medium ${
+          className={`px-3 py-2 sm:px-4 rounded-lg font-medium text-sm ${
             filter === 'all'
               ? 'bg-farcaster text-white'
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -216,7 +239,7 @@ export default function Explore() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-farcaster"></div>
         </div>
       ) : filteredLoans.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {filteredLoans.map(loan => (
             <ExploreCard key={loan.id} loan={loan} />
           ))}

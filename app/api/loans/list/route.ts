@@ -1,26 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
+import { withErrorHandling, createApiError } from '@/lib/error-handler'
+import { getOptimizedLoans } from '@/lib/database-utils'
 
 export async function GET(request: NextRequest) {
-  try {
-    const { data: loans, error } = await supabaseAdmin
-      .from('loans')
-      .select('*')
-      .order('created_at', { ascending: false })
+  // Check rate limit first - use readOnly limiter for public list
+  const { result, response } = await withRateLimit(request, rateLimiters.readOnly)
+  if (response) return response
+
+  return withErrorHandling(async () => {
+    const { searchParams } = new URL(request.url)
+    const status = searchParams.get('status') || undefined
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const offset = parseInt(searchParams.get('offset') || '0')
+
+    // Use optimized database function
+    const loans = await getOptimizedLoans({
+      status,
+      limit: Math.min(limit, 100), // Cap at 100
+      offset: Math.max(offset, 0)
+    })
     
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to fetch loans', details: error.message },
-        { status: 500 }
-      )
-    }
-    
-    return NextResponse.json(loans || [])
-  } catch (error) {
-    console.error('List loans error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+    return NextResponse.json(loans || [], {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
+      }
+    })
+  }, { endpoint: 'GET /api/loans/list' })
 }

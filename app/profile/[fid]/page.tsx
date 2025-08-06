@@ -76,23 +76,23 @@ export default function ProfilePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Profile Header */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-        <div className="flex items-start gap-6">
+      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
           {user.pfp_url && (
             <img
               src={user.pfp_url}
               alt={user.display_name}
-              className="w-20 h-20 rounded-full"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex-shrink-0"
             />
           )}
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+          <div className="flex-1 text-center sm:text-left">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
               {user.display_name}
             </h1>
             <p className="text-gray-600 mb-4">FID: {user.fid}</p>
             
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-farcaster">{user.total_loans}</div>
                 <div className="text-sm text-gray-600">Total Loans</div>
@@ -120,13 +120,13 @@ export default function ProfilePage() {
       </div>
 
       {/* Loans Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Loan History</h2>
-          <div className="flex space-x-2">
+      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
+          <h2 className="text-lg sm:text-xl font-semibold text-center sm:text-left">Loan History</h2>
+          <div className="flex space-x-2 justify-center sm:justify-end">
             <button
               onClick={() => setActiveTab('borrowed')}
-              className={`px-4 py-2 rounded-lg font-medium ${
+              className={`px-3 py-2 sm:px-4 rounded-lg font-medium text-sm ${
                 activeTab === 'borrowed'
                   ? 'bg-farcaster text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -136,7 +136,7 @@ export default function ProfilePage() {
             </button>
             <button
               onClick={() => setActiveTab('lent')}
-              className={`px-4 py-2 rounded-lg font-medium ${
+              className={`px-3 py-2 sm:px-4 rounded-lg font-medium text-sm ${
                 activeTab === 'lent'
                   ? 'bg-farcaster text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -148,7 +148,7 @@ export default function ProfilePage() {
         </div>
 
         {displayLoans.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {displayLoans.map(loan => (
               <LoanCard 
                 key={loan.id} 

@@ -14,14 +14,14 @@ export function ExploreCard({ loan }: ExploreCardProps) {
   const loanNumber = loan.loan_number ? `LOANCAST-${loan.loan_number.toString().padStart(3, '0')}` : `#${loan.id.slice(0, 6).toUpperCase()}`
 
   return (
-    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6">
+    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-4 sm:p-6 h-full flex flex-col">
       <div className="flex justify-between items-start mb-4">
-        <div>
-          <p className="text-xs font-mono text-gray-500 mb-1">{loanNumber}</p>
-          <h3 className="text-2xl font-bold text-gray-900">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-mono text-gray-500 mb-1 truncate">{loanNumber}</p>
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
             ${loan.repay_usdc?.toFixed(2) || '0.00'}
           </h3>
-          <p className="text-sm text-gray-500">Total repayment</p>
+          <p className="text-xs sm:text-sm text-gray-500">Total repayment</p>
         </div>
         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
           isFunded 
@@ -81,21 +81,21 @@ export function ExploreCard({ loan }: ExploreCardProps) {
             • 2% monthly • Due {format(dueDate, 'M/d')}
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-auto">
           <a
             href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 bg-farcaster text-white py-2 px-4 rounded-md font-medium hover:bg-farcaster-dark transition text-center block"
+            className="flex-1 bg-farcaster text-white py-2 px-3 sm:px-4 rounded-md font-medium hover:bg-farcaster-dark transition text-center block text-sm"
           >
             {isFunded ? 'View Cast' : 'Bid on Cast'}
           </a>
           <a
             href={`/profile/${loan.borrower_fid}`}
-            className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition text-center"
+            className="px-2 sm:px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition text-center"
             title="View borrower profile"
           >
-            👤
+            <span className="text-sm">👤</span>
           </a>
         </div>
       </div>
