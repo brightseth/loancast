@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
         results.push({
           loan_id: loan.id,
           synced: false,
-          error: error.message
+          error: error instanceof Error ? error.message : 'Unknown error'
         })
       }
     }

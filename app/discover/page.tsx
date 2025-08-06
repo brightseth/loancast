@@ -117,12 +117,7 @@ export default function DiscoverPage() {
           {loans.map((loan) => (
             <div key={loan.cast_hash} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-start justify-between mb-4">
-                <ProfileBadge
-                  fid={loan.borrower.fid}
-                  username={loan.borrower.username}
-                  displayName={loan.borrower.display_name}
-                  pfpUrl={loan.borrower.pfp_url}
-                />
+                <ProfileBadge fid={loan.borrower.fid} />
                 <span className="text-sm text-gray-500">
                   {formatTimeAgo(loan.created_at)}
                 </span>
