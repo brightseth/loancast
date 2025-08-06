@@ -32,6 +32,8 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
         if (isOverdue) return { ribbon: 'border-l-4 border-red-500', pill: 'bg-red-100 text-red-800' }
         if (isDueSoon) return { ribbon: 'border-l-4 border-yellow-500', pill: 'bg-yellow-100 text-yellow-800' }
         return { ribbon: 'border-l-4 border-green-500', pill: 'bg-green-100 text-green-800' }
+      case 'funded':
+        return { ribbon: 'border-l-4 border-blue-500', pill: 'bg-blue-100 text-blue-800' }
       case 'repaid':
         return { ribbon: 'border-l-4 border-green-500', pill: 'bg-green-100 text-green-800' }
       case 'default':
@@ -80,14 +82,14 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors.pill}`}>
             {getStatusText()}
           </span>
-          {loan.status === 'open' && userRole === 'borrower' && (
+          {(loan.status === 'open' || loan.status === 'funded') && userRole === 'borrower' && (
             <DropdownMenu
               items={[
-                {
+                ...(loan.status === 'funded' ? [{
                   label: 'Mark as Repaid',
-                  onClick: () => window.location.href = `/loans/${loan.id}/repay`,
+                  onClick: () => window.location.href = `/loans/${loan.id}`,
                   className: 'text-[#6936F5]'
-                },
+                }] : []),
                 {
                   label: 'View Details',
                   onClick: () => window.location.href = `/loans/${loan.id}`,
@@ -97,6 +99,21 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
           )}
         </div>
       </div>
+
+      {/* Repayment CTA for funded loans */}
+      {loan.status === 'funded' && userRole === 'borrower' && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+          <p className="text-sm text-green-800 mb-2">
+            💰 Loan funded! Time to repay ${loan.repay_usdc?.toFixed(2)}
+          </p>
+          <button
+            onClick={() => window.location.href = `/loans/${loan.id}`}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium"
+          >
+            Mark as Repaid
+          </button>
+        </div>
+      )}
 
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
