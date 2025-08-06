@@ -204,10 +204,27 @@ ${onTime ? '🏆 Perfect credit score!' : '📉 Credit score impact'}
 
 export async function getUserByFid(fid: number) {
   try {
-    const user = await client.lookupUserByFid(fid)
-    return user
+    console.log(`[Neynar] Looking up FID ${fid}...`)
+    
+    // Try the bulk users method which is the current API
+    const response = await client.fetchBulkUsers([fid])
+    const user = response.users?.[0]
+    
+    if (user) {
+      console.log(`[Neynar] Success for FID ${fid}:`, user?.display_name || 'unnamed')
+      return user
+    } else {
+      console.log(`[Neynar] No user found for FID ${fid}`)
+      return null
+    }
   } catch (error) {
-    console.error('Error fetching user:', error)
+    console.error(`[Neynar] Error fetching user FID ${fid}:`, {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      status: (error as any)?.response?.status,
+      statusText: (error as any)?.response?.statusText,
+      data: (error as any)?.response?.data,
+      error
+    })
     return null
   }
 }
