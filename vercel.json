@@ -3,9 +3,13 @@
     {
       "path": "/api/cron/defaults",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/sync-loans",
+      "schedule": "*/15 * * * *"
     }
   ],
   "env": {
-    "NEXT_PUBLIC_APP_URL": "https://loancast.vercel.app"
+    "NEXT_PUBLIC_APP_URL": "https://loancast.app"
   }
 }

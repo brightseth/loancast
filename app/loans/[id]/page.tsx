@@ -6,11 +6,29 @@ import { Loan } from '@/lib/supabase'
 import { format, formatDistanceToNow, isPast, addDays } from 'date-fns'
 import Link from 'next/link'
 import { CountdownTimer } from '@/components/CountdownTimer'
+import { ProfileBadge } from '@/components/ProfileBadge'
+
+interface Bid {
+  id: string
+  lender_fid: number
+  amount: number
+  cast_hash: string
+  created_at: string
+  status: string
+}
+
+interface ExtendedLoan extends Loan {
+  likes_count?: number
+  recasts_count?: number
+  replies_count?: number
+  bids?: Bid[]
+}
 
 export default function LoanDetail() {
   const { id } = useParams()
-  const [loan, setLoan] = useState<Loan | null>(null)
+  const [loan, setLoan] = useState<ExtendedLoan | null>(null)
   const [loading, setLoading] = useState(true)
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -29,6 +47,23 @@ export default function LoanDetail() {
       console.error('Error fetching loan:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const syncLoanData = async () => {
+    if (!loan) return
+    
+    setSyncing(true)
+    try {
+      const response = await fetch(`/api/webhooks/neynar?loan_id=${loan.id}`)
+      if (response.ok) {
+        // Refresh loan data
+        await fetchLoan()
+      }
+    } catch (error) {
+      console.error('Error syncing loan:', error)
+    } finally {
+      setSyncing(false)
     }
   }
 
@@ -63,6 +98,8 @@ export default function LoanDetail() {
   const dueDate = new Date(loan.due_ts)
   const isOverdue = isPast(dueDate) && loan.status === 'open'
   const apr = loan.yield_bps / 100
+  const auctionEndTime = addDays(new Date(loan.created_at), 1)
+  const isAuctionActive = !isPast(auctionEndTime) && loan.status === 'open'
 
   return (
     <div className="max-w-screen-md mx-auto p-4 py-12">
@@ -87,23 +124,102 @@ export default function LoanDetail() {
               ? isOverdue 
                 ? '🔴 bg-red-100 text-red-800' 
                 : '🟡 bg-yellow-100 text-yellow-800'
+              : loan.status === 'funded'
+                ? '💰 bg-blue-100 text-blue-800'
               : loan.status === 'repaid'
                 ? '🟢 bg-green-100 text-green-800'
                 : '🔴 bg-red-100 text-red-800'
           }`}>
-            {loan.status === 'open' && isOverdue ? '🔴 Overdue' : loan.status === 'open' ? '🟡 Open' : loan.status === 'repaid' ? '🟢 Repaid' : '🔴 Default'}
+            {loan.status === 'open' && isOverdue ? '🔴 Overdue' : 
+             loan.status === 'open' ? '🟡 Open' : 
+             loan.status === 'funded' ? '💰 Funded' :
+             loan.status === 'repaid' ? '🟢 Repaid' : '🔴 Default'}
           </span>
         </div>
 
-        {loan.status === 'open' && !isOverdue && (
+        {isAuctionActive && (
           <div className="mb-8 p-6 bg-gradient-to-r from-[#6936F5]/10 to-purple-100 rounded-lg">
             <CountdownTimer 
-              endTime={addDays(new Date(loan.created_at), 1)} 
+              endTime={auctionEndTime} 
               className="mb-4"
             />
             <p className="text-center text-sm text-gray-600">
               🗓️ Auction ends 24 hours after posting
             </p>
+          </div>
+        )}
+
+        {/* Engagement Metrics */}
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-700">Cast Engagement</h3>
+            <button
+              onClick={syncLoanData}
+              disabled={syncing}
+              className="text-xs text-[#6936F5] hover:underline disabled:opacity-50"
+            >
+              {syncing ? 'Syncing...' : 'Refresh'}
+            </button>
+          </div>
+          <div className="flex items-center gap-6 text-sm">
+            <span className="flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {loan.likes_count || 0} likes
+            </span>
+            <span className="flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {loan.recasts_count || 0} recasts
+            </span>
+            <span className="flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              {loan.replies_count || 0} replies
+            </span>
+          </div>
+        </div>
+
+        {/* Bids Section */}
+        {loan.bids && loan.bids.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold mb-4">Bids</h2>
+            <div className="space-y-2">
+              {loan.bids
+                .sort((a, b) => b.amount - a.amount)
+                .map((bid) => (
+                  <div
+                    key={bid.id}
+                    className={`p-4 rounded-lg border ${
+                      bid.status === 'accepted'
+                        ? 'bg-green-50 border-green-200'
+                        : bid.status === 'active'
+                        ? 'bg-white border-gray-200'
+                        : 'bg-gray-50 border-gray-200 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <ProfileBadge fid={bid.lender_fid} />
+                        <div>
+                          <p className="font-semibold">${bid.amount.toFixed(2)}</p>
+                          <p className="text-xs text-gray-600">
+                            {formatDistanceToNow(new Date(bid.created_at), { addSuffix: true })}
+                          </p>
+                        </div>
+                      </div>
+                      {bid.status === 'accepted' && (
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                          Winning Bid
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+            </div>
           </div>
         )}
 
@@ -154,12 +270,17 @@ export default function LoanDetail() {
                 </div>
               </div>
               
-              {loan.lender_fid && (
+              {loan.funded_at && (
                 <div className="flex items-start space-x-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                   <div>
                     <p className="font-medium">Loan Funded</p>
-                    <p className="text-sm text-gray-600">Lender FID: {loan.lender_fid}</p>
+                    <p className="text-sm text-gray-600">
+                      {format(new Date(loan.funded_at), 'MMM dd, yyyy HH:mm')}
+                    </p>
+                    {loan.lender_fid && (
+                      <p className="text-sm text-gray-600">Lender FID: {loan.lender_fid}</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -194,22 +315,31 @@ export default function LoanDetail() {
               href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center text-farcaster hover:underline"
+              className="inline-flex items-center text-[#6936F5] hover:underline"
             >
               View on Warpcast →
             </a>
+            <div className="mt-2">
+              <code className="text-xs text-gray-600 break-all">{loan.cast_hash}</code>
+            </div>
           </div>
         </div>
 
-        {loan.status === 'open' && (
-          <div className="mt-8 pt-6 border-t">
-            <h2 className="text-lg font-semibold mb-4">Actions</h2>
-            <Link
-              href={`/loans/${loan.id}/repay`}
-              className="bg-[#6936F5] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#5929cc] transition"
+        {loan.status === 'open' && !isOverdue && (
+          <div className="mt-8 p-6 bg-blue-50 border-2 border-blue-200 rounded-lg">
+            <h3 className="font-semibold text-blue-900 mb-2">💸 Payment Instructions</h3>
+            <p className="text-sm text-blue-800 mb-3">
+              To fund this loan, reply to the Farcaster cast with your bid amount (e.g., "$500").
+              The highest bidder at auction end will be selected as the lender.
+            </p>
+            <a
+              href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-[#6936F5] text-white px-4 py-2 rounded-lg hover:bg-[#5929cc] transition"
             >
-              Mark as Repaid
-            </Link>
+              Place Bid on Farcaster
+            </a>
           </div>
         )}
       </div>

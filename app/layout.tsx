@@ -8,16 +8,16 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'LoanCast - Social Lending on Farcaster',
-  description: 'Fixed rate loans as collectible casts. 2% monthly, 1-3 month terms.',
+  description: 'Social lending with no credit check, no collateral. Fixed 2% monthly rate.',
   openGraph: {
     title: 'LoanCast - Social Lending on Farcaster',
-    description: 'Fixed rate loans as collectible casts. 2% monthly, 1-3 month terms.',
+    description: 'Social lending with no credit check, no collateral. Fixed 2% monthly rate.',
     images: [`${process.env.NEXT_PUBLIC_APP_URL}/api/frame/image`],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'LoanCast',
-    description: 'Social lending on Farcaster',
+    description: 'Social lending with no credit check, no collateral',
     images: [`${process.env.NEXT_PUBLIC_APP_URL}/api/frame/image`],
   },
   other: {
@@ -56,11 +56,14 @@ export default function RootLayout({
                     <a href="/loans" className="text-gray-700 hover:text-[#6936F5]">
                       My Loans
                     </a>
+                    <a href="/dashboard/lending" className="text-gray-700 hover:text-[#6936F5]">
+                      Lending
+                    </a>
                     <a href="/explore" className="text-gray-700 hover:text-[#6936F5]">
                       Explore
                     </a>
-                    <a href="/admin" className="text-gray-500 hover:text-[#6936F5] text-sm">
-                      Admin
+                    <a href="/discover" className="text-gray-700 hover:text-[#6936F5]">
+                      Discover
                     </a>
                     <AuthButton />
                   </div>
@@ -76,16 +79,35 @@ export default function RootLayout({
                   <a href="/loans" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
                     My Loans
                   </a>
+                  <a href="/dashboard/lending" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
+                    Lending
+                  </a>
                   <a href="/explore" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
                     Explore
                   </a>
-                  <a href="/admin" className="block px-3 py-2 text-sm font-medium text-gray-500 hover:text-[#6936F5]">
-                    Admin
+                  <a href="/discover" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
+                    Discover
                   </a>
                 </div>
               </div>
             </nav>
             <main className="bg-white">{children}</main>
+            
+            {/* Fun compliance footer */}
+            <footer className="bg-zinc-50 border-t border-zinc-200 py-6 px-4">
+              <div className="max-w-4xl mx-auto text-center">
+                <p className="text-xs text-zinc-600 mb-2">
+                  <span className="text-sm">💫</span> LoanCast facilitates trust-based loans between friends—no securities, no interest on deposits, just social reputation.
+                </p>
+                <p className="text-xs text-zinc-500">
+                  USDC is fully backed by <a href="https://www.centre.io/usdc" target="_blank" rel="noopener" className="text-[#6936F5] hover:underline">Circle</a> • 
+                  Not FDIC insured • 
+                  <a href="/faq" className="text-[#6936F5] hover:underline">FAQ</a> • 
+                  Loans based on social trust, not credit scores • 
+                  <span className="text-sm">🎭</span> Built for the vibes
+                </p>
+              </div>
+            </footer>
           </div>
         </Providers>
       </body>

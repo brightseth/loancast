@@ -4,6 +4,44 @@
 
 @layer base {
   body {
-    @apply bg-zinc-50;
+    @apply bg-zinc-50 text-zinc-900 leading-tight;
+  }
+}
+
+@layer components {
+  /* Typography utilities */
+  h1 {
+    @apply text-4xl md:text-5xl font-bold mb-2;
+  }
+  
+  .lead {
+    @apply text-lg md:text-xl text-zinc-600 mb-6;
+  }
+  
+  .primary-button {
+    @apply bg-[#6936F5] hover:bg-[#5733d9] text-white rounded-full px-8 py-4 font-medium transition;
+  }
+
+  /* Custom slider styling */
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #6936F5;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #6936F5;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: none;
   }
 }

@@ -10,7 +10,7 @@ const loanSchema = z.object({
   amount: z
     .number({ invalid_type_error: 'Amount must be a number' })
     .min(10, 'Minimum loan amount is $10')
-    .max(5000, 'Maximum loan amount is $5,000'),
+    .max(1000, 'Maximum loan amount is $1,000'),
   duration_months: z
     .number({ invalid_type_error: 'Duration must be selected' })
     .min(1, 'Minimum duration is 1 month')
@@ -44,8 +44,9 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
   const amount = watch('amount') || 0
   const durationMonths = watch('duration_months') || 1
   
-  // Fixed 2% monthly rate (24% APR)
+  // Fixed 2% monthly rate for all early loans
   const monthlyRate = 0.02
+  const annualRate = 24 // 2% × 12 months
   const farcasterFee = amount * 0.10 // 10% Farcaster fee
   const netAmount = amount - farcasterFee // Borrower receives this amount
   const totalInterest = amount * monthlyRate * durationMonths
@@ -60,7 +61,7 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
 💸 Repay: $${repayAmount.toFixed(0)} 
 📅 Due: ${format(dueDate, 'M/d/yyyy')}
 
-Fixed rate social lending on Farcaster.
+🤝 Friend-to-friend lending • No securities • Trust-based
 Powered by @loancast`
 
   const copyCastText = async () => {
@@ -77,11 +78,11 @@ Powered by @loancast`
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-4">
         <div className="flex items-center space-x-2">
-          <span className="text-lg text-amber-600">⚠️</span>
+          <span className="text-lg text-amber-600">🤝</span>
           <div>
-            <h3 className="font-medium text-amber-900">Trust-Based Lending</h3>
+            <h3 className="font-medium text-amber-900">Friend-to-Friend Loans</h3>
             <p className="text-sm text-amber-800">
-              Social reputation only. No escrow or collateral.
+              Trust-based lending between friends. No credit checks, no collateral, no securities—just social reputation and good vibes.
             </p>
           </div>
         </div>
@@ -121,23 +122,24 @@ Powered by @loancast`
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Lender yield (30 days, %)
+          Lender yield (fixed for early cohorts)
         </label>
         <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-sm font-medium text-gray-900">Fixed Monthly Rate</p>
-              <p className="text-xs text-gray-600">2% monthly = 24% annual</p>
+              <p className="text-xs text-gray-600">2% monthly = 24% APR</p>
             </div>
             <div className="text-right">
               <p className="text-lg font-bold text-[#6936F5]">2%</p>
               <p className="text-xs text-gray-500">monthly</p>
             </div>
           </div>
-          <div className="mt-2 p-2 bg-blue-50 rounded text-xs text-blue-700">
-            <span className="text-lg">💰</span> Monthly yield: {amount > 0 ? `$${(amount * 0.02).toFixed(0)}` : '$0'} per month
+          
+          <div className="p-2 bg-blue-50 rounded text-xs text-blue-700">
+            <span className="text-lg">🔒</span> All early LoanCasts pay 2% lender yield for 30 days.
             <div className="mt-1 text-blue-600">
-              <span className="text-lg">📊</span> Helper: 2% monthly ≈ 24% APR
+              We'll unlock dynamic yields after we've published three full months of performance data.
             </div>
           </div>
         </div>
@@ -242,9 +244,12 @@ Powered by @loancast`
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-[#6936F5] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#5929cc] transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-[#6936F5] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#5929cc] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        {isSubmitting ? 'Posting...' : 'Post LoanCast'}
+        {isSubmitting && (
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        )}
+        {isSubmitting ? 'Creating LoanCast...' : 'Post LoanCast'}
       </button>
       </div>
     </form>

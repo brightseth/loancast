@@ -9,20 +9,20 @@ export async function createLoanCast(
   signerUuid: string,
   amount: number,
   yieldBps: number,
-  dueDate: Date
+  dueDate: Date,
+  loanId?: string
 ) {
   const apr = yieldBps / 100
   const repayAmount = amount + (amount * yieldBps) / 10000
   
-  const castText = `🏦 LOANCAST REQUEST
-
+  const castText = `┏━ ${loanId || 'LOANCAST'} ━┓
 Amount: $${amount.toFixed(2)} USDC
-Rate: 2% monthly (24% APR)
-Repay: $${repayAmount.toFixed(2)}
-Due: ${dueDate.toLocaleDateString()}
+Yield: 2.0% monthly
+Repay: $${repayAmount.toFixed(2)} on ${dueDate.toLocaleDateString()}
+Highest bid = lender. This cast is the note.
+┗━━━━━━━━━━━━━━┛
 
-Fixed rate social lending on Farcaster.
-Powered by @loancast`
+🤝 Friend-to-friend lending • No securities • Trust-based`
 
   try {
     if (isDev) {

@@ -7,6 +7,7 @@ interface LoanSuccessProps {
   loan: {
     id: string
     cast_hash: string
+    cast_url?: string
     amount: number
     repay_usdc: number
     due_ts: string
@@ -57,8 +58,12 @@ Recast to /loancast`
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Cast posted</h2>
-        <p className="text-gray-600">Auction live for 24 h</p>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">
+          {loan.cast_url ? 'Cast posted automatically!' : 'Loan created successfully!'}
+        </h2>
+        <p className="text-gray-600">
+          {loan.cast_url ? 'Auction live for 24 h' : 'Ready to post on Farcaster'}
+        </p>
       </div>
 
       <div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -81,13 +86,25 @@ Recast to /loancast`
       </div>
 
       <div className="space-y-3">
-        <button
-          onClick={shareOnWarpcast}
-          className="w-full bg-[#6936F5] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#5929cc] transition flex items-center justify-center space-x-2"
-        >
-          <span>🔄</span>
-          <span>Recast to /loancast</span>
-        </button>
+        {loan.cast_url ? (
+          <a
+            href={loan.cast_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full bg-[#6936F5] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#5929cc] transition flex items-center justify-center space-x-2 block"
+          >
+            <span>✅</span>
+            <span>View on Farcaster</span>
+          </a>
+        ) : (
+          <button
+            onClick={shareOnWarpcast}
+            className="w-full bg-[#6936F5] text-white py-3 px-4 rounded-lg font-medium hover:bg-[#5929cc] transition flex items-center justify-center space-x-2"
+          >
+            <span>🔄</span>
+            <span>Post to Farcaster</span>
+          </button>
+        )}
 
         <button
           onClick={copyShareText}

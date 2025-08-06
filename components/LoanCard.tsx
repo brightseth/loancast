@@ -5,6 +5,7 @@ import { format, formatDistanceToNow, isPast } from 'date-fns'
 import Link from 'next/link'
 import { CountdownChip } from './CountdownChip'
 import { DropdownMenu } from './DropdownMenu'
+import { ProfileBadge } from './ProfileBadge'
 
 interface LoanCardProps {
   loan: Loan
@@ -15,8 +16,10 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
   const dueDate = new Date(loan.due_ts)
   const isOverdue = isPast(dueDate) && loan.status === 'open'
   
-  // Generate a loan number from the ID (first 6 chars for display)
-  const loanNumber = `#${loan.id.slice(0, 6).toUpperCase()}`
+  // Use loan_number if available, otherwise fallback to ID slice
+  const loanNumber = loan.loan_number 
+    ? `LOANCAST-${loan.loan_number.toString().padStart(4, '0')}`
+    : `#${loan.id.slice(0, 6).toUpperCase()}`
   
   const getStatusColors = () => {
     const now = new Date()
@@ -55,14 +58,19 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
       <div className="flex justify-between items-start mb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono text-gray-500">LoanCast {loanNumber}</span>
+            <span className="text-xs font-mono text-gray-500">{loanNumber}</span>
           </div>
           <h3 className="text-lg font-semibold">
             ${loan.repay_usdc?.toFixed(0) || '0'} USDC
           </h3>
-          <p className="text-sm text-gray-700">
-            {loan.yield_bps / 100}% APR
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-700">
+              {loan.yield_bps / 100}% APR
+            </p>
+          </div>
+          <div className="mt-2">
+            <ProfileBadge fid={loan.borrower_fid} showStats={false} />
+          </div>
         </div>
         <div className="flex items-center space-x-2">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors.pill}`}>
@@ -110,6 +118,20 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
           <span className="text-gray-700">Farcaster Cast:</span>
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500">#{loan.cast_hash.slice(2, 8)}</span>
+            <button
+              onClick={async () => {
+                const url = `https://loancast.app/loans/${loan.id}`
+                try {
+                  await navigator.clipboard.writeText(url)
+                  // Could add toast notification here
+                } catch (err) {
+                  console.error('Failed to copy:', err)
+                }
+              }}
+              className="text-gray-500 hover:text-[#6936F5] text-xs font-medium"
+            >
+              Copy Link
+            </button>
             <a
               href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
               target="_blank"

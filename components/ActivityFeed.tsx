@@ -58,32 +58,17 @@ export function ActivityFeed() {
   }
 
   const getActivityText = (activity: ActivityItem) => {
-    const loanNumber = `#${activity.loan.id.slice(0, 6).toUpperCase()}`
     const apr = activity.loan.yield_bps / 100
+    const handle = `@${activity.user?.replace('User ', '').toLowerCase()}`
+    const amount = `$${activity.loan.repay_usdc?.toFixed(0) || '0'}`
+    
     switch (activity.type) {
       case 'new_loan':
-        return (
-          <span>
-            <span className="font-medium">@{activity.user?.replace('User ', '').toLowerCase()}</span>
-            <span className="mx-1">—</span>
-            <span className="font-medium text-[#6936F5]">${activity.loan.repay_usdc?.toFixed(0) || '0'}</span>
-            <span className="text-xs text-gray-500 ml-1">· {apr}% APR</span>
-          </span>
-        )
+        return `${handle} • ${amount} • ${apr}% APR`
       case 'funding':
-        return (
-          <span>
-            <span className="font-medium">{activity.user}</span> funded{' '}
-            <span className="font-medium text-green-600">${activity.amount?.toFixed(0) || '0'}</span>
-          </span>
-        )
+        return `${handle} • $${activity.amount?.toFixed(0) || '0'} • funded`
       case 'repayment':
-        return (
-          <span>
-            <span className="font-medium">{activity.user}</span> repaid{' '}
-            <span className="font-medium text-green-600">${activity.loan.repay_usdc?.toFixed(0) || '0'}</span>
-          </span>
-        )
+        return `${handle} • ${amount} • repaid`
       default:
         return 'Unknown activity'
     }
@@ -120,46 +105,28 @@ export function ActivityFeed() {
       
       {activities.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          <div className="text-4xl mb-2">💤</div>
-          <p>No recent activity</p>
+          <p className="text-sm">No live loans. <a href="/loans/new" className="text-[#6936F5] hover:underline">Start one →</a></p>
         </div>
       ) : (
-        <div className="space-y-3 max-h-[240px] overflow-y-auto">
+        <div className="space-y-2 max-h-56 overflow-y-auto">
           {activities.map((activity) => {
             const isExpired = activity.loan.status === 'open' && new Date(activity.loan.due_ts) < new Date()
-            const hoursLeft = Math.max(0, Math.floor((new Date(activity.loan.due_ts).getTime() - Date.now()) / (1000 * 60 * 60)))
             
             return (
-              <div key={activity.id} className="flex items-start space-x-3 py-2 hover:bg-gray-50 rounded-lg px-2 -mx-2 transition">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs">
-                    {activity.loan.status === 'repaid' ? '🟢' : 
-                     activity.loan.status === 'open' && !isExpired ? '🕑' : '🔴'}
-                  </span>
-                  <div className="text-xl">
-                    {getActivityIcon(activity.type)}
-                  </div>
-                </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm">
-                  {getActivityText(activity)}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-gray-500">
-                    {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
-                  </span>
-                  <span className="text-xs text-gray-400">•</span>
-                  <a
-                    href={`https://warpcast.com/~/conversations/${activity.loan.cast_hash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-[#6936F5] hover:underline"
-                  >
-                    View Cast
-                  </a>
+              <div key={activity.id} className="flex items-center space-x-3 py-2">
+                {/* State dot */}
+                <span className="text-sm">
+                  {activity.loan.status === 'repaid' ? '🟢' : 
+                   activity.loan.status === 'open' && !isExpired ? '🕑' : '🔴'}
+                </span>
+                
+                {/* Clean activity text */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-900">
+                    {getActivityText(activity)}
+                  </p>
                 </div>
               </div>
-            </div>
             )
           })}
         </div>

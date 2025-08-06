@@ -4,78 +4,136 @@ import { useState, useEffect } from 'react'
 
 interface CountdownTimerProps {
   endTime: string | Date
-  onExpired?: () => void
   className?: string
+  compact?: boolean
 }
 
-export function CountdownTimer({ endTime, onExpired, className = '' }: CountdownTimerProps) {
-  const [timeLeft, setTimeLeft] = useState<{
-    hours: number
-    minutes: number
-    seconds: number
-    expired: boolean
-  }>({ hours: 0, minutes: 0, seconds: 0, expired: false })
+interface TimeLeft {
+  days: number
+  hours: number
+  minutes: number
+  seconds: number
+  total: number
+}
+
+export function CountdownTimer({ endTime, className = '', compact = false }: CountdownTimerProps) {
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 })
 
   useEffect(() => {
-    const updateTimer = () => {
-      const end = new Date(endTime).getTime()
-      const now = new Date().getTime()
-      const difference = end - now
+    const calculateTimeLeft = () => {
+      const endTimeMs = new Date(endTime).getTime()
+      const now = Date.now()
+      const difference = endTimeMs - now
 
-      if (difference <= 0) {
-        setTimeLeft({ hours: 0, minutes: 0, seconds: 0, expired: true })
-        if (onExpired) onExpired()
-        return
+      if (difference > 0) {
+        return {
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+          total: difference
+        }
+      } else {
+        return { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 }
       }
-
-      const hours = Math.floor(difference / (1000 * 60 * 60))
-      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000)
-
-      setTimeLeft({ hours, minutes, seconds, expired: false })
     }
 
-    updateTimer()
-    const interval = setInterval(updateTimer, 1000)
+    // Update immediately
+    setTimeLeft(calculateTimeLeft())
 
-    return () => clearInterval(interval)
-  }, [endTime, onExpired])
+    // Then update every second
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft())
+    }, 1000)
 
-  if (timeLeft.expired) {
+    return () => clearInterval(timer)
+  }, [endTime])
+
+  const formatTime = (time: number) => {
+    return time.toString().padStart(2, '0')
+  }
+
+  const getUrgencyStyle = () => {
+    const { total } = timeLeft
+    const oneHour = 60 * 60 * 1000
+    const sixHours = 6 * oneHour
+
+    if (total <= 0) return 'text-gray-500'
+    if (total < oneHour) return 'text-red-600 animate-pulse'
+    if (total < sixHours) return 'text-orange-600'
+    return 'text-gray-700'
+  }
+
+  if (timeLeft.total <= 0) {
     return (
-      <div className={`text-center ${className}`}>
-        <div className="text-lg font-bold text-red-500">
-          ⏰ AUCTION ENDED
-        </div>
-        <div className="text-sm text-gray-500">
-          Bidding has closed
-        </div>
+      <div className={`${className} ${getUrgencyStyle()}`}>
+        <span className="text-sm font-medium">Auction ended</span>
       </div>
     )
   }
 
-  const formatNumber = (num: number) => num.toString().padStart(2, '0')
+  if (compact) {
+    // Compact format for cards/lists
+    if (timeLeft.days > 0) {
+      return (
+        <div className={`${className} ${getUrgencyStyle()}`}>
+          <span className="text-sm font-medium">
+            {timeLeft.days}d {formatTime(timeLeft.hours)}h left
+          </span>
+        </div>
+      )
+    } else if (timeLeft.hours > 0) {
+      return (
+        <div className={`${className} ${getUrgencyStyle()}`}>
+          <span className="text-sm font-medium">
+            {timeLeft.hours}h {formatTime(timeLeft.minutes)}m left
+          </span>
+        </div>
+      )
+    } else {
+      return (
+        <div className={`${className} ${getUrgencyStyle()}`}>
+          <span className="text-sm font-medium">
+            {formatTime(timeLeft.minutes)}:{formatTime(timeLeft.seconds)} left
+          </span>
+        </div>
+      )
+    }
+  }
 
+  // Full format for loan detail pages
   return (
-    <div className={`text-center ${className}`}>
-      <div className="text-lg font-bold text-[#6936F5] mb-1">
-        ⏰ TIME LEFT
+    <div className={`${className}`}>
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-gray-500">Auction ends in:</span>
+        <div className={`flex items-center gap-1 font-mono ${getUrgencyStyle()}`}>
+          {timeLeft.days > 0 && (
+            <>
+              <span className="text-lg font-semibold">{timeLeft.days}</span>
+              <span className="text-xs">d</span>
+            </>
+          )}
+          <span className="text-lg font-semibold">{formatTime(timeLeft.hours)}</span>
+          <span className="text-xs">h</span>
+          <span className="text-lg font-semibold">{formatTime(timeLeft.minutes)}</span>
+          <span className="text-xs">m</span>
+          <span className="text-lg font-semibold">{formatTime(timeLeft.seconds)}</span>
+          <span className="text-xs">s</span>
+        </div>
       </div>
-      <div className="flex items-center justify-center space-x-1 text-2xl font-mono font-bold">
-        <div className="bg-gray-100 px-2 py-1 rounded">
-          {formatNumber(timeLeft.hours)}
-        </div>
-        <span className="text-gray-400">:</span>
-        <div className="bg-gray-100 px-2 py-1 rounded">
-          {formatNumber(timeLeft.minutes)}
-        </div>
-        <span className="text-gray-400">:</span>
-        <div className="bg-gray-100 px-2 py-1 rounded">
-          {formatNumber(timeLeft.seconds)}
-        </div>
-      </div>
-      <div className="text-xs text-gray-500 mt-1">
-        HH:MM:SS
+      
+      {/* Progress bar */}
+      <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
+        <div 
+          className={`h-1 rounded-full transition-all duration-1000 ${
+            timeLeft.total < 60 * 60 * 1000 ? 'bg-red-500' : 
+            timeLeft.total < 6 * 60 * 60 * 1000 ? 'bg-orange-500' : 
+            'bg-blue-500'
+          }`}
+          style={{
+            width: `${Math.max(0, Math.min(100, (timeLeft.total / (24 * 60 * 60 * 1000)) * 100))}%`
+          }}
+        />
       </div>
     </div>
   )

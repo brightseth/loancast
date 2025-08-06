@@ -33,6 +33,7 @@ export default function NewLoan() {
         body: JSON.stringify({
           ...data,
           borrower_fid: user.fid,
+          signer_uuid: user.signerUuid, // Pass signer UUID for auto-posting
         }),
       })
 
