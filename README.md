@@ -145,3 +145,5 @@ MIT
 ## Contact
 
 Built by the LoanCast team. Follow us on Farcaster: [@loancast](https://warpcast.com/loancast)
+
+*Updated: Profile pages now include fallback test users for development.*
