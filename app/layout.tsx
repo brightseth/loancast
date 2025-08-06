@@ -110,7 +110,9 @@ export default function RootLayout({
                     <span className="hidden sm:inline">•</span>
                     <span>Not FDIC insured</span>
                     <span className="hidden sm:inline">•</span>
-                    <a href="/faq" className="text-[#6936F5] hover:underline">FAQ</a>
+                    <a href="/terms" className="text-[#6936F5] hover:underline">Terms</a>
+                    <span className="hidden sm:inline">•</span>
+                    <a href="/privacy" className="text-[#6936F5] hover:underline">Privacy</a>
                   </div>
                   <div className="sm:mt-1">
                     <span>Loans based on social trust, not credit scores</span>
