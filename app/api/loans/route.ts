@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
 
     // Try cast creation
     let cast
+    let castSuccess = false
     try {
       cast = await createLoanCast(
         signer_uuid || 'default-signer',
@@ -78,9 +79,17 @@ export async function POST(request: NextRequest) {
         loanId // Pass loan ID to the cast
       )
       console.log('Cast created:', cast)
+      castSuccess = ((cast as any).success !== false) && !!cast.hash && !cast.hash.includes('failed-')
+      
+      // Track cast creation event
+      if (castSuccess && !cast.hash.includes('mock-') && !cast.hash.includes('failed-')) {
+        console.log('Real cast created successfully for', loanId)
+      }
+      
     } catch (castError) {
       console.error('Cast creation error:', castError)
       cast = { hash: `mock-${Date.now()}` } // fallback
+      castSuccess = false
     }
 
     const uuid = uuidv4()

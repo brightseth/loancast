@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { createFundingCast, getUserByFid } from '@/lib/neynar'
 
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const { amount, lenderFid, txHash } = await request.json()
+    const { amount, lenderFid, txHash, signerUuid } = await request.json()
 
     // Validate input
     if (!amount || !lenderFid) {
@@ -43,12 +44,15 @@ export async function POST(
     const newFunding = currentFunding + amount
     const targetAmount = loan.repay_usdc || 0
 
+    const fullyFunded = newFunding >= targetAmount
+    
     // Update the loan with new funding amount
     const { error: updateError } = await supabase
       .from('loans')
       .update({
         gross_usdc: newFunding,
-        lender_fid: newFunding >= targetAmount ? lenderFid : loan.lender_fid
+        lender_fid: fullyFunded ? lenderFid : loan.lender_fid,
+        status: fullyFunded ? 'funded' : 'open'
       })
       .eq('id', params.id)
 
@@ -59,10 +63,39 @@ export async function POST(
       )
     }
 
+    // If loan is fully funded, create a funding cast
+    if (fullyFunded && loan.cast_hash && signerUuid) {
+      try {
+        // Get lender and borrower names for the cast
+        const [lenderData, borrowerData] = await Promise.all([
+          getUserByFid(lenderFid),
+          getUserByFid(loan.borrower_fid)
+        ])
+        
+        const lenderName = (lenderData as any)?.display_name || (lenderData as any)?.username || `FID ${lenderFid}`
+        const borrowerName = (borrowerData as any)?.display_name || (borrowerData as any)?.username || `FID ${loan.borrower_fid}`
+        const loanId = `LOANCAST-${loan.loan_number.toString().padStart(4, '0')}`
+        
+        console.log(`Creating funding cast for ${loanId}`)
+        await createFundingCast(
+          signerUuid,
+          loanId,
+          loan.cast_hash,
+          lenderName,
+          borrowerName,
+          amount
+        )
+      } catch (castError) {
+        console.error('Failed to create funding cast:', castError)
+        // Don't fail the funding if cast creation fails
+      }
+    }
+
     return NextResponse.json({
       success: true,
       newFunding,
-      fullyFunded: newFunding >= targetAmount
+      fullyFunded,
+      loanId: `LOANCAST-${loan.loan_number.toString().padStart(4, '0')}`
     })
 
   } catch (error) {
