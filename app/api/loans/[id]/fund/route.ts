@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { createFundingCast, getUserByFid } from '@/lib/neynar'
+import { notificationService } from '@/lib/notifications'
 
 export async function POST(
   request: Request,
@@ -63,8 +64,8 @@ export async function POST(
       )
     }
 
-    // If loan is fully funded, create a funding cast
-    if (fullyFunded && loan.cast_hash && signerUuid) {
+    // If loan is fully funded, create a funding cast and send notifications
+    if (fullyFunded) {
       try {
         // Get lender and borrower names for the cast
         const [lenderData, borrowerData] = await Promise.all([
@@ -76,18 +77,31 @@ export async function POST(
         const borrowerName = (borrowerData as any)?.display_name || (borrowerData as any)?.username || `FID ${loan.borrower_fid}`
         const loanId = `LOANCAST-${loan.loan_number.toString().padStart(4, '0')}`
         
-        console.log(`Creating funding cast for ${loanId}`)
-        await createFundingCast(
-          signerUuid,
-          loanId,
-          loan.cast_hash,
+        // Send notification to borrower
+        await notificationService.notifyLoanFunded(
+          loan.borrower_fid,
+          params.id,
           lenderName,
-          borrowerName,
-          amount
+          amount,
+          signerUuid,
+          loan.cast_hash
         )
-      } catch (castError) {
-        console.error('Failed to create funding cast:', castError)
-        // Don't fail the funding if cast creation fails
+        
+        // Create funding cast if we have the necessary data
+        if (loan.cast_hash && signerUuid) {
+          console.log(`Creating funding cast for ${loanId}`)
+          await createFundingCast(
+            signerUuid,
+            loanId,
+            loan.cast_hash,
+            lenderName,
+            borrowerName,
+            amount
+          )
+        }
+      } catch (error) {
+        console.error('Failed to create funding cast or notification:', error)
+        // Don't fail the funding if cast creation or notification fails
       }
     }
 

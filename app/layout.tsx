@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
 import { AuthButton } from '../components/AuthButton'
+import { NotificationBellWrapper } from '../components/NotificationBellWrapper'
 import { Analytics } from '@vercel/analytics/react'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 
@@ -65,6 +66,7 @@ export default function RootLayout({
                     <a href="/explore" className="text-gray-700 hover:text-[#6936F5]">
                       Explore
                     </a>
+                    <NotificationBellWrapper />
                     <AuthButton />
                   </div>
 
