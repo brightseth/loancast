@@ -13,6 +13,7 @@
     "@neynar/nodejs-sdk": "^1.16.0",
     "@neynar/react": "^1.2.7",
     "@privy-io/react-auth": "^2.21.1",
+    "@sentry/nextjs": "^10.1.0",
     "@supabase/supabase-js": "^2.39.0",
     "@types/node": "20.11.0",
     "@types/react": "18.2.47",

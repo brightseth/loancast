@@ -30,10 +30,9 @@ export async function POST(request: NextRequest) {
     
     const loanData = {
       id: uuidv4(),
-      loan_number: 1, // LOANCAST-001
       cast_hash: castHash,
       borrower_fid: 5046, // Your FID
-      lender_fid: henryFid, // @henry's FID (placeholder)
+      lender_fid: henryFid, // @henry's FID
       gross_usdc: grossAmount,
       net_usdc: netAmount,
       yield_bps: yieldBps,
@@ -43,7 +42,6 @@ export async function POST(request: NextRequest) {
       status: 'funded', // It's been funded!
       tx_fund: txHash, // BaseScan transaction hash
       tx_repay: null,
-      funded_at: fundedDate.toISOString(),
       created_at: createdDate.toISOString(),
       updated_at: fundedDate.toISOString()
     }
@@ -52,7 +50,7 @@ export async function POST(request: NextRequest) {
     
     const { data, error } = await supabaseAdmin
       .from('loans')
-      .upsert(loanData, { onConflict: 'loan_number' })
+      .upsert(loanData, { onConflict: 'cast_hash' })
       .select()
       .single()
     
