@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { User, Loan } from '@/lib/supabase'
 import { LoanCard } from '@/components/LoanCard'
 import { ReputationProfile } from '@/components/ReputationProfile'
+import { ReputationCard } from '@/components/ReputationCard'
 
 export default function ProfilePage() {
   const params = useParams()
@@ -160,6 +161,11 @@ export default function ProfilePage() {
       {/* Reputation Details */}
       <div className="mb-8">
         <ReputationProfile user={user} />
+      </div>
+
+      {/* Advanced Reputation System */}
+      <div className="mb-8">
+        <ReputationCard userFid={parseInt(fid)} />
       </div>
 
       {/* Loans Section */}

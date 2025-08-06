@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CountdownChip } from './CountdownChip'
 import { DropdownMenu } from './DropdownMenu'
 import { ProfileBadge } from './ProfileBadge'
+import { CompactReputation } from './CompactReputation'
 
 interface LoanCardProps {
   loan: Loan
@@ -70,6 +71,9 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
           </div>
           <div className="mt-2">
             <ProfileBadge fid={loan.borrower_fid} showStats={false} />
+            <div className="mt-1">
+              <CompactReputation userFid={loan.borrower_fid} />
+            </div>
           </div>
         </div>
         <div className="flex items-center space-x-2">

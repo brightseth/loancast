@@ -268,34 +268,62 @@ class ReputationService {
   // Get comprehensive user reputation
   async getUserReputation(userFid: number): Promise<UserReputation | null> {
     try {
-      // Get loan statistics
-      const { data: loanStats, error: loanError } = await supabase
-        .rpc('get_user_loan_stats', { p_user_fid: userFid })
+      // Fallback to simple queries for now
+      const { data: borrowedLoans } = await supabase
+        .from('loans')
+        .select('*')
+        .eq('borrower_fid', userFid)
 
-      if (loanError) {
-        console.error('Error fetching loan stats:', loanError)
-        return null
+      const { data: lentLoans } = await supabase
+        .from('loans')
+        .select('*')
+        .eq('lender_fid', userFid)
+
+      const borrowed = borrowedLoans || []
+      const lent = lentLoans || []
+
+      const totalLoans = borrowed.length
+      const loansRepaid = borrowed.filter(l => l.status === 'repaid').length
+      const loansDefaulted = borrowed.filter(l => l.status === 'defaulted').length
+      const totalBorrowed = borrowed.filter(l => l.status === 'repaid').reduce((sum, l) => sum + (l.repay_usdc || 0), 0)
+      const totalLent = lent.length
+
+      // Calculate repayment streak (simplified)
+      const recentLoans = borrowed.sort((a, b) => new Date(b.due_ts).getTime() - new Date(a.due_ts).getTime())
+      let repaymentStreak = 0
+      for (const loan of recentLoans) {
+        if (loan.status === 'repaid') {
+          repaymentStreak++
+        } else if (loan.status === 'defaulted') {
+          break
+        }
       }
 
-      // Get user profile data (follower count, etc.)
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('fid', userFid)
-        .single()
+      // Calculate average repayment days
+      const repaidLoans = borrowed.filter(l => l.status === 'repaid' && l.repaid_at)
+      let avgRepaymentDays = null
+      if (repaidLoans.length > 0) {
+        const totalDays = repaidLoans.reduce((sum, loan) => {
+          const dueDate = new Date(loan.due_ts)
+          const repaidDate = new Date(loan.repaid_at!)
+          const daysDiff = (repaidDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24)
+          return sum + daysDiff
+        }, 0)
+        avgRepaymentDays = totalDays / repaidLoans.length
+      }
 
       const stats = {
-        totalLoans: loanStats?.total_loans || 0,
-        loansRepaid: loanStats?.loans_repaid || 0,
-        loansDefaulted: loanStats?.loans_defaulted || 0,
-        totalBorrowed: loanStats?.total_borrowed || 0,
-        totalLent: loanStats?.total_lent || 0,
-        repaymentStreak: loanStats?.repayment_streak || 0,
-        avgRepaymentDays: loanStats?.avg_repayment_days,
-        accountAge: loanStats?.account_age_months || 0,
-        followerCount: profile?.follower_count || 0,
-        isVerified: profile?.power_badge || false,
-        userNumber: profile?.user_number || 999999
+        totalLoans,
+        loansRepaid,
+        loansDefaulted,
+        totalBorrowed,
+        totalLent,
+        repaymentStreak,
+        avgRepaymentDays,
+        accountAge: 1, // Assume 1 month for now
+        followerCount: 100, // Default follower count
+        isVerified: false,
+        userNumber: userFid
       }
 
       // Calculate scores
@@ -320,7 +348,7 @@ class ReputationService {
         total_lent: stats.totalLent,
         repayment_streak: stats.repaymentStreak,
         avg_repayment_days: stats.avgRepaymentDays,
-        earliest_loan: loanStats?.earliest_loan,
+        earliest_loan: borrowed.length > 0 ? borrowed.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())[0].created_at : null,
         badges,
         reputation_tier: reputationTier,
         trust_score: trustScore
