@@ -86,9 +86,9 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
             <DropdownMenu
               items={[
                 ...(loan.status === 'funded' ? [{
-                  label: 'Mark as Repaid',
+                  label: 'Repay This Loan',
                   onClick: () => window.location.href = `/loans/${loan.id}`,
-                  className: 'text-[#6936F5]'
+                  className: 'text-[#6936F5] font-medium'
                 }] : []),
                 {
                   label: 'View Details',
@@ -104,13 +104,13 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
       {loan.status === 'funded' && userRole === 'borrower' && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
           <p className="text-sm text-green-800 mb-2">
-            💰 Loan funded! Time to repay ${loan.repay_usdc?.toFixed(2)}
+            💰 Loan funded! Ready to repay ${loan.repay_usdc?.toFixed(2)}
           </p>
           <button
             onClick={() => window.location.href = `/loans/${loan.id}`}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-medium"
+            className="bg-[#6936F5] text-white px-6 py-3 rounded-lg hover:bg-[#5929cc] transition font-bold text-sm tracking-wide"
           >
-            Mark as Repaid
+            REPAY THIS LOAN
           </button>
         </div>
       )}

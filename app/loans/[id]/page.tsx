@@ -353,9 +353,9 @@ export default function LoanDetail() {
             </p>
             <button
               onClick={() => setShowRepaymentModal(true)}
-              className="bg-[#6936F5] text-white px-4 py-2 rounded-lg hover:bg-[#5929cc] transition font-medium"
+              className="bg-[#6936F5] text-white px-6 py-3 rounded-lg hover:bg-[#5929cc] transition font-bold text-lg tracking-wide"
             >
-              Mark as Repaid
+              REPAY THIS LOAN
             </button>
           </div>
         )}

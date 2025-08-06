@@ -64,7 +64,7 @@ export function RepaymentModal({ loan, lenderAddress, onClose }: RepaymentModalP
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <h2 className="text-xl font-bold mb-4">Mark Loan as Repaid</h2>
+        <h2 className="text-xl font-bold mb-4">Repay Your Loan</h2>
 
         {!verification ? (
           <>
@@ -120,7 +120,7 @@ export function RepaymentModal({ loan, lenderAddress, onClose }: RepaymentModalP
                     Verifying...
                   </>
                 ) : (
-                  'Verify & Mark Repaid'
+                  'VERIFY REPAYMENT'
                 )}
               </button>
               <button
