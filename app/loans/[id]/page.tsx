@@ -7,6 +7,7 @@ import { format, formatDistanceToNow, isPast, addDays } from 'date-fns'
 import Link from 'next/link'
 import { CountdownTimer } from '@/components/CountdownTimer'
 import { ProfileBadge } from '@/components/ProfileBadge'
+import { RepaymentModal } from '@/components/RepaymentModal'
 
 interface Bid {
   id: string
@@ -29,6 +30,7 @@ export default function LoanDetail() {
   const [loan, setLoan] = useState<ExtendedLoan | null>(null)
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
+  const [showRepaymentModal, setShowRepaymentModal] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -341,6 +343,30 @@ export default function LoanDetail() {
               Place Bid on Farcaster
             </a>
           </div>
+        )}
+
+        {loan.status === 'funded' && (
+          <div className="mt-8 p-6 bg-green-50 border-2 border-green-200 rounded-lg">
+            <h3 className="font-semibold text-green-900 mb-2">✅ Loan Funded - Ready for Repayment</h3>
+            <p className="text-sm text-green-800 mb-4">
+              This loan has been funded and is ready for repayment. Send ${loan.repay_usdc?.toFixed(2)} USDC to the lender.
+            </p>
+            <button
+              onClick={() => setShowRepaymentModal(true)}
+              className="bg-[#6936F5] text-white px-4 py-2 rounded-lg hover:bg-[#5929cc] transition font-medium"
+            >
+              Mark as Repaid
+            </button>
+          </div>
+        )}
+
+        {/* Repayment Modal */}
+        {showRepaymentModal && loan && (
+          <RepaymentModal
+            loan={loan}
+            lenderAddress="0x1234...5678" // This should come from loan data or lender profile
+            onClose={() => setShowRepaymentModal(false)}
+          />
         )}
       </div>
     </div>
