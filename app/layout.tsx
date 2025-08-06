@@ -62,9 +62,6 @@ export default function RootLayout({
                     <a href="/explore" className="text-gray-700 hover:text-[#6936F5]">
                       Explore
                     </a>
-                    <a href="/discover" className="text-gray-700 hover:text-[#6936F5]">
-                      Discover
-                    </a>
                     <AuthButton />
                   </div>
 
@@ -84,9 +81,6 @@ export default function RootLayout({
                   </a>
                   <a href="/explore" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
                     Explore
-                  </a>
-                  <a href="/discover" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#6936F5]">
-                    Discover
                   </a>
                 </div>
               </div>
