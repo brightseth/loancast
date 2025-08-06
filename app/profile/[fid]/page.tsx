@@ -14,6 +14,7 @@ export default function ProfilePage() {
   const [loans, setLoans] = useState<Loan[]>([])
   const [lentLoans, setLentLoans] = useState<Loan[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'borrowed' | 'lent'>('borrowed')
 
   useEffect(() => {
@@ -24,12 +25,30 @@ export default function ProfilePage() {
 
   const fetchUserData = async () => {
     setLoading(true)
+    setError(null)
+    
     try {
       // Fetch user profile
+      console.log(`Fetching profile for FID: ${fid}`)
       const userResponse = await fetch(`/api/profiles/${fid}`)
+      
       if (userResponse.ok) {
         const userData = await userResponse.json()
+        console.log('Profile data received:', userData)
         setUser(userData)
+      } else {
+        // Handle different error types
+        const errorData = await userResponse.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Profile API error:', userResponse.status, errorData)
+        
+        if (userResponse.status === 503) {
+          setError('Profile lookup is temporarily unavailable. API not configured.')
+        } else if (userResponse.status === 404) {
+          setError(errorData.error || 'User not found on Farcaster')
+        } else {
+          setError(`Profile lookup failed: ${errorData.error || 'Unknown error'}`)
+        }
+        return // Don't try to fetch loans if profile failed
       }
 
       // Fetch borrowed loans
@@ -47,6 +66,7 @@ export default function ProfilePage() {
       }
     } catch (error) {
       console.error('Error fetching user data:', error)
+      setError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
@@ -60,12 +80,35 @@ export default function ProfilePage() {
     )
   }
 
-  if (!user) {
+  if (error || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">User not found</h1>
-          <p className="text-gray-600">This user doesn't exist or hasn't used LoanCast yet.</p>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            {error ? 'Profile Error' : 'User Not Found'}
+          </h1>
+          <p className="text-gray-600 mb-4">
+            {error || 'This user doesn\'t exist or hasn\'t used LoanCast yet.'}
+          </p>
+          <div className="text-sm text-gray-500 mb-4">
+            <p>FID: {fid}</p>
+            {error && error.includes('API not configured') && (
+              <p className="mt-2 text-blue-600">
+                Try test profiles: /profile/1, /profile/2, /profile/3, or /profile/12345
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-[#6936F5] text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       </div>
     )
