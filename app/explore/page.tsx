@@ -77,8 +77,19 @@ export default function Explore() {
   const fetchLoans = async () => {
     setLoading(true)
     try {
+      console.log('Fetching loans with filter:', filter)
       const response = await fetch('/api/loans/list')
+      
+      if (!response.ok) {
+        console.error('Loans list API error:', response.status, response.statusText)
+        const errorText = await response.text()
+        console.error('Error details:', errorText)
+        setLoans([])
+        return
+      }
+      
       const data = await response.json()
+      console.log('Received loans data:', data?.length, 'loans')
       
       let filteredData = data || []
       if (filter === 'active') {
@@ -87,9 +98,11 @@ export default function Explore() {
         filteredData = (data || []).filter((loan: Loan) => loan.status === 'funded')
       }
       
+      console.log('Filtered loans:', filteredData.length)
       setLoans(filteredData)
     } catch (error) {
       console.error('Error fetching loans:', error)
+      setLoans([])
     } finally {
       setLoading(false)
     }
