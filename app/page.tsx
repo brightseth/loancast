@@ -3,9 +3,32 @@
 import { useAuth } from './providers'
 import Link from 'next/link'
 import { ActivityFeed } from '@/components/ActivityFeed'
+import { useEffect, useState } from 'react'
 
 export default function Home() {
   const { user, login } = useAuth()
+  const [stats, setStats] = useState<{
+    totalLoans: number
+    totalFunded: number
+    totalVolume: number
+  }>({ totalLoans: 0, totalFunded: 0, totalVolume: 0 })
+
+  useEffect(() => {
+    // Fetch platform statistics
+    fetch('/api/loans/list')
+      .then(res => res.json())
+      .then(loans => {
+        const funded = loans.filter((loan: any) => loan.status === 'funded')
+        const totalVolume = funded.reduce((sum: number, loan: any) => sum + (loan.gross_usdc || 0), 0)
+        
+        setStats({
+          totalLoans: loans.length,
+          totalFunded: funded.length,
+          totalVolume
+        })
+      })
+      .catch(err => console.error('Failed to fetch stats:', err))
+  }, [])
 
   return (
     <div className="min-h-screen px-4">
@@ -38,9 +61,13 @@ export default function Home() {
             </Link>
           )}
           
-          {/* Trust signal - subtle */}
+          {/* Trust signal - real platform stats */}
           <p className="text-sm text-zinc-500">
-            147 friends helping friends
+            {stats.totalFunded > 0 ? (
+              `$${stats.totalVolume.toLocaleString()} funded • ${stats.totalLoans} loan${stats.totalLoans === 1 ? '' : 's'} created`
+            ) : (
+              'Loading platform stats...'
+            )}
           </p>
         </div>
 
