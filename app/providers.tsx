@@ -4,16 +4,6 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { AnalyticsProvider } from '@/components/AnalyticsProvider'
 import { analytics } from '@/lib/analytics'
 
-declare global {
-  interface Window {
-    neynarSIWNLoaded?: boolean
-    onNeynarSignInSuccess?: (data: any) => void
-    neynar?: {
-      signIn: () => void
-    }
-  }
-}
-
 interface User {
   fid: number
   displayName: string
@@ -24,13 +14,13 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  login: () => Promise<void>
+  handleAuthSuccess: (userData: any) => void
   logout: () => void
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: async () => {},
+  handleAuthSuccess: () => {},
   logout: () => {},
 })
 
@@ -77,83 +67,40 @@ export function Providers({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const login = async () => {
-    // Check if we have Neynar API key for real auth
-    if (process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID) {
-      // Load Neynar SIWN script and trigger sign-in
-      if (!window.neynarSIWNLoaded) {
-        const script = document.createElement('script')
-        script.src = 'https://neynarxyz.github.io/siwn/raw/1.2.0/index.js'
-        script.async = true
-        document.head.appendChild(script)
-        window.neynarSIWNLoaded = true
+  const handleAuthSuccess = (userData: any) => {
+    let user: User
+    
+    // Handle data from Neynar SDK vs mock auth
+    if (userData.signer_uuid) {
+      // Neynar SDK format
+      user = {
+        fid: Number(userData.fid),
+        displayName: userData.user.display_name,
+        pfpUrl: userData.user.pfp_url,
+        verifiedWallet: userData.user.verified_addresses?.eth_addresses?.[0] || null,
+        signerUuid: userData.signer_uuid
       }
       
-      // Create SIWN element and trigger
-      const siwn = document.createElement('div')
-      siwn.className = 'neynar_signin'
-      siwn.setAttribute('data-client_id', process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID)
-      siwn.setAttribute('data-success-callback', 'onNeynarSignInSuccess')
-      siwn.setAttribute('data-theme', 'light')
-      siwn.style.display = 'none'
-      document.body.appendChild(siwn)
-      
-      // Define success callback
-      window.onNeynarSignInSuccess = (data: any) => {
-        console.log('SIWN success:', data)
-        const user = {
-          fid: Number(data.fid),
-          displayName: data.user.display_name,
-          pfpUrl: data.user.pfp_url,
-          verifiedWallet: data.user.verified_addresses?.eth_addresses?.[0] || null,
-          signerUuid: data.signer_uuid
-        }
-        setUser(user)
-        localStorage.setItem('user', JSON.stringify(user))
-        
-        // Identify user for analytics
-        analytics.identify(user.fid.toString(), {
-          display_name: user.displayName,
-          verified_wallet: user.verifiedWallet,
-          has_signer: !!user.signerUuid,
-          login_method: 'neynar'
-        })
-        analytics.track('User Logged In', { method: 'neynar' })
-        
-        document.body.removeChild(siwn)
-      }
-      
-      // Trigger click after script loads
-      setTimeout(() => {
-        const button = siwn.querySelector('button')
-        if (button) {
-          button.click()
-        } else {
-          // Fallback - trigger SIWN manually
-          if (window.neynar) {
-            window.neynar.signIn()
-          }
-        }
-      }, 100)
+      analytics.identify(user.fid.toString(), {
+        display_name: user.displayName,
+        verified_wallet: user.verifiedWallet,
+        has_signer: !!user.signerUuid,
+        login_method: 'neynar'
+      })
+      analytics.track('User Logged In', { method: 'neynar' })
     } else {
-      // Mock login for development
-      const mockUser = {
-        fid: 12345,
-        displayName: 'Test User',
-        pfpUrl: 'https://i.pravatar.cc/64?img=1',
-        verifiedWallet: '0x0196F2aB8b1d12345a06e5123456789abcdef123'
-      }
-      setUser(mockUser)
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      
-      // Identify user for analytics
-      analytics.identify(mockUser.fid.toString(), {
-        display_name: mockUser.displayName,
-        verified_wallet: mockUser.verifiedWallet,
+      // Mock auth format
+      user = userData
+      analytics.identify(user.fid.toString(), {
+        display_name: user.displayName,
+        verified_wallet: user.verifiedWallet,
         login_method: 'mock'
       })
       analytics.track('User Logged In', { method: 'mock' })
     }
+    
+    setUser(user)
+    localStorage.setItem('user', JSON.stringify(user))
   }
 
   const logout = () => {
@@ -163,7 +110,7 @@ export function Providers({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, handleAuthSuccess, logout }}>
       <AnalyticsProvider>
         {children}
       </AnalyticsProvider>

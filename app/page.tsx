@@ -6,7 +6,7 @@ import { ActivityFeed } from '@/components/ActivityFeed'
 import { useEffect, useState } from 'react'
 
 export default function Home() {
-  const { user, login } = useAuth()
+  const { user } = useAuth()
   const [stats, setStats] = useState<{
     totalLoans: number
     totalFunded: number
@@ -46,12 +46,12 @@ export default function Home() {
           
           {/* Single CTA */}
           {!user ? (
-            <button
-              onClick={login}
-              className="bg-[#6936F5] hover:bg-[#5733d9] text-white text-lg px-8 py-4 rounded-full font-medium transform transition hover:scale-105 mb-4"
+            <Link
+              href="/loans/new"
+              className="inline-block bg-[#6936F5] hover:bg-[#5733d9] text-white text-lg px-8 py-4 rounded-full font-medium transform transition hover:scale-105 mb-4"
             >
               Cast your loan →
-            </button>
+            </Link>
           ) : (
             <Link
               href="/loans/new"
