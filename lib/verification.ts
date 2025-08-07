@@ -1,11 +1,6 @@
-import { createPublicClient, http, parseAbi, decodeEventLog } from 'viem'
-import { base } from 'viem/chains'
+import { parseAbi, decodeEventLog } from 'viem'
+import { rpcClient } from './rpc-client'
 import { supabaseAdmin } from './supabase'
-
-const publicClient = createPublicClient({
-  chain: base,
-  transport: http(process.env.BASE_RPC_URL || 'https://mainnet.base.org'),
-})
 
 const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' // USDC on Base
 const USDC_ABI = parseAbi([
@@ -32,9 +27,7 @@ export async function verifyRepayment(
 ): Promise<RepaymentVerification> {
   try {
     // Get transaction receipt
-    const receipt = await publicClient.getTransactionReceipt({
-      hash: txHash as `0x${string}`,
-    })
+    const receipt = await rpcClient.getTransactionReceipt(txHash as `0x${string}`)
 
     if (!receipt) {
       return {
@@ -79,18 +72,36 @@ export async function verifyRepayment(
       }
     }
 
-    // Find the relevant transfer
-    const relevantTransfer = transferEvents.find((event: any) => {
-      const from = event.args.from.toLowerCase()
-      const to = event.args.to.toLowerCase()
-      const amount = Number(event.args.value) / 1e6 // USDC has 6 decimals
+    // Find the relevant transfer with exact amount validation
+    let relevantTransfer = null
+    let amountError = null
+    
+    for (const event of transferEvents) {
+      const from = (event as any).args.from.toLowerCase()
+      const to = (event as any).args.to.toLowerCase()
+      const actualAmount = Number((event as any).args.value) / 1e6 // USDC has 6 decimals
 
-      return (
-        from === expectedBorrower.toLowerCase() &&
-        to === expectedLender.toLowerCase() &&
-        amount >= expectedAmount * 0.99 // Allow 1% tolerance for rounding
-      )
-    })
+      // Check if addresses match
+      if (from === expectedBorrower.toLowerCase() && to === expectedLender.toLowerCase()) {
+        const amountDiff = Math.abs(actualAmount - expectedAmount)
+        
+        if (amountDiff < 0.01) {
+          // Exact match (within 1 cent tolerance for floating point)
+          relevantTransfer = event
+          break
+        } else if (actualAmount < expectedAmount) {
+          // Underpayment - store error but continue looking
+          amountError = `Underpayment: sent $${actualAmount.toFixed(2)}, required $${expectedAmount.toFixed(2)}. Please send exactly $${expectedAmount.toFixed(2)}.`
+        } else {
+          // Overpayment - accept but note excess
+          relevantTransfer = event
+          if (actualAmount > expectedAmount + 0.01) {
+            console.warn(`Overpayment detected: sent $${actualAmount.toFixed(2)}, required $${expectedAmount.toFixed(2)}. Excess will be ignored.`)
+          }
+          break
+        }
+      }
+    }
 
     if (!relevantTransfer) {
       return {
@@ -101,12 +112,12 @@ export async function verifyRepayment(
         to: '',
         amount: '0',
         timestamp: 0,
-        error: 'Transfer does not match loan requirements',
+        error: amountError || 'Transfer does not match loan requirements (wrong addresses or amount)',
       }
     }
 
     // Get block timestamp
-    const block = await publicClient.getBlock({
+    const block = await rpcClient.getBlock({
       blockNumber: receipt.blockNumber,
     })
 
@@ -196,12 +207,13 @@ async function updateBorrowerStats(borrowerFid: string, isRepaid: boolean) {
 export async function checkWalletHistory(address: string) {
   try {
     // Get recent transactions
-    const balance = await publicClient.getBalance({
+    const client = rpcClient.getCurrentClient()
+    const balance = await client.getBalance({
       address: address as `0x${string}`,
     })
 
     // Check USDC balance
-    const usdcBalance = await publicClient.readContract({
+    const usdcBalance = await client.readContract({
       address: USDC_ADDRESS as `0x${string}`,
       abi: parseAbi(['function balanceOf(address) view returns (uint256)']),
       functionName: 'balanceOf',

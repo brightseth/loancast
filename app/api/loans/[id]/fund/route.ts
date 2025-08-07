@@ -39,12 +39,37 @@ export async function POST(
       )
     }
 
-    // For now, simulate funding by updating loan with partial funding
-    // In production, this would verify the blockchain transaction first
-    const currentFunding = loan.gross_usdc || 0
-    const newFunding = currentFunding + amount
-    const targetAmount = loan.repay_usdc || 0
+    // Prevent borrowers from funding their own loans
+    if (loan.borrower_fid === lenderFid) {
+      return NextResponse.json(
+        { error: 'Borrowers cannot fund their own loans' },
+        { status: 403 }
+      )
+    }
 
+    // Validate exact funding amount
+    const targetAmount = loan.repay_usdc || 0
+    const currentFunding = loan.gross_usdc || 0
+    const remainingAmount = targetAmount - currentFunding
+
+    // Check for exact amount or underpayment/overpayment
+    if (Math.abs(amount - remainingAmount) > 0.01) {
+      if (amount < remainingAmount - 0.01) {
+        return NextResponse.json(
+          { 
+            error: `Insufficient funding: sent $${amount.toFixed(2)}, required $${remainingAmount.toFixed(2)}. Please send exactly $${remainingAmount.toFixed(2)}.`,
+            required_amount: remainingAmount,
+            sent_amount: amount
+          },
+          { status: 400 }
+        )
+      } else if (amount > remainingAmount + 0.01) {
+        // Overpayment - accept but ignore excess
+        console.warn(`Overpayment detected: sent $${amount.toFixed(2)}, required $${remainingAmount.toFixed(2)}. Excess will be accepted but may not be recoverable.`)
+      }
+    }
+
+    const newFunding = currentFunding + Math.min(amount, remainingAmount) // Cap at required amount
     const fullyFunded = newFunding >= targetAmount
     
     // ATOMIC UPDATE: Only update if loan is still 'open' to prevent race conditions
