@@ -200,6 +200,33 @@ export default function AboutPage() {
           </p>
         </section>
 
+        {/* Technical Details */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-4">Technical Details</h2>
+          <p className="text-gray-700 mb-6">
+            For developers, researchers, and those interested in the technical architecture 
+            and protocol design behind LoanCast, we've published a comprehensive whitepaper.
+          </p>
+          
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+            <h3 className="font-semibold text-lg mb-2">📄 LoanCast Protocol Whitepaper</h3>
+            <p className="text-gray-700 mb-4">
+              "Social Credit for the Network Age" - A detailed analysis of how persistent identity 
+              and social reputation can replace traditional collateral in peer-to-peer lending.
+            </p>
+            <a 
+              href="/whitepaper.md" 
+              target="_blank"
+              className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition"
+            >
+              📖 Read Whitepaper
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
+        </section>
+
         {/* Join Us */}
         <section className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">Join Us</h2>
