@@ -41,20 +41,10 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
       if (response.ok) {
         const data = await response.json()
         
-        // Filter for Base chain wallets with USDC
-        const baseWallets = data.wallets?.filter((w: any) => 
-          w.chain === 'base' || w.chain === 'ethereum'
-        ) || []
+        // Get all wallets (they should all work on Base)
+        const baseWallets = data.wallets || []
         
-        // Mock data for testing - in production this would come from the API
-        if (baseWallets.length === 0) {
-          baseWallets.push({
-            address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4',
-            chain: 'base',
-            display: '0x742d...bEb4',
-            balance: '500.00' // Mock balance
-          })
-        }
+        console.log('Fetched wallets:', baseWallets)
         
         setUserWallets(baseWallets)
         if (baseWallets.length === 1) {
@@ -241,7 +231,7 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
                 </div>
               ) : (
                 <span className="text-gray-500">
-                  {userWallets.length === 0 ? 'No wallets found' : 'Choose a wallet'}
+                  {userWallets.length === 0 ? 'No connected wallets' : 'Choose a wallet'}
                 </span>
               )}
               <ChevronDown className="w-4 h-4 text-gray-400" />
@@ -272,6 +262,15 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
               </div>
             )}
           </div>
+          
+          {userWallets.length === 0 && (
+            <p className="text-xs text-gray-500 mt-1">
+              To use wallet payment, connect a wallet to your Farcaster profile at{' '}
+              <a href="https://warpcast.com/settings" target="_blank" rel="noopener noreferrer" className="text-[#6936F5] hover:underline">
+                warpcast.com/settings
+              </a>
+            </p>
+          )}
         </div>
 
         {/* Warning */}
