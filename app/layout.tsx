@@ -67,6 +67,9 @@ export default function RootLayout({
                     <a href="/explore" className="text-gray-700 hover:text-[#6936F5]">
                       Explore
                     </a>
+                    <a href="/about" className="text-gray-700 hover:text-[#6936F5]">
+                      About
+                    </a>
                     <NotificationBellWrapper />
                     <AuthButton />
                   </div>
@@ -94,6 +97,9 @@ export default function RootLayout({
                   <a href="/explore" className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-[#6936F5] hover:bg-white rounded-lg mx-3 transition">
                     Explore
                   </a>
+                  <a href="/about" className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-[#6936F5] hover:bg-white rounded-lg mx-3 transition">
+                    About
+                  </a>
                 </div>
               </div>
             </nav>
@@ -110,6 +116,8 @@ export default function RootLayout({
                     <span>USDC is fully backed by <a href="https://www.centre.io/usdc" target="_blank" rel="noopener" className="text-[#6936F5] hover:underline">Circle</a></span>
                     <span className="hidden sm:inline">•</span>
                     <span>Not FDIC insured</span>
+                    <span className="hidden sm:inline">•</span>
+                    <a href="/about" className="text-[#6936F5] hover:underline">About</a>
                     <span className="hidden sm:inline">•</span>
                     <a href="/terms" className="text-[#6936F5] hover:underline">Terms</a>
                     <span className="hidden sm:inline">•</span>
