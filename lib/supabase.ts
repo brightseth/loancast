@@ -27,10 +27,11 @@ export type Loan = {
   repay_usdc: number
   start_ts: string
   due_ts: string
-  status: 'open' | 'funded' | 'repaid' | 'default'
+  status: 'open' | 'funded' | 'repaid' | 'default' | 'deleted'
   tx_fund: string | null
   tx_repay: string | null
   funded_at: string | null
+  notes: string | null
   created_at: string
   updated_at: string
 }

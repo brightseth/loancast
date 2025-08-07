@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
         break
         
       case 'cast.deleted':
-        // Handle cast deletion if needed
+        // Handle cast deletion - delete associated loan
+        await handleCastDeleted(data.data)
         break
         
       default:
@@ -158,6 +159,143 @@ async function handleReaction(data: any) {
     
   } catch (error) {
     console.error('Error handling reaction:', error)
+  }
+}
+
+async function handleCastDeleted(data: any) {
+  try {
+    const castHash = data.hash || data.cast_hash
+    
+    if (!castHash) {
+      console.error('No cast hash provided in delete webhook')
+      return
+    }
+    
+    console.log('Processing cast deletion:', castHash)
+    
+    // Find loan associated with this cast
+    const { data: loan, error: fetchError } = await supabaseAdmin
+      .from('loans')
+      .select('*')
+      .eq('cast_hash', castHash)
+      .single()
+    
+    if (fetchError || !loan) {
+      console.log('No loan found for deleted cast:', castHash)
+      return
+    }
+    
+    console.log(`Cast deleted for loan ${loan.id} (${loan.loan_number}):`, {
+      borrower_fid: loan.borrower_fid,
+      amount: loan.amount_usdc || loan.gross_usdc || loan.net_usdc,
+      status: loan.status
+    })
+    
+    // Only delete unfunded loans to avoid issues with active loans
+    if (loan.status === 'open') {
+      // Delete associated data first (cascading deletes)
+      await supabaseAdmin
+        .from('bids')
+        .delete()
+        .eq('loan_id', loan.id)
+      
+      await supabaseAdmin
+        .from('reactions')
+        .delete()
+        .eq('loan_id', loan.id)
+      
+      await supabaseAdmin
+        .from('notifications')
+        .delete()
+        .eq('loan_id', loan.id)
+      
+      // Delete the loan
+      const { error: deleteError } = await supabaseAdmin
+        .from('loans')
+        .delete()
+        .eq('id', loan.id)
+      
+      if (deleteError) {
+        console.error('Error deleting loan:', deleteError)
+      } else {
+        console.log(`Successfully deleted loan ${loan.id} due to cast deletion`)
+        
+        // Create notification for borrower (if they have notifications enabled)
+        const notification = {
+          user_fid: loan.borrower_fid,
+          type: 'loan_deleted',
+          title: 'Loan Deleted',
+          message: `Your loan request for $${loan.amount_usdc || loan.gross_usdc || loan.net_usdc} was deleted because you removed the cast from Farcaster`,
+          metadata: {
+            loan_id: loan.id,
+            loan_number: loan.loan_number,
+            reason: 'cast_deleted'
+          },
+          created_at: new Date().toISOString()
+        }
+        
+        const { error: notificationError } = await supabaseAdmin
+          .from('notifications')
+          .insert(notification)
+        
+        if (notificationError) {
+          console.error('Error creating deletion notification:', notificationError)
+        }
+      }
+    } else if (loan.status === 'funded') {
+      // For funded loans, mark as deleted but don't remove from database
+      // This preserves the transaction history
+      const { error: updateError } = await supabaseAdmin
+        .from('loans')
+        .update({ 
+          status: 'deleted',
+          updated_at: new Date().toISOString(),
+          notes: `Cast deleted by borrower on ${new Date().toISOString()}`
+        })
+        .eq('id', loan.id)
+      
+      if (updateError) {
+        console.error('Error marking funded loan as deleted:', updateError)
+      } else {
+        console.log(`Marked funded loan ${loan.id} as deleted due to cast deletion`)
+        
+        // Notify both borrower and lender
+        const notifications = [
+          {
+            user_fid: loan.borrower_fid,
+            type: 'loan_cast_deleted',
+            title: 'Loan Cast Deleted',
+            message: `You deleted the cast for your funded loan of $${loan.repay_usdc}. The loan is still active and must be repaid.`,
+            loan_id: loan.id,
+            metadata: { loan_number: loan.loan_number },
+            created_at: new Date().toISOString()
+          }
+        ]
+        
+        if (loan.lender_fid) {
+          notifications.push({
+            user_fid: loan.lender_fid,
+            type: 'loan_cast_deleted',
+            title: 'Borrower Deleted Cast',
+            message: `The borrower deleted the cast for loan $${loan.repay_usdc}, but the loan is still active.`,
+            loan_id: loan.id,
+            metadata: { loan_number: loan.loan_number },
+            created_at: new Date().toISOString()
+          })
+        }
+        
+        const { error: notificationError } = await supabaseAdmin
+          .from('notifications')
+          .insert(notifications)
+        
+        if (notificationError) {
+          console.error('Error creating cast deletion notifications:', notificationError)
+        }
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error handling cast deletion:', error)
   }
 }
 
