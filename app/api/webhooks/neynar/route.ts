@@ -21,16 +21,30 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('x-neynar-signature')
     const webhookSecret = process.env.NEYNAR_WEBHOOK_SECRET
     
-    // Verify webhook signature if secret is configured
-    if (webhookSecret && signature) {
-      const isValid = verifyWebhookSignature(body, signature, webhookSecret)
-      if (!isValid) {
-        console.error('Invalid webhook signature')
-        return NextResponse.json(
-          { error: 'Invalid signature' },
-          { status: 401 }
-        )
-      }
+    // Verify webhook signature - REQUIRED for security
+    if (!webhookSecret) {
+      console.error('NEYNAR_WEBHOOK_SECRET not configured - webhook rejected')
+      return NextResponse.json(
+        { error: 'Webhook secret not configured' },
+        { status: 500 }
+      )
+    }
+
+    if (!signature) {
+      console.error('Missing x-neynar-signature header')
+      return NextResponse.json(
+        { error: 'Missing signature header' },
+        { status: 401 }
+      )
+    }
+
+    const isValid = verifyWebhookSignature(body, signature, webhookSecret)
+    if (!isValid) {
+      console.error('Invalid webhook signature - potential security breach')
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      )
     }
     
     const data = JSON.parse(body)
