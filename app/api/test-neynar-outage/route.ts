@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { uuidv4 } from '@/lib/utils'
+import { v4 as uuidv4 } from 'uuid'
 
 // Mock function that simulates Neynar 503 failure
 async function createFailingLoanCast() {
@@ -28,19 +28,22 @@ export async function POST(request: NextRequest) {
     const uuid = uuidv4()
     
     // Try cast creation - this will fail
-    let cast
+    let cast: { hash: string; success: boolean; error?: string }
     let castSuccess = false
     try {
-      cast = await createFailingLoanCast()
+      await createFailingLoanCast()
+      // This won't execute due to the throw
+      cast = { hash: `success-${Date.now()}`, success: true }
       castSuccess = true
     } catch (castError) {
-      console.log('Cast creation failed as expected:', castError.message)
+      const errorMessage = castError instanceof Error ? castError.message : 'Unknown error'
+      console.log('Cast creation failed as expected:', errorMessage)
       
       // Fallback - loan still gets created with failed cast hash
       cast = { 
         hash: `failed-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
         success: false,
-        error: castError.message
+        error: errorMessage
       }
       castSuccess = false
     }
