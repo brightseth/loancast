@@ -78,42 +78,81 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
     setError('')
 
     try {
-      // In production, this would trigger WalletConnect or similar
-      // For now, we'll create a transaction link for the user
       const amount = loan.repay_usdc || 0
+      const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' // USDC on Base
       
-      // Create transaction parameters
-      const txParams = {
-        to: lenderAddress,
-        value: '0x0', // 0 ETH
-        data: encodeUSDCTransfer(lenderAddress, amount),
-        from: selectedWallet.address
-      }
+      // Check if we're in a browser with wallet support
+      if (typeof window !== 'undefined' && (window as any).ethereum) {
+        try {
+          // Request wallet connection
+          await (window as any).ethereum.request({ method: 'eth_requestAccounts' })
+          
+          // Switch to Base network if needed
+          try {
+            await (window as any).ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x2105' }], // Base mainnet
+            })
+          } catch (switchError: any) {
+            // If Base network is not added, add it
+            if (switchError.code === 4902) {
+              await (window as any).ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: '0x2105',
+                  chainName: 'Base',
+                  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                  rpcUrls: ['https://mainnet.base.org'],
+                  blockExplorerUrls: ['https://basescan.org']
+                }]
+              })
+            }
+          }
+          
+          // Encode USDC transfer transaction
+          const transferAmount = (amount * 1000000).toString(16) // USDC has 6 decimals
+          const data = `0xa9059cbb${lenderAddress.slice(2).padStart(64, '0')}${transferAmount.padStart(64, '0')}`
+          
+          // Send transaction
+          const txHash = await (window as any).ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [{
+              from: selectedWallet.address,
+              to: usdcAddress,
+              data: data,
+              gas: '0x186A0', // 100000 gas
+            }],
+          })
+          
+          console.log('Transaction sent:', txHash)
+          setTxHash(txHash)
+          
+          // Mark loan as repaid
+          const response = await fetch(`/api/loans/${loan.id}/mark-repaid`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              tx_hash: txHash,
+              from_wallet: selectedWallet.address 
+            }),
+          })
 
-      // Generate a Base blockchain transaction URL
-      const baseUrl = 'https://basescan.org/tx'
-      
-      // For demo: simulate successful transaction
-      setTimeout(async () => {
-        const mockTxHash = `0x${Math.random().toString(16).substring(2, 66)}`
-        setTxHash(mockTxHash)
-        
-        // Mark loan as repaid
-        const response = await fetch(`/api/loans/${loan.id}/mark-repaid`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            tx_hash: mockTxHash,
-            from_wallet: selectedWallet.address 
-          }),
-        })
-
-        if (response.ok) {
-          setRepaymentComplete(true)
-        } else {
-          throw new Error('Failed to mark loan as repaid')
+          if (response.ok) {
+            setRepaymentComplete(true)
+          } else {
+            throw new Error('Failed to mark loan as repaid')
+          }
+          
+        } catch (walletError: any) {
+          console.error('Wallet transaction error:', walletError)
+          setError(`Wallet error: ${walletError.message || 'Transaction cancelled'}`)
         }
-      }, 2000)
+      } else {
+        // Fallback: Open wallet app or show manual instructions
+        const walletUrl = `https://metamask.app.link/send/${usdcAddress}@8453/transfer?address=${lenderAddress}&uint256=${amount * 1000000}`
+        window.open(walletUrl, '_blank')
+        setError('Please complete the transaction in your wallet app, then enter the transaction hash manually.')
+      }
 
     } catch (err) {
       setError('Failed to send payment. Please try manual payment.')
