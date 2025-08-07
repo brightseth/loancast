@@ -275,8 +275,23 @@ export default function Explore() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-farcaster"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {/* Loading skeletons */}
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i} className="bg-white rounded-lg shadow-md p-4 sm:p-6 animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-1/3 mb-3"></div>
+              <div className="h-8 bg-gray-200 rounded w-2/3 mb-2"></div>
+              <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
+              <div className="space-y-2">
+                <div className="h-3 bg-gray-200 rounded"></div>
+                <div className="h-3 bg-gray-200 rounded"></div>
+                <div className="h-3 bg-gray-200 rounded"></div>
+              </div>
+              <div className="mt-4 pt-4 border-t">
+                <div className="h-10 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : filteredLoans.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">

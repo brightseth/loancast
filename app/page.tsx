@@ -63,10 +63,13 @@ export default function Home() {
           
           {/* Trust signal - real platform stats */}
           <p className="text-sm text-zinc-500">
-            {stats.totalFunded > 0 ? (
-              `$${stats.totalVolume.toLocaleString()} funded • ${stats.totalLoans} loan${stats.totalLoans === 1 ? '' : 's'} created`
+            {stats.totalLoans > 0 ? (
+              <>
+                {stats.totalFunded > 0 && `$${stats.totalVolume.toLocaleString()} funded • `}
+                {stats.totalLoans} loan{stats.totalLoans === 1 ? '' : 's'} created
+              </>
             ) : (
-              'Loading platform stats...'
+              'Join the trust-based lending community'
             )}
           </p>
         </div>

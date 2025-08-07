@@ -92,8 +92,8 @@ export function ExploreCard({ loan }: ExploreCardProps) {
             • 2% monthly • Due {format(dueDate, 'M/d')}
           </div>
         </div>
-        {/* Desktop/larger mobile: regular button layout */}
-        <div className="hidden xs:flex gap-2 mt-auto">
+        {/* Action buttons - always at bottom of card */}
+        <div className="flex gap-2 mt-auto">
           <a
             href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
             target="_blank"
@@ -109,31 +109,6 @@ export function ExploreCard({ loan }: ExploreCardProps) {
           >
             <span className="text-sm">👤</span>
           </a>
-        </div>
-
-        {/* Small mobile: sticky bottom drawer for thumb-friendly access */}
-        <div className="xs:hidden">
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 z-40">
-            <div className="flex gap-2 max-w-sm mx-auto">
-              <a
-                href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 bg-farcaster text-white py-3 px-4 rounded-lg font-medium text-center text-sm active:bg-farcaster-dark"
-              >
-                {isFunded ? 'View Cast' : 'Fund This Loan'}
-              </a>
-              <a
-                href={`/profile/${loan.borrower_fid}`}
-                className="px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 active:bg-gray-100 text-center"
-                title="View borrower profile"
-              >
-                👤
-              </a>
-            </div>
-          </div>
-          {/* Spacer to prevent content from being hidden behind sticky drawer */}
-          <div className="h-16"></div>
         </div>
       </div>
     </div>

@@ -18,6 +18,12 @@ interface LoanSuccessProps {
 export function LoanSuccess({ loan, onNewLoan }: LoanSuccessProps) {
   const [copied, setCopied] = useState(false)
   const [showSnackBar, setShowSnackBar] = useState(true)
+  const [showSuccess, setShowSuccess] = useState(false)
+  
+  // Success animation on mount
+  useEffect(() => {
+    setTimeout(() => setShowSuccess(true), 100)
+  }, [])
 
   // Detect if this is a real cast vs mock
   const isRealCast = loan.cast_hash && 
@@ -60,7 +66,9 @@ ${isRealCast ? 'Recast to /loancast' : 'Post to Farcaster to start the auction!'
           onClose={() => setShowSnackBar(false)}
         />
       )}
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6">
+      <div className={`max-w-md mx-auto bg-white rounded-lg shadow-lg p-6 transition-all duration-500 ${
+        showSuccess ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+      }`}>
       <div className="text-center mb-6">
         <div className={`w-16 h-16 ${isRealCast ? 'bg-green-100' : 'bg-blue-100'} rounded-full flex items-center justify-center mx-auto mb-4`}>
           {isRealCast ? (
