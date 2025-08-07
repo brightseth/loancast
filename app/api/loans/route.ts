@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createLoanCast } from '@/lib/neynar'
-import { postCast, formatLoanCast } from '@/lib/neynar-post'
 import { addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
 import { withErrorHandling, createApiError } from '@/lib/error-handler'
@@ -103,44 +102,6 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('Loan created successfully:', loan)
-    
-    // Post to Farcaster if signer_uuid is provided
-    if (signer_uuid) {
-      try {
-        console.log('Posting to Farcaster...')
-        
-        const castText = formatLoanCast({
-          amount: amount,
-          durationMonths: duration_months,
-          dueDate: dueDate,
-          yieldPercent: yield_bps / 100
-        })
-        
-        const cast = await postCast({
-          text: castText,
-          signerUuid: signer_uuid
-        })
-        
-        console.log('Cast posted successfully:', cast)
-        
-        // Update loan with cast hash
-        if (cast.hash) {
-          await supabaseAdmin
-            .from('loans')
-            .update({ cast_hash: cast.hash })
-            .eq('id', loan.id)
-        }
-        
-        return NextResponse.json({ ...loan, cast_hash: cast.hash, cast_url: `https://warpcast.com/${cast.author.username}/${cast.hash}` })
-      } catch (castError) {
-        console.error('Failed to post to Farcaster:', castError)
-        // Still return the loan even if casting fails
-        return NextResponse.json({ 
-          ...loan, 
-          warning: 'Loan created but failed to post to Farcaster. Please post manually.' 
-        })
-      }
-    }
     
     return NextResponse.json(loan)
   }, { endpoint: 'POST /api/loans' })
