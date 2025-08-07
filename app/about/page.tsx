@@ -30,13 +30,31 @@ export default function AboutPage() {
           </p>
           
           <p className="text-gray-700 mb-4">
-            Henry and Phil competed in Farcaster's native auction system. Henry won with a $789 bid. 
+            <a href="https://warpcast.com/henry" target="_blank" rel="noopener" className="text-farcaster hover:underline font-medium">@henry</a> and <a href="https://warpcast.com/phil" target="_blank" rel="noopener" className="text-farcaster hover:underline font-medium">@phil</a> competed in Farcaster's native auction system:
+          </p>
+          
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-sm space-y-2">
+            <div className="text-gray-600">
+              <strong>Bidding History:</strong>
+            </div>
+            <div className="pl-4 space-y-1 font-mono text-xs">
+              <div>@phil: "I'll do $500"</div>
+              <div>@henry: "I can do $600"</div>
+              <div>@phil: "$700"</div>
+              <div>@henry: "$789 - final offer"</div>
+            </div>
+            <div className="text-green-700 font-medium">
+              🏆 @henry won with $789
+            </div>
+          </div>
+          
+          <p className="text-gray-700 mb-4">
             The funds moved instantly via USDC on Base. No paperwork. No credit check. 
             Just trust between people who knew each other through their casts.
           </p>
           
           <p className="text-gray-700">
-            When Seth repaid on September 2nd—on time, in full, publicly—LoanCast was born.
+            When Seth repays on September 2nd—on time, in full, publicly—LoanCast will have proven its model works.
           </p>
         </section>
 
