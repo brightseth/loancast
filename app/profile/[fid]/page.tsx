@@ -30,17 +30,22 @@ export default function ProfilePage() {
     
     try {
       // Fetch user profile
-      console.log(`Fetching profile for FID: ${fid}`)
-      const userResponse = await fetch(`/api/profiles/${fid}`)
+      console.log(`[ProfilePage] Starting fetch for FID: ${fid}`)
+      const profileUrl = `/api/profiles/${fid}`
+      console.log(`[ProfilePage] Fetching from: ${profileUrl}`)
+      
+      const userResponse = await fetch(profileUrl)
+      
+      console.log(`[ProfilePage] Response status: ${userResponse.status}`)
       
       if (userResponse.ok) {
         const userData = await userResponse.json()
-        console.log('Profile data received:', userData)
+        console.log('[ProfilePage] Profile data received:', userData)
         setUser(userData)
       } else {
         // Handle different error types
         const errorData = await userResponse.json().catch(() => ({ error: 'Unknown error' }))
-        console.error('Profile API error:', userResponse.status, errorData)
+        console.error('[ProfilePage] API error:', userResponse.status, errorData)
         
         if (userResponse.status === 503) {
           setError('Profile lookup is temporarily unavailable. API not configured.')
@@ -53,20 +58,30 @@ export default function ProfilePage() {
       }
 
       // Fetch borrowed loans
+      console.log(`[ProfilePage] Fetching borrowed loans for FID: ${fid}`)
       const borrowedResponse = await fetch(`/api/loans?borrower_fid=${fid}`)
       if (borrowedResponse.ok) {
         const borrowedData = await borrowedResponse.json()
+        console.log(`[ProfilePage] Found ${borrowedData?.length || 0} borrowed loans`)
         setLoans(borrowedData || [])
+      } else {
+        console.error('[ProfilePage] Failed to fetch borrowed loans')
+        setLoans([])
       }
 
       // Fetch lent loans
+      console.log(`[ProfilePage] Fetching lent loans for FID: ${fid}`)
       const lentResponse = await fetch(`/api/loans?lender_fid=${fid}`)
       if (lentResponse.ok) {
         const lentData = await lentResponse.json()
+        console.log(`[ProfilePage] Found ${lentData?.length || 0} lent loans`)
         setLentLoans(lentData || [])
+      } else {
+        console.error('[ProfilePage] Failed to fetch lent loans')
+        setLentLoans([])
       }
     } catch (error) {
-      console.error('Error fetching user data:', error)
+      console.error('[ProfilePage] Network error:', error)
       setError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
