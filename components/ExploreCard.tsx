@@ -11,13 +11,13 @@ export function ExploreCard({ loan }: ExploreCardProps) {
   const dueDate = new Date(loan.due_ts)
   const apr = loan.yield_bps / 100
   const isFunded = loan.status === 'funded'
-  const loanNumber = loan.loan_number ? `LOANCAST-${loan.loan_number.toString().padStart(3, '0')}` : `#${loan.id.slice(0, 6).toUpperCase()}`
+  const castHashDisplay = `#${loan.cast_hash.slice(0, 8)}`
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-4 sm:p-6 h-full flex flex-col">
       <div className="flex justify-between items-start mb-4">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-mono text-gray-500 mb-1 truncate">{loanNumber}</p>
+          <p className="text-xs font-mono text-gray-500 mb-1 truncate">{castHashDisplay}</p>
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
             ${loan.repay_usdc?.toFixed(2) || '0.00'}
           </h3>

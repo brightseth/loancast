@@ -23,7 +23,7 @@ export async function createLoanCast(
     year: 'numeric' 
   })
   
-  const castText = `┏━ ${loanId || 'LOANCAST'} ━┓
+  const castText = `┏━━━━ 💰 LOAN REQUEST ━━━━┓
 
 🏦 Borrow ≤ ${amount.toLocaleString()} USDC
 📅 ${daysToRepay} days • due ${dueDateStr}
@@ -34,7 +34,7 @@ export async function createLoanCast(
 
 Cast on @loancast
 
-┗━━━━━━━━━━━━━━━━━┛`
+┗━━━━━━━━━━━━━━━━━━━━━┛`
 
   // Check if we have a valid signer UUID (not mock/default)
   const hasValidSigner = signerUuid && 

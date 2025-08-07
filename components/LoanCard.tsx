@@ -17,10 +17,8 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
   const dueDate = new Date(loan.due_ts)
   const isOverdue = isPast(dueDate) && loan.status === 'open'
   
-  // Use loan_number if available, otherwise fallback to ID slice
-  const loanNumber = loan.loan_number 
-    ? `LOANCAST-${loan.loan_number.toString().padStart(4, '0')}`
-    : `#${loan.id.slice(0, 6).toUpperCase()}`
+  // Use cast hash as identifier
+  const castHashDisplay = `#${loan.cast_hash.slice(0, 8)}`
   
   const getStatusColors = () => {
     const now = new Date()
@@ -61,7 +59,7 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
       <div className="flex justify-between items-start mb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-mono text-gray-500">{loanNumber}</span>
+            <span className="text-xs font-mono text-gray-500">{castHashDisplay}</span>
           </div>
           <h3 className="text-lg font-semibold">
             ${loan.repay_usdc?.toFixed(0) || '0'} USDC

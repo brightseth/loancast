@@ -37,19 +37,19 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
     
-    // Filter for LoanCast posts
+    // Filter for LoanCast posts using improved detection
     const loanCasts = data.casts.filter((cast: any) => 
-      cast.text.includes('LOANCAST') || 
-      cast.text.includes('┏━') // Our formatted LoanCast border
+      (cast.text.includes('┏━') && cast.text.includes('Borrow ≤')) || // Our formatted template
+      cast.text.includes('LOAN REQUEST') || // New template
+      cast.text.includes('Cast on @loancast') // App signature
     )
 
     // Extract loan data from casts
     const loans = loanCasts.map((cast: any) => {
       const text = cast.text
       
-      // Extract loan number (LOANCAST-XXXX)
-      const loanNumberMatch = text.match(/LOANCAST-(\d+)/)
-      const loanNumber = loanNumberMatch ? loanNumberMatch[1] : null
+      // Use cast hash as identifier (remove loan number dependency)
+      const loanNumber = null // Deprecated - using cast hash as unique identifier
       
       // Extract amount
       const amountMatch = text.match(/Borrow ≤ (\d+(?:,\d+)*) USDC/)
@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
 // Search for all LoanCast posts across Farcaster
 export async function POST(request: NextRequest) {
   try {
-    const { query = 'LOANCAST', cursor } = await request.json()
+    const { query = 'Cast on @loancast', cursor } = await request.json()
 
     const url = new URL('https://api.neynar.com/v2/farcaster/cast/search')
     url.searchParams.append('q', query)
@@ -125,19 +125,18 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json()
     
-    // Filter for actual LoanCast posts with our format
+    // Filter for actual LoanCast posts with improved detection
     const loanCasts = data.casts.filter((cast: any) => 
-      cast.text.includes('┏━') && 
-      cast.text.includes('LOANCAST-') &&
-      cast.text.includes('Borrow ≤')
+      (cast.text.includes('┏━') && cast.text.includes('Borrow ≤')) ||
+      cast.text.includes('LOAN REQUEST') ||
+      cast.text.includes('Cast on @loancast')
     )
 
     // Extract and format loan data
     const loans = loanCasts.map((cast: any) => {
       const text = cast.text
       
-      // Extract loan details using regex
-      const loanNumberMatch = text.match(/LOANCAST-(\d+)/)
+      // Extract loan details using regex (no longer require loan number)
       const amountMatch = text.match(/Borrow ≤ (\d+(?:,\d+)*) USDC/)
       const yieldMatch = text.match(/Yield (\d+(?:\.\d+)?) %/)
       const repayMatch = text.match(/repay (\d+) USDC/)
@@ -147,7 +146,7 @@ export async function POST(request: NextRequest) {
       return {
         cast_hash: cast.hash,
         cast_url: `https://warpcast.com/${cast.author.username}/${cast.hash}`,
-        loan_number: loanNumberMatch ? `LOANCAST-${loanNumberMatch[1]}` : null,
+        loan_number: null, // Deprecated - using cast hash as identifier
         amount: amountMatch ? parseInt(amountMatch[1].replace(/,/g, '')) : null,
         yield_percent: yieldMatch ? parseFloat(yieldMatch[1]) : null,
         repay_amount: repayMatch ? parseInt(repayMatch[1]) : null,
