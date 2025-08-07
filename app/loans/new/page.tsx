@@ -13,6 +13,7 @@ export default function NewLoan() {
   const analytics = useAnalytics()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdLoan, setCreatedLoan] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     analytics.featureUsed('Loan Creation Page Viewed')
@@ -30,6 +31,7 @@ export default function NewLoan() {
 
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true)
+    setError(null) // Clear previous errors
     analytics.formStarted('Loan Creation')
     
     try {
@@ -60,18 +62,34 @@ export default function NewLoan() {
         analytics.formCompleted('Loan Creation')
         
       } else {
-        throw new Error('Failed to create loan')
+        // Try to get specific error message from response
+        const errorData = await response.json().catch(() => ({}))
+        const errorMsg = errorData.error || `Server error (${response.status})`
+        throw new Error(errorMsg)
       }
     } catch (error) {
       console.error('Error creating loan:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      
+      // Set user-friendly error message
+      if (errorMessage.includes('Rate limit')) {
+        setError('Too many requests. Please wait a moment and try again.')
+      } else if (errorMessage.includes('Authentication')) {
+        setError('Please sign in again to create a loan.')
+      } else if (errorMessage.includes('Amount')) {
+        setError('Please enter a valid loan amount between $10 and $5,000.')
+      } else if (errorMessage.includes('Duration')) {
+        setError('Please select a loan duration between 1-3 months.')
+      } else {
+        setError('Unable to create loan. Please check your internet connection and try again.')
+      }
+      
       analytics.errorOccurred({
         message: errorMessage,
         page: '/loans/new',
         userId: user.fid.toString(),
       })
       analytics.formAbandoned('Loan Creation', 'submission_error')
-      alert('Failed to create loan. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -91,6 +109,26 @@ export default function NewLoan() {
   return (
     <div className="max-w-screen-md mx-auto p-4 py-12">
       <h1 className="text-3xl font-bold mb-8">New LoanCast</h1>
+      
+      {/* Error Display */}
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <span className="text-red-500 text-xl">⚠️</span>
+            <div className="flex-1">
+              <p className="text-red-800 font-medium">Error creating loan</p>
+              <p className="text-red-700 text-sm mt-1">{error}</p>
+              <button
+                onClick={() => setError(null)}
+                className="mt-3 text-sm bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <LoanForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
     </div>
   )

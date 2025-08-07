@@ -4,6 +4,7 @@ import './globals.css'
 import { Providers } from './providers'
 import { AuthButton } from '../components/AuthButton'
 import { NotificationBellWrapper } from '../components/NotificationBellWrapper'
+import { FeedbackButton } from '../components/FeedbackButton'
 import { Analytics } from '@vercel/analytics/react'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 
@@ -113,6 +114,8 @@ export default function RootLayout({
                     <a href="/terms" className="text-[#6936F5] hover:underline">Terms</a>
                     <span className="hidden sm:inline">•</span>
                     <a href="/privacy" className="text-[#6936F5] hover:underline">Privacy</a>
+                    <span className="hidden sm:inline">•</span>
+                    <FeedbackButton variant="link" location="footer" />
                   </div>
                   <div className="sm:mt-1">
                     <span>Loans based on social trust, not credit scores</span>

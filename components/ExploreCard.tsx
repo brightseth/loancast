@@ -9,15 +9,26 @@ interface ExploreCardProps {
 
 export function ExploreCard({ loan }: ExploreCardProps) {
   const dueDate = new Date(loan.due_ts)
+  const createdDate = new Date(loan.created_at || loan.start_ts)
   const apr = loan.yield_bps / 100
   const isFunded = loan.status === 'funded'
   const castHashDisplay = `#${loan.cast_hash.slice(0, 8)}`
+  
+  // Check if loan is new (created within last 24 hours)
+  const isNew = Date.now() - createdDate.getTime() < 24 * 60 * 60 * 1000
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-4 sm:p-6 h-full flex flex-col">
       <div className="flex justify-between items-start mb-4">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-mono text-gray-500 mb-1 truncate">{castHashDisplay}</p>
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-xs font-mono text-gray-500 truncate">{castHashDisplay}</p>
+            {isNew && (
+              <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                NEW
+              </span>
+            )}
+          </div>
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
             ${loan.repay_usdc?.toFixed(2) || '0.00'}
           </h3>

@@ -123,6 +123,46 @@ export default function Home() {
           </p>
         </div>
       </div>
+
+      {/* How It Works Section */}
+      <div className="max-w-4xl mx-auto py-16">
+        <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">📱</span>
+            </div>
+            <h3 className="text-xl font-semibold mb-2">1. Post Your Loan</h3>
+            <p className="text-gray-600">Cast your loan request on Farcaster with the amount, duration, and yield you're offering.</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">🤝</span>
+            </div>
+            <h3 className="text-xl font-semibold mb-2">2. Get Funded</h3>
+            <p className="text-gray-600">Friends and community members can fund your loan directly with USDC on Base.</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">💰</span>
+            </div>
+            <h3 className="text-xl font-semibold mb-2">3. Repay & Build Trust</h3>
+            <p className="text-gray-600">Repay on time to build your reputation and unlock access to larger loans.</p>
+          </div>
+        </div>
+
+        {/* Explore CTA */}
+        <div className="text-center mt-12">
+          <Link
+            href="/explore"
+            className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium"
+          >
+            Browse active loans → 
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }
