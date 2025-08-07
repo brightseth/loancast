@@ -55,20 +55,14 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
       console.log('Fetched wallets:', baseWallets)
       console.log('Primary wallet:', data.primaryWallet)
         
-        setUserWallets(baseWallets)
-        if (baseWallets.length === 1) {
-          setSelectedWallet(baseWallets[0])
-        }
+      setUserWallets(baseWallets)
+      if (baseWallets.length === 1) {
+        setSelectedWallet(baseWallets[0])
       }
     } catch (error) {
       console.error('Error fetching wallets:', error)
-      // Fallback for testing
-      setUserWallets([{
-        address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb4',
-        chain: 'base',
-        display: '0x742d...bEb4',
-        balance: '500.00'
-      }])
+      // Set empty array on error
+      setUserWallets([])
     } finally {
       setLoading(false)
     }
