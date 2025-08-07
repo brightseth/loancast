@@ -87,7 +87,7 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
     try {
       // In production, this would trigger WalletConnect or similar
       // For now, we'll create a transaction link for the user
-      const amount = loan.repay_usdc || loan.amount_usdc
+      const amount = loan.repay_usdc || 0
       
       // Create transaction parameters
       const txParams = {
