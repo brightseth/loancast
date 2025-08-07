@@ -145,7 +145,7 @@ export default function MyLoans() {
               <h2 className="text-xl font-semibold mb-4">Active Loans</h2>
               <div className="grid gap-4">
                 {activeLoans.map(loan => (
-                  <LoanCard key={loan.id} loan={loan} userRole={activeTab === 'watching' ? 'lender' : activeTab} />
+                  <LoanCard key={loan.id} loan={loan} userRole="borrower" />
                 ))}
               </div>
             </div>
@@ -156,7 +156,7 @@ export default function MyLoans() {
               <h2 className="text-xl font-semibold mb-4">History</h2>
               <div className="grid gap-4">
                 {completedLoans.map(loan => (
-                  <LoanCard key={loan.id} loan={loan} userRole={activeTab === 'watching' ? 'lender' : activeTab} />
+                  <LoanCard key={loan.id} loan={loan} userRole="borrower" />
                 ))}
               </div>
             </div>
