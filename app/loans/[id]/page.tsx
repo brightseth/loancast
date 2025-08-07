@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { CountdownTimer } from '@/components/CountdownTimer'
 import { ProfileBadge } from '@/components/ProfileBadge'
 import { RepaymentModal } from '@/components/RepaymentModal'
+import { WalletRepaymentModal } from '@/components/WalletRepaymentModal'
 
 interface Bid {
   id: string
@@ -31,6 +32,8 @@ export default function LoanDetail() {
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
   const [showRepaymentModal, setShowRepaymentModal] = useState(false)
+  const [showWalletRepayment, setShowWalletRepayment] = useState(false)
+  const [lenderWallet, setLenderWallet] = useState<string | null>(null)
 
   useEffect(() => {
     if (id) {
@@ -44,11 +47,28 @@ export default function LoanDetail() {
       if (response.ok) {
         const data = await response.json()
         setLoan(data)
+        
+        // Fetch lender wallet if loan is funded
+        if (data.status === 'funded' && data.lender_fid) {
+          fetchLenderWallet()
+        }
       }
     } catch (error) {
       console.error('Error fetching loan:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchLenderWallet = async () => {
+    try {
+      const response = await fetch(`/api/loans/${id}/lender-wallet`)
+      if (response.ok) {
+        const data = await response.json()
+        setLenderWallet(data.wallet)
+      }
+    } catch (error) {
+      console.error('Error fetching lender wallet:', error)
     }
   }
 
@@ -351,21 +371,40 @@ export default function LoanDetail() {
             <p className="text-sm text-green-800 mb-4">
               This loan has been funded and is ready for repayment. Send ${loan.repay_usdc?.toFixed(2)} USDC to the lender.
             </p>
-            <button
-              onClick={() => setShowRepaymentModal(true)}
-              className="bg-[#6936F5] text-white px-6 py-3 rounded-lg hover:bg-[#5929cc] transition font-bold text-lg tracking-wide"
-            >
-              REPAY THIS LOAN
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowWalletRepayment(true)}
+                className="bg-[#6936F5] text-white px-6 py-3 rounded-lg hover:bg-[#5929cc] transition font-bold text-lg tracking-wide flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                PAY WITH WALLET
+              </button>
+              <button
+                onClick={() => setShowRepaymentModal(true)}
+                className="px-6 py-3 border-2 border-[#6936F5] text-[#6936F5] rounded-lg hover:bg-[#6936F5] hover:text-white transition font-bold text-lg tracking-wide"
+              >
+                PAY MANUALLY
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Repayment Modal */}
+        {/* Repayment Modals */}
         {showRepaymentModal && loan && (
           <RepaymentModal
             loan={loan}
-            lenderAddress="0x1234...5678" // This should come from loan data or lender profile
+            lenderAddress={lenderWallet || "0x1234...5678"}
             onClose={() => setShowRepaymentModal(false)}
+          />
+        )}
+        
+        {showWalletRepayment && loan && lenderWallet && (
+          <WalletRepaymentModal
+            loan={loan}
+            lenderAddress={lenderWallet}
+            onClose={() => setShowWalletRepayment(false)}
           />
         )}
       </div>
