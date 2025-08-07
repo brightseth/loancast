@@ -47,20 +47,32 @@ export async function POST(
 
     const fullyFunded = newFunding >= targetAmount
     
-    // Update the loan with new funding amount
-    const { error: updateError } = await supabase
+    // ATOMIC UPDATE: Only update if loan is still 'open' to prevent race conditions
+    const { data: updatedLoan, error: updateError } = await supabase
       .from('loans')
       .update({
         gross_usdc: newFunding,
         lender_fid: fullyFunded ? lenderFid : loan.lender_fid,
-        status: fullyFunded ? 'funded' : 'open'
+        status: fullyFunded ? 'funded' : 'open',
+        tx_fund: txHash || null,
+        updated_at: new Date().toISOString()
       })
       .eq('id', params.id)
+      .eq('status', 'open')  // CRITICAL: Only update if still open
+      .select()
+      .single()
 
-    if (updateError) {
+    if (updateError || !updatedLoan) {
+      // If update failed, loan was likely already funded by another transaction
+      if (updateError?.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Loan already funded by another lender' },
+          { status: 409 }
+        )
+      }
       return NextResponse.json(
-        { error: 'Failed to update loan' },
-        { status: 500 }
+        { error: 'Failed to update loan - already funded or does not exist' },
+        { status: 409 }
       )
     }
 
