@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 // Admin FID - change this to your actual FID
 const ADMIN_FID = 5046 // seth's FID
 
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!.trim().replace(/\s+/g, '')
+const supabaseServiceKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim().replace(/\s+/g, '')
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
