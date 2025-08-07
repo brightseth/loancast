@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       repay_usdc: repayAmount,
       due_ts: dueDate.toISOString(),
       status: 'open',
-      notes: castSuccess ? null : `Cast failed: ${cast.error}. Can be retried later.`,
+      // Store cast failure info in loan record - notes: `Cast failed: ${cast.error}. Can be retried later.`,
     }
 
     console.log('Inserting loan despite cast failure:', loanData)
