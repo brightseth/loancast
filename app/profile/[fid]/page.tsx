@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -10,10 +9,12 @@ async function getProfileData(fid: string) {
       ? 'http://localhost:3000' 
       : 'https://loancast.app'
     const response = await fetch(`${baseUrl}/api/profiles/${fid}`, {
-      cache: 'no-store'
+      cache: 'no-store',
+      next: { revalidate: 0 }
     })
     
     if (!response.ok) {
+      console.error(`Profile API error: ${response.status} ${response.statusText}`)
       return null
     }
     
@@ -45,13 +46,6 @@ async function getLoans(fid: string) {
   }
 }
 
-function LoadingProfile() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6936F5]"></div>
-    </div>
-  )
-}
 
 function LoanCard({ loan, userRole }: { loan: any, userRole: 'borrower' | 'lender' }) {
   return (
@@ -284,9 +278,7 @@ export default async function ProfilePage({ params }: { params: { fid: string } 
       </div>
 
       {/* Loans Section */}
-      <Suspense fallback={<LoadingProfile />}>
-        <ProfileTabs borrowed={loans.borrowed} lent={loans.lent} />
-      </Suspense>
+      <ProfileTabs borrowed={loans.borrowed} lent={loans.lent} />
     </div>
   )
 }
