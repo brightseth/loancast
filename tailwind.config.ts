@@ -12,6 +12,9 @@ const config: Config = {
         'farcaster': '#8A63D2',
         'farcaster-dark': '#7C4DFF',
       },
+      screens: {
+        'xs': '390px',
+      },
     },
   },
   plugins: [],

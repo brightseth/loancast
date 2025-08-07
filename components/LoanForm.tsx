@@ -53,16 +53,18 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
   const repayAmount = amount + totalInterest // Borrower pays back full amount + interest
   const dueDate = addDays(new Date(), durationMonths * 30)
 
-  const castText = `🏦 LOAN REQUEST
+  const castText = `┏━━━━ 💰 LOAN REQUEST ━━━━┓
 
-🟢 Gross: $${amount?.toFixed(0) || '0'} USDC
-💰 Net: $${netAmount?.toFixed(0) || '0'} USDC
-📈 Yield: 2% monthly (24% APR)
-💸 Repay: $${repayAmount.toFixed(0)} 
-📅 Due: ${format(dueDate, 'M/d/yyyy')}
+🏦 Borrow ≤ ${amount?.toLocaleString() || '0'} USDC
+📅 ${durationMonths * 30} days • due ${format(dueDate, 'MMM d, yyyy')}
+📈 Yield 2% monthly → repay ${repayAmount.toFixed(0)} USDC
+🎯 Highest bid = lender
+💰 I eat Farcaster's 10% (get ${netAmount?.toFixed(0) || '0'} USDC)
+⚠️ This cast *is* the note
 
-🤝 Friend-to-friend lending • No securities • Trust-based
-Powered by @loancast`
+Cast on @loancast
+
+┗━━━━━━━━━━━━━━━━━━━━━┛`
 
   const copyCastText = async () => {
     try {
@@ -217,6 +219,9 @@ Powered by @loancast`
           <div className="flex justify-between text-red-600">
             <span>🏛️ Farcaster Fee (10%):</span>
             <span className="font-medium">-${farcasterFee.toFixed(0)}</span>
+          </div>
+          <div className="text-xs text-orange-600 italic mt-1">
+            💡 Fee under negotiation—target 2% soon
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">💰 You Receive:</span>

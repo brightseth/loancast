@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Loan } from '@/lib/supabase'
 import { ExploreCard } from '@/components/ExploreCard'
 import { StatsCard } from '@/components/StatsCard'
@@ -8,6 +9,7 @@ import { useAnalytics } from '@/lib/analytics'
 
 export default function Explore() {
   const analytics = useAnalytics()
+  const searchParams = useSearchParams()
   const [loans, setLoans] = useState<Loan[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'active' | 'funded'>('active')
@@ -16,6 +18,7 @@ export default function Explore() {
   const [maxAmount, setMaxAmount] = useState('')
   const [duration, setDuration] = useState<string>('')
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showToast, setShowToast] = useState(false)
 
   useEffect(() => {
     fetchLoans()
@@ -23,7 +26,15 @@ export default function Explore() {
 
   useEffect(() => {
     analytics.featureUsed('Explore Page Viewed')
-  }, [])
+    
+    // Check if user came from 404 redirect
+    const from404 = searchParams?.get('from') === '404'
+    if (from404) {
+      setShowToast(true)
+      // Auto-hide toast after 5 seconds
+      setTimeout(() => setShowToast(false), 5000)
+    }
+  }, [searchParams])
 
   const filteredLoans = loans.filter(loan => {
     // Search term filter
@@ -110,6 +121,22 @@ export default function Explore() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
+      {/* Toast notification for 404 redirects */}
+      {showToast && (
+        <div className="fixed top-4 right-4 bg-blue-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 max-w-sm">
+          <div className="flex items-center gap-2">
+            <span>ℹ️</span>
+            <p className="text-sm">That loan was deleted—browse others here!</p>
+            <button 
+              onClick={() => setShowToast(false)}
+              className="ml-auto text-white hover:text-gray-200"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Explore Loans</h1>
         <p className="text-gray-600 mb-6">
