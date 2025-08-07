@@ -215,7 +215,7 @@ export default function AboutPage() {
               and social reputation can replace traditional collateral in peer-to-peer lending.
             </p>
             <a 
-              href="/whitepaper.md" 
+              href="/whitepaper" 
               target="_blank"
               className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition"
             >
