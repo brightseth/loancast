@@ -43,13 +43,11 @@ export async function postCast({
 }
 
 export function formatLoanCast({
-  loanNumber,
   amount,
   durationMonths,
   dueDate,
   yieldPercent
 }: {
-  loanNumber: string
   amount: number
   durationMonths: number
   dueDate: Date
@@ -64,16 +62,16 @@ export function formatLoanCast({
   
   const netAmount = amount * 0.9 // After 10% Farcaster fee
   
-  return `┏━ ${loanNumber} ━┓
+  return `┏━━━━ 💰 LOAN REQUEST ━━━━┓
 
 🏦 Borrow ≤ ${amount.toLocaleString()} USDC
 📅 ${durationMonths * 30} days • due ${dueDateStr}
-📈 Yield ${yieldPercent} % → repay ${repayAmount.toFixed(0)} USDC
+📈 Yield ${yieldPercent}% → repay ${repayAmount.toFixed(0)} USDC
 🎯 Highest bid = lender
-💰 I eat Farcaster's 10 % (get ${netAmount.toFixed(0)} USDC)
+💰 I eat Farcaster's 10% (get ${netAmount.toFixed(0)} USDC)
 ⚠️ This cast *is* the note
 
 Cast on @loancast
 
-┗━━━━━━━━━━━━━━━━━┛`
+┗━━━━━━━━━━━━━━━━━━━━━┛`
 }

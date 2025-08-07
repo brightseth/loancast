@@ -53,19 +53,9 @@ export async function POST(request: NextRequest) {
     const dueDate = addDays(new Date(), duration_months * 30)
     console.log('Calculated repayAmount:', repayAmount, 'dueDate:', dueDate, 'duration_months:', duration_months)
 
-    // Get next loan number atomically
-    console.log('Getting next loan number...')
-    const { data: loanNumberResult, error: counterError } = await supabaseAdmin
-      .rpc('get_next_loan_number')
-    
-    if (counterError) {
-      console.error('Error getting loan number:', counterError)
-      throw createApiError(`Failed to generate loan number: ${counterError.message}`, 500, 'LOAN_NUMBER_ERROR')
-    }
-    
-    const loanNumber = loanNumberResult
-    const loanId = `LOANCAST-${loanNumber.toString().padStart(4, '0')}`
-    console.log('Generated loan ID:', loanId)
+    // Generate UUID for loan (no longer need sequential numbers)
+    const uuid = uuidv4()
+    console.log('Generated loan UUID:', uuid)
 
     // Try cast creation
     let cast
@@ -75,15 +65,15 @@ export async function POST(request: NextRequest) {
         signer_uuid || 'default-signer',
         amount,
         yield_bps,
-        dueDate,
-        loanId // Pass loan ID to the cast
+        dueDate
+        // No longer pass loan ID to cast - using new template
       )
       console.log('Cast created:', cast)
       castSuccess = ((cast as any).success !== false) && !!cast.hash && !cast.hash.includes('failed-')
       
       // Track cast creation event
       if (castSuccess && !cast.hash.includes('mock-') && !cast.hash.includes('failed-')) {
-        console.log('Real cast created successfully for', loanId)
+        console.log('Real cast created successfully for loan UUID:', uuid)
       }
       
     } catch (castError) {
@@ -92,10 +82,9 @@ export async function POST(request: NextRequest) {
       castSuccess = false
     }
 
-    const uuid = uuidv4()
     const loanData = {
       id: uuid,
-      loan_number: loanNumber,
+      loan_number: null, // No longer using sequential numbers
       cast_hash: cast.hash,
       borrower_fid,
       yield_bps,
@@ -121,7 +110,6 @@ export async function POST(request: NextRequest) {
         console.log('Posting to Farcaster...')
         
         const castText = formatLoanCast({
-          loanNumber: loanId,
           amount: amount,
           durationMonths: duration_months,
           dueDate: dueDate,
