@@ -108,7 +108,7 @@ export default function NewLoan() {
 
   return (
     <div className="max-w-screen-md mx-auto p-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">New LoanCast</h1>
+      <h1 className="text-3xl font-bold mb-8">New Loan Request</h1>
       
       {/* Error Display */}
       {error && (

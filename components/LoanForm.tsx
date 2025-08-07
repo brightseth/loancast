@@ -53,7 +53,7 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
   const repayAmount = amount + totalInterest // Borrower pays back full amount + interest
   const dueDate = addDays(new Date(), durationMonths * 30)
 
-  const castText = `🏦 LOANCAST REQUEST
+  const castText = `🏦 LOAN REQUEST
 
 🟢 Gross: $${amount?.toFixed(0) || '0'} USDC
 💰 Net: $${netAmount?.toFixed(0) || '0'} USDC
@@ -249,7 +249,7 @@ Powered by @loancast`
         {isSubmitting && (
           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
         )}
-        {isSubmitting ? 'Creating LoanCast...' : 'Post LoanCast'}
+        {isSubmitting ? 'Creating loan...' : 'Post Loan Request'}
       </button>
       </div>
     </form>
