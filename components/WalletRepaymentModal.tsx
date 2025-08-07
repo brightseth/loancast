@@ -38,13 +38,22 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
       setLoading(true)
       // Get user's connected wallets from their Farcaster profile
       const response = await fetch('/api/user/wallets')
-      if (response.ok) {
-        const data = await response.json()
-        
-        // Get all wallets (they should all work on Base)
-        const baseWallets = data.wallets || []
-        
-        console.log('Fetched wallets:', baseWallets)
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Failed to fetch wallets:', response.status, errorData)
+        setError(errorData.error || 'Failed to fetch wallets')
+        setLoading(false)
+        return
+      }
+      
+      const data = await response.json()
+      
+      // Get all wallets (they should all work on Base)
+      const baseWallets = data.wallets || []
+      
+      console.log('Fetched wallets:', baseWallets)
+      console.log('Primary wallet:', data.primaryWallet)
         
         setUserWallets(baseWallets)
         if (baseWallets.length === 1) {

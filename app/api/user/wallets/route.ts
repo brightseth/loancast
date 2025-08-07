@@ -40,17 +40,22 @@ export async function GET(request: NextRequest) {
     
     // Format wallets for the frontend
     const wallets = []
+    const seenAddresses = new Set<string>()
     
-    // Add verified addresses
+    // Add verified addresses (no duplicates)
     for (const address of verifiedAddresses) {
-      wallets.push({
-        address: address,
-        chain: 'base', // Farcaster verified addresses work on Base
-        display: `${address.slice(0, 6)}...${address.slice(-4)}`,
-        verified: true,
-        // In production, would check actual balance
-        balance: null
-      })
+      const lowerAddress = address.toLowerCase()
+      if (!seenAddresses.has(lowerAddress)) {
+        seenAddresses.add(lowerAddress)
+        wallets.push({
+          address: address,
+          chain: 'base', // Farcaster verified addresses work on Base
+          display: `${address.slice(0, 6)}...${address.slice(-4)}`,
+          verified: true,
+          // In production, would check actual balance
+          balance: null
+        })
+      }
     }
     
     // Add custody address if different and exists
@@ -65,18 +70,12 @@ export async function GET(request: NextRequest) {
       })
     }
     
-    // If no wallets found, add a mock wallet for testing
-    if (wallets.length === 0) {
-      console.log('No wallets found, adding mock wallet for testing')
-      wallets.push({
-        address: '0x0000000000000000000000000000000000000000',
-        chain: 'base',
-        display: '0x0000...0000',
-        verified: false,
-        mock: true,
-        balance: '100.00'
-      })
-    }
+    // Log wallet detection results
+    console.log(`Wallet detection for FID ${userFid}:`, {
+      verifiedCount: verifiedAddresses.length,
+      hasCustody: !!custodyAddress,
+      totalWallets: wallets.length
+    })
 
     return NextResponse.json({ 
       wallets,
