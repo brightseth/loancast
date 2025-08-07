@@ -63,6 +63,13 @@ export function Providers({ children }: { children: ReactNode }) {
           verified_wallet: parsedUser.verifiedWallet,
           has_signer: !!parsedUser.signerUuid,
         })
+        
+        // Ensure server session is also set
+        fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user: parsedUser })
+        }).catch(console.error)
       }
     }
   }, [])
@@ -101,12 +108,22 @@ export function Providers({ children }: { children: ReactNode }) {
     
     setUser(user)
     localStorage.setItem('user', JSON.stringify(user))
+    
+    // Also set server-side session cookie
+    fetch('/api/auth/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user })
+    }).catch(console.error)
   }
 
   const logout = () => {
     analytics.track('User Logged Out')
     localStorage.removeItem('user')
     setUser(null)
+    
+    // Also clear server-side session
+    fetch('/api/auth/session', { method: 'DELETE' }).catch(console.error)
   }
 
   return (
