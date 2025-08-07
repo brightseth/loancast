@@ -11,40 +11,19 @@ export default function MyLoans() {
   const [loans, setLoans] = useState<Loan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'borrower' | 'lender' | 'watching'>('borrower')
-
-  // Load saved tab from localStorage on mount
-  useEffect(() => {
-    const savedTab = localStorage.getItem('loancast-active-tab') as 'borrower' | 'lender' | 'watching'
-    if (savedTab && (savedTab === 'borrower' || savedTab === 'lender' || savedTab === 'watching')) {
-      setActiveTab(savedTab)
-    }
-  }, [])
+  const [activeTab, setActiveTab] = useState<'borrower'>('borrower')
 
   useEffect(() => {
     if (user) {
       fetchLoans()
     }
-  }, [user, activeTab])
-
-  const handleTabChange = (tab: 'borrower' | 'lender' | 'watching') => {
-    setActiveTab(tab)
-    localStorage.setItem('loancast-active-tab', tab)
-  }
+  }, [user])
 
   const fetchLoans = async () => {
     setLoading(true)
     setError(null)
     try {
-      let params = ''
-      if (activeTab === 'borrower') {
-        params = `borrower_fid=${user!.fid}`
-      } else if (activeTab === 'lender') {
-        params = `lender_fid=${user!.fid}`
-      } else if (activeTab === 'watching') {
-        // For watching tab, get loans they've interacted with but not funded
-        params = `status=open&limit=20`
-      }
+      const params = `borrower_fid=${user!.fid}`
       
       const response = await fetch(`/api/loans?${params}`)
       
@@ -108,19 +87,12 @@ export default function MyLoans() {
   const activeLoans = loans?.filter(loan => loan.status === 'open') || []
   const completedLoans = loans?.filter(loan => loan.status !== 'open') || []
   
-  // Calculate lender earnings for lent tab
-  const totalEarnings = activeTab === 'lender' ? completedLoans.reduce((sum, loan) => {
-    if (loan.status === 'repaid' && loan.gross_usdc && loan.repay_usdc) {
-      return sum + (loan.repay_usdc - loan.gross_usdc)
-    }
-    return sum
-  }, 0) : 0
 
   return (
     <div className="max-w-screen-md mx-auto p-4 py-12">
       <div className="flex justify-between items-start mb-8">
         <div>
-          <h1 className="text-3xl font-bold mb-2">My Loans</h1>
+          <h1 className="text-3xl font-bold mb-2">My Loan Requests</h1>
           {user && (
             <div className="flex items-center space-x-3 text-sm text-gray-600">
               <img 
@@ -134,12 +106,6 @@ export default function MyLoans() {
                   <span>📊 Reputation: 85%</span>
                   <span>•</span>
                   <span>FID: {user.fid}</span>
-                  {activeTab === 'lender' && totalEarnings > 0 && (
-                    <>
-                      <span>•</span>
-                      <span>💰 Earned: ${totalEarnings.toFixed(0)}</span>
-                    </>
-                  )}
                 </div>
               </div>
             </div>
@@ -149,42 +115,10 @@ export default function MyLoans() {
           href="/loans/new"
           className="bg-[#6936F5] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#5929cc] transition"
         >
-          New LoanCast
+          Request Loan
         </Link>
       </div>
 
-      <div className="flex space-x-1 mb-6">
-        <button
-          onClick={() => handleTabChange('borrower')}
-          className={`px-4 py-2 rounded-t-lg font-medium ${
-            activeTab === 'borrower'
-              ? 'bg-white border-b-2 border-[#6936F5] text-[#6936F5]'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          Borrowed
-        </button>
-        <button
-          onClick={() => handleTabChange('lender')}
-          className={`px-4 py-2 rounded-t-lg font-medium ${
-            activeTab === 'lender'
-              ? 'bg-white border-b-2 border-[#6936F5] text-[#6936F5]'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          Lent
-        </button>
-        <button
-          onClick={() => handleTabChange('watching')}
-          className={`px-4 py-2 rounded-t-lg font-medium ${
-            activeTab === 'watching'
-              ? 'bg-white border-b-2 border-[#6936F5] text-[#6936F5]'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          Watching
-        </button>
-      </div>
 
       {loading ? (
         <div className="space-y-4">

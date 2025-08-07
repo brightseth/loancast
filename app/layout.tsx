@@ -59,10 +59,10 @@ export default function RootLayout({
                   {/* Desktop nav */}
                   <div className="hidden md:flex items-center space-x-4">
                     <a href="/loans" className="text-gray-700 hover:text-[#6936F5]">
-                      My Loans
+                      Borrow
                     </a>
                     <a href="/dashboard/lending" className="text-gray-700 hover:text-[#6936F5]">
-                      Lending
+                      Lend
                     </a>
                     <a href="/explore" className="text-gray-700 hover:text-[#6936F5]">
                       Explore
@@ -86,13 +86,13 @@ export default function RootLayout({
                     href="/loans/new" 
                     className="block mx-3 px-4 py-3 text-center bg-[#6936F5] text-white font-medium rounded-lg hover:bg-purple-700 transition"
                   >
-                    Create Loan
+                    Request Loan
                   </a>
                   <a href="/loans" className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-[#6936F5] hover:bg-white rounded-lg mx-3 transition">
-                    My Loans
+                    Borrow
                   </a>
                   <a href="/dashboard/lending" className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-[#6936F5] hover:bg-white rounded-lg mx-3 transition">
-                    Lending
+                    Lend
                   </a>
                   <a href="/explore" className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-[#6936F5] hover:bg-white rounded-lg mx-3 transition">
                     Explore
