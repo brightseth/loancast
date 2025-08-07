@@ -1,102 +1,160 @@
-'use client'
+import { Suspense } from 'react'
 
-import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import { User, Loan } from '@/lib/supabase'
-import { LoanCard } from '@/components/LoanCard'
-import { ReputationProfile } from '@/components/ReputationProfile'
-import { ReputationCard } from '@/components/ReputationCard'
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
 
-export default function ProfilePage() {
-  const params = useParams()
-  const fid = params.fid as string
-  
-  const [user, setUser] = useState<User | null>(null)
-  const [loans, setLoans] = useState<Loan[]>([])
-  const [lentLoans, setLentLoans] = useState<Loan[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'borrowed' | 'lent'>('borrowed')
-
-  useEffect(() => {
-    if (fid) {
-      fetchUserData()
-    }
-  }, [fid])
-
-  const fetchUserData = async () => {
-    setLoading(true)
-    setError(null)
+async function getProfileData(fid: string) {
+  try {
+    // In server components, use absolute URL for API calls
+    const baseUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3000' 
+      : 'https://loancast.app'
+    const response = await fetch(`${baseUrl}/api/profiles/${fid}`, {
+      cache: 'no-store'
+    })
     
-    try {
-      // Fetch user profile
-      console.log(`[ProfilePage] Starting fetch for FID: ${fid}`)
-      const profileUrl = `/api/profiles/${fid}`
-      console.log(`[ProfilePage] Fetching from: ${profileUrl}`)
-      
-      const userResponse = await fetch(profileUrl)
-      
-      console.log(`[ProfilePage] Response status: ${userResponse.status}`)
-      
-      if (userResponse.ok) {
-        const userData = await userResponse.json()
-        console.log('[ProfilePage] Profile data received:', userData)
-        setUser(userData)
-      } else {
-        // Handle different error types
-        const errorData = await userResponse.json().catch(() => ({ error: 'Unknown error' }))
-        console.error('[ProfilePage] API error:', userResponse.status, errorData)
-        
-        if (userResponse.status === 503) {
-          setError('Profile lookup is temporarily unavailable. API not configured.')
-        } else if (userResponse.status === 404) {
-          setError(errorData.error || 'User not found on Farcaster')
-        } else {
-          setError(`Profile lookup failed: ${errorData.error || 'Unknown error'}`)
-        }
-        return // Don't try to fetch loans if profile failed
-      }
-
-      // Fetch borrowed loans
-      console.log(`[ProfilePage] Fetching borrowed loans for FID: ${fid}`)
-      const borrowedResponse = await fetch(`/api/loans?borrower_fid=${fid}`)
-      if (borrowedResponse.ok) {
-        const borrowedData = await borrowedResponse.json()
-        console.log(`[ProfilePage] Found ${borrowedData?.length || 0} borrowed loans`)
-        setLoans(borrowedData || [])
-      } else {
-        console.error('[ProfilePage] Failed to fetch borrowed loans')
-        setLoans([])
-      }
-
-      // Fetch lent loans
-      console.log(`[ProfilePage] Fetching lent loans for FID: ${fid}`)
-      const lentResponse = await fetch(`/api/loans?lender_fid=${fid}`)
-      if (lentResponse.ok) {
-        const lentData = await lentResponse.json()
-        console.log(`[ProfilePage] Found ${lentData?.length || 0} lent loans`)
-        setLentLoans(lentData || [])
-      } else {
-        console.error('[ProfilePage] Failed to fetch lent loans')
-        setLentLoans([])
-      }
-    } catch (error) {
-      console.error('[ProfilePage] Network error:', error)
-      setError(`Network error: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    } finally {
-      setLoading(false)
+    if (!response.ok) {
+      return null
     }
+    
+    return await response.json()
+  } catch (error) {
+    console.error('Error fetching profile:', error)
+    return null
   }
+}
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-farcaster"></div>
+async function getLoans(fid: string) {
+  try {
+    const baseUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3000' 
+      : 'https://loancast.app'
+    
+    const [borrowedRes, lentRes] = await Promise.all([
+      fetch(`${baseUrl}/api/loans?borrower_fid=${fid}`, { cache: 'no-store' }),
+      fetch(`${baseUrl}/api/loans?lender_fid=${fid}`, { cache: 'no-store' })
+    ])
+    
+    const borrowed = borrowedRes.ok ? await borrowedRes.json() : []
+    const lent = lentRes.ok ? await lentRes.json() : []
+    
+    return { borrowed, lent }
+  } catch (error) {
+    console.error('Error fetching loans:', error)
+    return { borrowed: [], lent: [] }
+  }
+}
+
+function LoadingProfile() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6936F5]"></div>
+    </div>
+  )
+}
+
+function LoanCard({ loan, userRole }: { loan: any, userRole: 'borrower' | 'lender' }) {
+  return (
+    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+      <div className="flex justify-between items-start mb-2">
+        <span className="text-sm font-medium text-gray-600">
+          #{loan.loan_number || loan.id.slice(0, 8)}
+        </span>
+        <span className={`text-xs px-2 py-1 rounded ${
+          loan.status === 'open' ? 'bg-blue-100 text-blue-700' :
+          loan.status === 'funded' ? 'bg-yellow-100 text-yellow-700' :
+          loan.status === 'repaid' ? 'bg-green-100 text-green-700' :
+          'bg-red-100 text-red-700'
+        }`}>
+          {loan.status}
+        </span>
       </div>
-    )
-  }
+      <div className="text-2xl font-bold mb-1">
+        ${loan.amount_usdc || loan.gross_usdc || loan.net_usdc}
+      </div>
+      <div className="text-sm text-gray-600 mb-3">
+        Due: {new Date(loan.due_ts).toLocaleDateString()}
+      </div>
+      {userRole === 'borrower' && loan.status === 'funded' && (
+        <div className="text-sm text-amber-600 mb-2">
+          Repay: ${loan.repay_usdc?.toFixed(2)}
+        </div>
+      )}
+      <a 
+        href={`/loans/${loan.id}`}
+        className="block text-center bg-[#6936F5] text-white py-2 rounded hover:bg-purple-700 transition-colors"
+      >
+        View Details
+      </a>
+    </div>
+  )
+}
 
-  if (error || !user) {
+interface ProfileTabsProps {
+  borrowed: any[]
+  lent: any[]
+}
+
+function ProfileTabs({ borrowed, lent }: ProfileTabsProps) {
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-6">
+      <h2 className="text-xl font-semibold mb-6">Loan History</h2>
+      
+      {/* Static tabs - borrowed by default for simplicity in server component */}
+      <div className="flex gap-2 mb-6 border-b">
+        <div className="px-4 py-2 font-medium border-b-2 border-[#6936F5] text-[#6936F5]">
+          Borrowed ({borrowed.length})
+        </div>
+        <div className="px-4 py-2 font-medium text-gray-600">
+          Lent ({lent.length})
+        </div>
+      </div>
+      
+      {/* Show borrowed loans by default */}
+      {borrowed.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {borrowed.map((loan: any) => (
+            <LoanCard 
+              key={loan.id} 
+              loan={loan} 
+              userRole="borrower"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 text-gray-500">
+          No borrowed loans yet
+        </div>
+      )}
+      
+      {/* Show lent loans if no borrowed loans */}
+      {borrowed.length === 0 && lent.length > 0 && (
+        <>
+          <div className="mt-8 pt-6 border-t">
+            <h3 className="text-lg font-semibold mb-4">Lent Loans</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {lent.map((loan: any) => (
+                <LoanCard 
+                  key={loan.id} 
+                  loan={loan} 
+                  userRole="lender"
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+export default async function ProfilePage({ params }: { params: { fid: string } }) {
+  const [user, loans] = await Promise.all([
+    getProfileData(params.fid),
+    getLoans(params.fid)
+  ])
+  
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center max-w-md">
@@ -105,33 +163,24 @@ export default function ProfilePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            {error ? 'Profile Error' : 'User Not Found'}
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">User Not Found</h1>
           <p className="text-gray-600 mb-4">
-            {error || 'This user doesn\'t exist or hasn\'t used LoanCast yet.'}
+            FID {params.fid} doesn't exist or hasn't used LoanCast yet.
           </p>
           <div className="text-sm text-gray-500 mb-4">
-            <p>FID: {fid}</p>
-            {error && error.includes('API not configured') && (
-              <p className="mt-2 text-blue-600">
-                Try test profiles: /profile/1, /profile/2, /profile/3, or /profile/12345
-              </p>
-            )}
+            <p>FID: {params.fid}</p>
           </div>
-          <button
-            onClick={() => window.location.reload()}
+          <a
+            href="/explore"
             className="bg-[#6936F5] text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
           >
-            Retry
-          </button>
+            Browse Loans
+          </a>
         </div>
       </div>
     )
   }
-
-  const displayLoans = activeTab === 'borrowed' ? loans : lentLoans
-
+  
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Profile Header */}
@@ -148,87 +197,96 @@ export default function ProfilePage() {
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
               {user.display_name}
             </h1>
-            <p className="text-gray-600 mb-4">FID: {user.fid}</p>
+            <p className="text-gray-600 mb-4">
+              {user.username && `@${user.username} • `}FID: {user.fid}
+            </p>
+            
+            {/* Bio */}
+            {user.bio && (
+              <p className="text-gray-700 mb-4 text-sm sm:text-base">
+                {typeof user.bio === 'object' ? user.bio.text : user.bio}
+              </p>
+            )}
             
             {/* Quick Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-farcaster">{user.total_loans}</div>
-                <div className="text-sm text-gray-600">Total Loans</div>
+                <div className="text-xl sm:text-2xl font-bold text-[#6936F5]">{user.total_loans || 0}</div>
+                <div className="text-xs sm:text-sm text-gray-600">Total Loans</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{user.loans_repaid}</div>
-                <div className="text-sm text-gray-600">Repaid</div>
+                <div className="text-xl sm:text-2xl font-bold text-green-600">{user.loans_repaid || 0}</div>
+                <div className="text-xs sm:text-sm text-gray-600">Repaid</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-farcaster">${user.total_borrowed?.toFixed(0) || '0'}</div>
-                <div className="text-sm text-gray-600">Total Borrowed</div>
+                <div className="text-xl sm:text-2xl font-bold text-[#6936F5]">
+                  ${(user.total_borrowed || 0).toFixed(0)}
+                </div>
+                <div className="text-xs sm:text-sm text-gray-600">Total Borrowed</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-amber-600">{user.credit_score}</div>
-                <div className="text-sm text-gray-600">Credit Score</div>
+                <div className="text-xl sm:text-2xl font-bold text-amber-600">{user.credit_score || 50}</div>
+                <div className="text-xs sm:text-sm text-gray-600">Credit Score</div>
               </div>
             </div>
+
+            {/* Additional Stats */}
+            {(user.follower_count || user.following_count) && (
+              <div className="flex justify-center sm:justify-start gap-6 mt-4 text-sm text-gray-600">
+                {user.follower_count && (
+                  <div>
+                    <span className="font-medium">{user.follower_count.toLocaleString()}</span> followers
+                  </div>
+                )}
+                {user.following_count && (
+                  <div>
+                    <span className="font-medium">{user.following_count.toLocaleString()}</span> following
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Reputation Details */}
-      <div className="mb-8">
-        <ReputationProfile user={user} />
-      </div>
-
-      {/* Advanced Reputation System */}
-      <div className="mb-8">
-        <ReputationCard userFid={parseInt(fid)} />
-      </div>
-
-      {/* Loans Section */}
-      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-          <h2 className="text-lg sm:text-xl font-semibold text-center sm:text-left">Loan History</h2>
-          <div className="flex space-x-2 justify-center sm:justify-end">
-            <button
-              onClick={() => setActiveTab('borrowed')}
-              className={`px-3 py-2 sm:px-4 rounded-lg font-medium text-sm ${
-                activeTab === 'borrowed'
-                  ? 'bg-farcaster text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Borrowed ({loans.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('lent')}
-              className={`px-3 py-2 sm:px-4 rounded-lg font-medium text-sm ${
-                activeTab === 'lent'
-                  ? 'bg-farcaster text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Lent ({lentLoans.length})
-            </button>
+      {/* Reputation Section */}
+      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
+        <h2 className="text-lg sm:text-xl font-semibold mb-4">Reputation</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="text-center">
+            <div className="text-lg sm:text-xl font-bold text-green-600">
+              {user.repayment_streak || 0}
+            </div>
+            <div className="text-xs sm:text-sm text-gray-600">Repayment Streak</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg sm:text-xl font-bold text-blue-600">
+              {user.avg_repayment_days ? `${user.avg_repayment_days.toFixed(1)} days` : 'N/A'}
+            </div>
+            <div className="text-xs sm:text-sm text-gray-600">Avg Repayment Time</div>
+          </div>
+          <div className="text-center col-span-2 sm:col-span-1">
+            <div className="text-lg sm:text-xl font-bold text-red-600">
+              {user.loans_defaulted || 0}
+            </div>
+            <div className="text-xs sm:text-sm text-gray-600">Defaults</div>
           </div>
         </div>
-
-        {displayLoans.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {displayLoans.map(loan => (
-              <LoanCard 
-                key={loan.id} 
-                loan={loan} 
-                userRole={activeTab === 'borrowed' ? 'borrower' : 'lender'}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-600">
-              No {activeTab} loans found.
-            </p>
+        
+        {/* Power Badge */}
+        {user.power_badge && (
+          <div className="mt-4 text-center">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+              ⚡ Power User
+            </span>
           </div>
         )}
       </div>
+
+      {/* Loans Section */}
+      <Suspense fallback={<LoadingProfile />}>
+        <ProfileTabs borrowed={loans.borrowed} lent={loans.lent} />
+      </Suspense>
     </div>
   )
 }
