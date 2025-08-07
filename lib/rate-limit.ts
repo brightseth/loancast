@@ -137,8 +137,8 @@ export class RateLimiter {
 export const rateLimiters = {
   // Strict limits for sensitive operations
   loanCreation: new RateLimiter({
-    max: 5, // 5 loan creations per hour
-    windowMs: 60 * 60 * 1000,
+    max: 10, // 10 loan creations per 15 minutes (more reasonable for active users)
+    windowMs: 15 * 60 * 1000,
   }),
 
   // Moderate limits for API endpoints

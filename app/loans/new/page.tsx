@@ -65,15 +65,27 @@ export default function NewLoan() {
         // Try to get specific error message from response
         const errorData = await response.json().catch(() => ({}))
         const errorMsg = errorData.error || `Server error (${response.status})`
-        throw new Error(errorMsg)
+        
+        // Store the full error data for rate limit handling
+        const fullError = new Error(errorMsg) as any
+        fullError.data = errorData
+        throw fullError
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating loan:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
       
       // Set user-friendly error message
       if (errorMessage.includes('Rate limit')) {
-        setError('Too many requests. Please wait a moment and try again.')
+        // Try to extract reset time from error response
+        const resetTimeMatch = error.data?.resetTime
+        if (resetTimeMatch) {
+          const resetDate = new Date(resetTimeMatch)
+          const minutesLeft = Math.ceil((resetDate.getTime() - Date.now()) / 60000)
+          setError(`Too many loan requests. Please wait ${minutesLeft} minute${minutesLeft > 1 ? 's' : ''} and try again.`)
+        } else {
+          setError('Too many requests. Please wait a few minutes and try again.')
+        }
       } else if (errorMessage.includes('Authentication')) {
         setError('Please sign in again to create a loan.')
       } else if (errorMessage.includes('Amount')) {
