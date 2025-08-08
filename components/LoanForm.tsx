@@ -45,7 +45,7 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
   const durationMonths = watch('duration_months') || 1
   
   // Fixed 2% monthly rate for all early loans
-  const monthlyRate = 0.02
+  const monthlyRate = 0.02 // 2% monthly rate
   const annualRate = 24 // 2% × 12 months
   const farcasterFee = amount * 0.10 // 10% Farcaster fee
   const netAmount = amount - farcasterFee // Borrower receives this amount
