@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
+import { guardTestEndpoint } from '@/lib/launch-guard'
 
 export async function GET() {
+  // Guard test endpoint in production
+  const guard = guardTestEndpoint()
+  if (guard) return guard
+
   try {
     // Test fetching a known Farcaster user (dwr.eth - FID 3)
     const response = await fetch('https://api.neynar.com/v2/farcaster/user/bulk?fids=3', {

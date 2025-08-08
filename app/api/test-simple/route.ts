@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { guardTestEndpoint } from '@/lib/launch-guard'
 
 export async function POST() {
+  // Guard test endpoint in production
+  const guard = guardTestEndpoint()
+  if (guard) return guard
+
   try {
     console.log('=== SIMPLE SUPABASE TEST ===')
     

@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
+import { guardTestEndpoint } from '@/lib/launch-guard'
 
 export async function GET() {
+  // Guard test endpoint in production
+  const guard = guardTestEndpoint()
+  if (guard) return guard
+
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY

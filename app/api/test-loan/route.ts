@@ -2,8 +2,13 @@ import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
+import { guardTestEndpoint } from '@/lib/launch-guard'
 
 export async function POST() {
+  // Guard test endpoint in production
+  const guard = guardTestEndpoint()
+  if (guard) return guard
+
   try {
     console.log('=== TEST LOAN CREATION ===')
     
@@ -15,7 +20,7 @@ export async function POST() {
     }
 
     const monthlyRate = 0.02
-    const yield_bps = 2400
+    const yield_bps = 200 // 2% monthly = 200 basis points
     const totalInterest = testData.amount * monthlyRate * testData.duration_months
     const repayAmount = testData.amount + totalInterest
     const dueDate = addDays(new Date(), testData.duration_months * 30)

@@ -2,12 +2,22 @@ import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { createFundingCast, getUserByFid } from '@/lib/neynar'
 import { notificationService } from '@/lib/notifications'
+import { canFundLoans } from '@/lib/feature-flags'
 
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check kill switch first
+    const fundingCheck = canFundLoans()
+    if (!fundingCheck.allowed) {
+      return NextResponse.json(
+        { error: fundingCheck.reason },
+        { status: 503 }
+      )
+    }
+
     const { amount, lenderFid, txHash, signerUuid } = await request.json()
 
     // Validate input

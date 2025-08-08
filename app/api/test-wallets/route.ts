@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getUserByFid } from '@/lib/neynar'
+import { guardTestEndpoint } from '@/lib/launch-guard'
 
 export async function GET(request: NextRequest) {
+  // Guard test endpoint in production
+  const guard = guardTestEndpoint()
+  if (guard) return guard
+
   try {
     // Get user session from cookie
     const cookieStore = cookies()

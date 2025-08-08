@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { emailService } from '@/lib/email'
+import { guardTestEndpoint } from '@/lib/launch-guard'
 
 export async function GET(request: NextRequest) {
+  // Guard test endpoint in production
+  const guard = guardTestEndpoint()
+  if (guard) return guard
+
   try {
     // Test email data
     const testData = {

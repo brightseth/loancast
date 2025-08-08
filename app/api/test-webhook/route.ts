@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { guardTestEndpoint } from '@/lib/launch-guard'
 
 export async function POST(request: NextRequest) {
+  // Guard test endpoint in production
+  const guard = guardTestEndpoint()
+  if (guard) return guard
   try {
     // Simulate a cast.deleted webhook payload
     const testPayload = {

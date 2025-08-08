@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createLoanCast } from '@/lib/neynar'
+import { canCreateLoans } from '@/lib/feature-flags'
 import { addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
 import { withErrorHandling, createApiError } from '@/lib/error-handler'
@@ -8,7 +9,16 @@ import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
 import * as Sentry from '@sentry/nextjs'
 
 export async function POST(request: NextRequest) {
-  // Check rate limit first
+  // Check kill switch first
+  const loanCheck = canCreateLoans()
+  if (!loanCheck.allowed) {
+    return NextResponse.json(
+      { error: loanCheck.reason },
+      { status: 503 }
+    )
+  }
+
+  // Check rate limit
   const { result, response } = await withRateLimit(request, rateLimiters.loanCreation)
   if (response) return response
 
@@ -46,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     // Fixed 2% monthly rate for all early loans
     const monthlyRate = 0.02
-    const yield_bps = 2400 // 24% APR in basis points
+    const yield_bps = 200 // 2% monthly rate in basis points (2% = 200 bps)
     const totalInterest = amount * monthlyRate * duration_months
     const repayAmount = amount + totalInterest
     const dueDate = addDays(new Date(), duration_months * 30)
