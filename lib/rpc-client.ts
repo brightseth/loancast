@@ -30,11 +30,7 @@ class MultiRpcClient {
     this.clients = RPC_ENDPOINTS.map(url => 
       createPublicClient({
         chain: base,
-        transport: http(url, {
-          timeout: this.timeoutMs,
-          retryCount: 1,
-          retryDelay: 1000
-        })
+        transport: http(url)
       })
     )
   }
