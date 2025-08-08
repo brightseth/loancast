@@ -44,8 +44,8 @@ export async function verifyRepayment(
 
     // Parse USDC transfer events
     const transferEvents = (receipt as any).logs
-      .filter(log => log.address.toLowerCase() === USDC_ADDRESS.toLowerCase())
-      .map(log => {
+      .filter((log: any) => log.address.toLowerCase() === USDC_ADDRESS.toLowerCase())
+      .map((log: any) => {
         try {
           const decoded = decodeEventLog({
             abi: USDC_ABI,
@@ -63,7 +63,7 @@ export async function verifyRepayment(
       return {
         isValid: false,
         txHash,
-        blockNumber: Number(receipt.blockNumber),
+        blockNumber: Number((receipt as any).blockNumber),
         from: '',
         to: '',
         amount: '0',
@@ -107,7 +107,7 @@ export async function verifyRepayment(
       return {
         isValid: false,
         txHash,
-        blockNumber: Number(receipt.blockNumber),
+        blockNumber: Number((receipt as any).blockNumber),
         from: '',
         to: '',
         amount: '0',
@@ -118,17 +118,17 @@ export async function verifyRepayment(
 
     // Get block timestamp
     const block = await rpcClient.getBlock({
-      blockNumber: receipt.blockNumber,
+      blockNumber: (receipt as any).blockNumber,
     })
 
     const verification: RepaymentVerification = {
       isValid: true,
       txHash,
-      blockNumber: Number(receipt.blockNumber),
+      blockNumber: Number((receipt as any).blockNumber),
       from: (relevantTransfer as any).args.from,
       to: (relevantTransfer as any).args.to,
       amount: (Number((relevantTransfer as any).args.value) / 1e6).toFixed(2),
-      timestamp: Number(block.timestamp),
+      timestamp: Number((block as any).timestamp),
     }
 
     // Store verification in database
