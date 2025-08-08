@@ -66,7 +66,7 @@ export function LoanCard({ loan, userRole }: LoanCardProps) {
           </h3>
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-700">
-              {loan.yield_bps / 100}% APR
+              2% monthly
             </p>
           </div>
           <div className="mt-2">
