@@ -277,17 +277,47 @@ class NotificationService {
   async notifyPaymentReminder(
     borrowerFid: number,
     loanId: string,
+    loanNumber: string,
     amount: number,
     dueDate: Date,
     hoursUntilDue: number
   ): Promise<void> {
-    const title = `Payment Reminder ⏰`
-    const message = `Your ${amount.toLocaleString()} USDC loan is due in ${hoursUntilDue} hours`
+    let title: string
+    let message: string
+    let urgency: 'low' | 'medium' | 'high' = 'low'
+    
+    // Format due date
+    const formattedDate = dueDate.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+    
+    if (hoursUntilDue === 24) {
+      title = '⏰ Payment Due Tomorrow'
+      message = `Your loan ${loanNumber} for ${amount.toLocaleString()} USDC is due tomorrow at ${formattedDate}. Repay at loancast.app/loans/${loanId}`
+      urgency = 'medium'
+    } else if (hoursUntilDue === 2) {
+      title = '🚨 Payment Due in 2 Hours!'
+      message = `URGENT: Your loan ${loanNumber} for ${amount.toLocaleString()} USDC is due in 2 hours! Repay now at loancast.app/loans/${loanId}`
+      urgency = 'high'
+    } else if (hoursUntilDue < 0) {
+      title = '⚠️ Payment Overdue'
+      message = `Your loan ${loanNumber} for ${amount.toLocaleString()} USDC is OVERDUE. Please repay immediately at loancast.app/loans/${loanId} to avoid default.`
+      urgency = 'high'
+    } else {
+      title = `Payment Reminder ⏰`
+      message = `Your ${amount.toLocaleString()} USDC loan is due in ${hoursUntilDue} hours`
+      urgency = 'low'
+    }
 
     await this.createNotification(borrowerFid, 'payment_reminder', title, message, loanId, {
       amount,
+      loan_number: loanNumber,
       due_date: dueDate.toISOString(),
-      hours_until_due: hoursUntilDue
+      hours_until_due: hoursUntilDue,
+      urgency
     })
   }
 

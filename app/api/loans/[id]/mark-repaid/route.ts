@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { notificationService } from '@/lib/notifications'
 import { getUserByFid } from '@/lib/neynar'
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
@@ -11,69 +11,95 @@ export async function POST(
   // Rate limiting
   const { result, response } = await withRateLimit(request, rateLimiters.api)
   if (response) return response
+  
+  // Add CORS headers for browser requests
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  }
 
   try {
-    const { tx_hash } = await request.json()
+    const { tx_hash, from_wallet } = await request.json()
+    
+    console.log(`Mark repaid request for loan ${params.id}:`, {
+      tx_hash,
+      from_wallet,
+      timestamp: new Date().toISOString()
+    })
 
     if (!tx_hash) {
+      console.error('Missing transaction hash')
       return NextResponse.json(
         { error: 'Transaction hash is required' },
-        { status: 400 }
+        { status: 400, headers }
       )
     }
 
     // Get the loan details
-    const { data: loan, error: loanError } = await supabase
+    const { data: loan, error: loanError } = await supabaseAdmin
       .from('loans')
       .select('*')
       .eq('id', params.id)
       .single()
 
     if (loanError || !loan) {
+      console.error('Loan lookup failed:', { loanError, loanId: params.id })
       return NextResponse.json(
         { error: 'Loan not found' },
-        { status: 404 }
+        { status: 404, headers }
       )
     }
+    
+    console.log('Found loan:', { 
+      id: loan.id, 
+      status: loan.status, 
+      borrower_fid: loan.borrower_fid,
+      repay_usdc: loan.repay_usdc
+    })
 
     if (loan.status !== 'funded') {
+      console.error('Invalid loan status:', loan.status)
       return NextResponse.json(
-        { error: 'Loan is not in funded status' },
-        { status: 400 }
+        { error: `Loan is not in funded status (current: ${loan.status})` },
+        { status: 400, headers }
       )
     }
 
     // Check if loan is already repaid
     if (loan.status === 'repaid') {
+      console.error('Loan already repaid')
       return NextResponse.json(
         { error: 'Loan has already been marked as repaid' },
-        { status: 400 }
+        { status: 400, headers }
       )
     }
 
-    // Calculate if repayment is on time
-    const dueDate = new Date(loan.due_ts)
+    // Calculate if repayment is on time (use repay_by field, fallback to due_ts)
+    const dueDateField = loan.repay_by || loan.due_ts
+    const dueDate = new Date(dueDateField)
     const repaidAt = new Date()
     const isOnTime = repaidAt <= dueDate
 
     // Update loan status to repaid
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('loans')
       .update({
         status: 'repaid',
-        repaid_at: repaidAt.toISOString(),
-        repayment_tx_hash: tx_hash,
-        repaid_on_time: isOnTime
+        updated_at: repaidAt.toISOString(),
+        tx_repay: tx_hash
       })
       .eq('id', params.id)
 
     if (updateError) {
-      console.error('Error updating loan:', updateError)
+      console.error('Database update failed:', updateError)
       return NextResponse.json(
-        { error: 'Failed to mark loan as repaid' },
-        { status: 500 }
+        { error: `Database error: ${updateError.message}` },
+        { status: 500, headers }
       )
     }
+    
+    console.log(`Successfully marked loan ${params.id} as repaid`)
 
     // Send notification to lender if we have their FID
     if (loan.lender_fid) {
@@ -112,12 +138,12 @@ export async function POST(
       isOnTime,
       repaidAt: repaidAt.toISOString(),
       message: `Loan successfully marked as repaid${isOnTime ? ' on time' : ' (late)'}`
-    })
+    }, { headers })
   } catch (error) {
     console.error('Error marking loan as repaid:', error)
     return NextResponse.json(
       { error: 'Failed to mark loan as repaid' },
-      { status: 500 }
+      { status: 500, headers }
     )
   }
 }

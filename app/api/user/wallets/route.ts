@@ -8,16 +8,27 @@ export async function GET(request: NextRequest) {
   if (response) return response
 
   try {
-    // Get user session from cookie
-    const cookieStore = cookies()
-    const sessionCookie = cookieStore.get('session')
+    // Get FID from query param or session cookie
+    const { searchParams } = new URL(request.url)
+    const queryFid = searchParams.get('fid')
     
-    if (!sessionCookie) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-    }
+    let userFid: number
+    
+    if (queryFid) {
+      // Use FID from query param (for repayment modal)
+      userFid = parseInt(queryFid)
+    } else {
+      // Get user session from cookie (for authenticated users)
+      const cookieStore = cookies()
+      const sessionCookie = cookieStore.get('session')
+      
+      if (!sessionCookie) {
+        return NextResponse.json({ error: 'Not authenticated - provide FID parameter' }, { status: 401 })
+      }
 
-    const session = JSON.parse(sessionCookie.value)
-    const userFid = session.fid
+      const session = JSON.parse(sessionCookie.value)
+      userFid = session.fid
+    }
 
     // Get user profile from Neynar to get connected wallets
     const userData = await getUserByFid(userFid)

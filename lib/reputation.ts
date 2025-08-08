@@ -1,5 +1,6 @@
 import { supabaseAdmin } from './supabase'
 import { getUserByFid } from './neynar'
+import { getIdentitySignals, calculateIdentityBonus, getIdentityBasedLoanCap } from './identity'
 
 // Badge definitions as outlined in the plan
 export enum Badge {
@@ -43,7 +44,7 @@ interface UserReputation {
 
 /**
  * Calculate reputation score for a user
- * Formula: 200 (base) + f(account_age) + g(repaid_loans, total_loans) + h(fid_followers)
+ * Formula: 200 (base) + f(account_age) + g(repaid_loans, total_loans) + h(fid_followers) + identity_bonus
  */
 export async function calculateReputationScore(fid: string): Promise<UserReputation> {
   try {
@@ -63,9 +64,12 @@ export async function calculateReputationScore(fid: string): Promise<UserReputat
     // Get Farcaster profile data for follower count and account age
     const farcasterUser = await getUserByFid(parseInt(fid))
     
-    // Use reasonable defaults since we don't always have complete Neynar data
-    const accountAge = 30 // Default to 30 days for existing users
-    const followerCount = farcasterUser?.follower_count || 0
+    // Get identity signals (ENS, Basename, Power Badge, etc.)
+    const identitySignals = await getIdentitySignals(fid, farcasterUser)
+    
+    // Use identity signals for account age, or default
+    const accountAge = identitySignals.accountAge || 30 // Default to 30 days
+    const followerCount = identitySignals.followerCount || 0
 
     // Calculate components
     const baseScore = 200
@@ -75,26 +79,31 @@ export async function calculateReputationScore(fid: string): Promise<UserReputat
       : 0
     const followerScore = Math.min(Math.sqrt(followerCount) * 2, 100) // Max 100 points for followers
     const streakBonus = Math.min(userData.repayment_streak * 10, 100)
+    
+    // NEW: Add identity verification bonus
+    const identityBonus = calculateIdentityBonus(identitySignals)
 
-    // Calculate total score
+    // Calculate total score with identity bonus
     let totalScore = Math.round(
       baseScore + 
       accountAgeScore + 
       repaymentRateScore + 
       followerScore + 
-      streakBonus
+      streakBonus +
+      identityBonus // Add identity bonus to score
     )
 
     // Apply penalties for defaults
     totalScore -= userData.loans_defaulted * 200
 
-    // Ensure score stays within bounds
-    totalScore = Math.max(0, Math.min(1000, totalScore))
+    // Ensure score stays within bounds (increased max to 1200 with identity bonus)
+    totalScore = Math.max(0, Math.min(1200, totalScore))
 
-    // Calculate max loan amount based on score
-    const maxLoanAmount = getMaxLoanAmount(totalScore, userData.total_loans)
+    // Calculate max loan amount based on score and identity
+    const baseMaxLoan = getMaxLoanAmount(totalScore, userData.total_loans)
+    const maxLoanAmount = getIdentityBasedLoanCap(identitySignals, baseMaxLoan)
 
-    // Calculate badges
+    // Calculate badges (including identity badges)
     const badges = calculateBadges(userData, farcasterUser)
 
     return {

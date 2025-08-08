@@ -37,7 +37,7 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
     try {
       setLoading(true)
       // Get user's connected wallets from their Farcaster profile
-      const response = await fetch('/api/user/wallets')
+      const response = await fetch(`/api/user/wallets?fid=${loan.borrower_fid}`)
       
       if (!response.ok) {
         const errorData = await response.json()
@@ -87,6 +87,24 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
           // Request wallet connection
           await (window as any).ethereum.request({ method: 'eth_requestAccounts' })
           
+          // Check USDC balance before proceeding
+          const balanceHex = await (window as any).ethereum.request({
+            method: 'eth_call',
+            params: [{
+              to: usdcAddress,
+              data: `0x70a08231${selectedWallet.address.slice(2).padStart(64, '0')}` // balanceOf(address)
+            }, 'latest']
+          })
+          
+          const balance = parseInt(balanceHex, 16) / 1000000 // Convert from wei to USDC
+          const requiredAmount = amount
+          
+          if (balance < requiredAmount) {
+            setError(`Insufficient USDC balance. You have $${balance.toFixed(2)} but need $${requiredAmount.toFixed(2)}`)
+            setSending(false)
+            return
+          }
+          
           // Switch to Base network if needed
           try {
             await (window as any).ethereum.request({
@@ -110,24 +128,43 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
           }
           
           // Encode USDC transfer transaction
-          const transferAmount = (amount * 1000000).toString(16) // USDC has 6 decimals
-          const data = `0xa9059cbb${lenderAddress.slice(2).padStart(64, '0')}${transferAmount.padStart(64, '0')}`
+          // Convert amount to wei (6 decimals for USDC)
+          const transferAmountWei = BigInt(Math.round(amount * 1000000))
+          const transferAmountHex = transferAmountWei.toString(16).padStart(64, '0')
           
-          // Send transaction
+          // Clean and pad address
+          const cleanAddress = lenderAddress.toLowerCase().replace('0x', '')
+          const paddedAddress = cleanAddress.padStart(64, '0')
+          
+          // ERC20 transfer function signature + padded parameters
+          const data = `0xa9059cbb${paddedAddress}${transferAmountHex}`
+          
+          console.log('Transaction details:', {
+            to: usdcAddress,
+            from: selectedWallet.address,
+            amount: amount,
+            amountWei: transferAmountWei.toString(),
+            lenderAddress,
+            data
+          })
+          
+          // Send transaction with proper gas estimation
           const txHash = await (window as any).ethereum.request({
             method: 'eth_sendTransaction',
             params: [{
               from: selectedWallet.address,
               to: usdcAddress,
               data: data,
-              gas: '0x186A0', // 100000 gas
+              gas: '0x30D40', // 200000 gas (higher for ERC20 transfers)
+              gasPrice: '0x3B9ACA00', // 1 gwei
             }],
           })
           
-          console.log('Transaction sent:', txHash)
+          console.log('✅ Transaction sent successfully:', txHash)
           setTxHash(txHash)
           
-          // Mark loan as repaid
+          // Mark loan as repaid in database
+          console.log('📡 Calling mark-repaid API...')
           const response = await fetch(`/api/loans/${loan.id}/mark-repaid`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -140,12 +177,37 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
           if (response.ok) {
             setRepaymentComplete(true)
           } else {
-            throw new Error('Failed to mark loan as repaid')
+            // Get the actual API error
+            const errorData = await response.json().catch(() => ({}))
+            const apiError = errorData.error || `HTTP ${response.status}: ${response.statusText}`
+            console.error('Mark-repaid API Error:', {
+              status: response.status,
+              statusText: response.statusText,
+              errorData,
+              url: `/api/loans/${loan.id}/mark-repaid`,
+              requestBody: { tx_hash: txHash, from_wallet: selectedWallet.address }
+            })
+            throw new Error(`API Error: ${apiError}`)
           }
           
         } catch (walletError: any) {
           console.error('Wallet transaction error:', walletError)
-          setError(`Wallet error: ${walletError.message || 'Transaction cancelled'}`)
+          
+          // Better error messages based on error codes
+          let errorMessage = 'Transaction failed'
+          if (walletError.code === 4001) {
+            errorMessage = 'Transaction cancelled by user'
+          } else if (walletError.code === -32603) {
+            errorMessage = 'Insufficient funds or gas'
+          } else if (walletError.message?.includes('insufficient funds')) {
+            errorMessage = 'Insufficient USDC balance or ETH for gas'
+          } else if (walletError.message?.includes('gas')) {
+            errorMessage = 'Transaction failed: Not enough gas or gas price too low'
+          } else {
+            errorMessage = `Wallet error: ${walletError.message || 'Unknown error'}`
+          }
+          
+          setError(errorMessage)
         }
       } else {
         // Fallback: Open wallet app or show manual instructions
