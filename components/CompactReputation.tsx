@@ -52,30 +52,28 @@ export function CompactReputation({ userFid, className = '' }: CompactReputation
     return 'bg-red-100 text-red-800'
   }
 
-  const getTierIcon = (tier: string) => {
-    switch (tier) {
-      case 'legendary': return '👑'
-      case 'elite': return '⭐'
-      case 'veteran': return '🛡️'
-      case 'trusted': return '✅'
-      default: return '🌱'
-    }
+  const getTierIcon = (score: number) => {
+    if (score >= 800) return '👑'
+    if (score >= 700) return '⭐'
+    if (score >= 600) return '🛡️'
+    if (score >= 500) return '✅'
+    return '🌱'
   }
 
   return (
     <div className={`inline-flex items-center gap-2 ${className}`}>
-      <div className={`px-2 py-1 rounded-full text-xs font-medium ${getScoreColor(reputation.credit_score)}`}>
-        <span className="mr-1">{getTierIcon(reputation.reputation_tier)}</span>
-        {reputation.credit_score}
+      <div className={`px-2 py-1 rounded-full text-xs font-medium ${getScoreColor(reputation.score)}`}>
+        <span className="mr-1">{getTierIcon(reputation.score)}</span>
+        {reputation.score}
       </div>
       
-      {reputation.repayment_streak >= 5 && (
-        <div className="text-xs text-orange-600" title={`${reputation.repayment_streak} loan streak`}>
-          🔥{reputation.repayment_streak}
+      {reputation.repaymentStreak >= 5 && (
+        <div className="text-xs text-orange-600" title={`${reputation.repaymentStreak} loan streak`}>
+          🔥{reputation.repaymentStreak}
         </div>
       )}
       
-      {reputation.badges.length > 0 && (
+      {reputation.badges && reputation.badges.length > 0 && (
         <div className="text-xs" title={`${reputation.badges.length} badges earned`}>
           🏆{reputation.badges.length}
         </div>

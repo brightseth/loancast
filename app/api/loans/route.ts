@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createLoanCast } from '@/lib/neynar'
 import { canCreateLoans } from '@/lib/feature-flags'
+import { canRequestLoan } from '@/lib/reputation'
 import { addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
 import { withErrorHandling, createApiError } from '@/lib/error-handler'
@@ -52,6 +53,13 @@ export async function POST(request: NextRequest) {
     if (!borrower_fid) {
       console.log('Missing borrower_fid')
       throw createApiError('Authentication required', 401, 'AUTH_REQUIRED')
+    }
+
+    // Check reputation and loan eligibility
+    const eligibility = await canRequestLoan(borrower_fid.toString(), amount)
+    if (!eligibility.allowed) {
+      console.log(`Loan rejected for FID ${borrower_fid}:`, eligibility.reason)
+      throw createApiError(eligibility.reason || 'Loan request not allowed', 400, 'LOAN_NOT_ALLOWED')
     }
 
     // Fixed 2% monthly rate for all early loans

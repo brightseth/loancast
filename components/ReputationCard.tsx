@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { UserReputation, reputationService } from '@/lib/reputation'
+import { UserReputation } from '@/lib/reputation'
 import { ReputationBadges } from './ReputationBadges'
 
 interface ReputationCardProps {
@@ -60,21 +60,31 @@ export function ReputationCard({ userFid, className = '', compact = false }: Rep
     )
   }
 
-  const colors = reputationService.getReputationColors(reputation.reputation_tier)
-  const tierInfo = reputationService.getTierInfo(reputation.reputation_tier)
+  const getScoreColor = (score: number) => {
+    if (score >= 800) return 'bg-green-100 text-green-800'
+    if (score >= 600) return 'bg-blue-100 text-blue-800'
+    if (score >= 400) return 'bg-yellow-100 text-yellow-800'
+    return 'bg-red-100 text-red-800'
+  }
+
+  const getTierIcon = (score: number) => {
+    if (score >= 800) return '👑'
+    if (score >= 600) return '⭐'
+    if (score >= 400) return '✅'
+    return '🌱'
+  }
 
   if (compact) {
     return (
-      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${colors.bg} ${colors.text} text-sm font-medium ${className}`}>
-        <span>{tierInfo.icon}</span>
-        <span>{reputation.credit_score}</span>
-        <span className="text-xs opacity-75">{tierInfo.name}</span>
+      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${getScoreColor(reputation.score)} text-sm font-medium ${className}`}>
+        <span>{getTierIcon(reputation.score)}</span>
+        <span>{reputation.score}</span>
       </div>
     )
   }
 
-  const repaymentRate = reputation.total_loans > 0 
-    ? (reputation.loans_repaid / reputation.total_loans) * 100 
+  const repaymentRate = reputation.totalLoans > 0 
+    ? (reputation.repaidLoans / reputation.totalLoans) * 100 
     : 0
 
   return (
@@ -82,27 +92,27 @@ export function ReputationCard({ userFid, className = '', compact = false }: Rep
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Reputation Score</h3>
-        <div className={`px-3 py-1 rounded-full ${colors.bg} ${colors.text} text-sm font-medium`}>
-          {tierInfo.icon} {tierInfo.name}
+        <div className={`px-3 py-1 rounded-full ${getScoreColor(reputation.score)} text-sm font-medium`}>
+          {getTierIcon(reputation.score)} Score: {reputation.score}
         </div>
       </div>
 
       {/* Credit Score */}
       <div className="text-center">
         <div className="text-4xl font-bold text-gray-900 mb-1">
-          {reputation.credit_score}
+          {reputation.score}
         </div>
         <div className="text-sm text-gray-600">
-          Credit Score (out of 1000)
+          Reputation Score (out of 1000)
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
           <div 
             className={`h-2 rounded-full transition-all duration-500 ${
-              reputation.credit_score >= 800 ? 'bg-green-500' :
-              reputation.credit_score >= 600 ? 'bg-yellow-500' :
-              reputation.credit_score >= 400 ? 'bg-orange-500' : 'bg-red-500'
+              reputation.score >= 800 ? 'bg-green-500' :
+              reputation.score >= 600 ? 'bg-yellow-500' :
+              reputation.score >= 400 ? 'bg-orange-500' : 'bg-red-500'
             }`}
-            style={{ width: `${Math.min(reputation.credit_score / 10, 100)}%` }}
+            style={{ width: `${Math.min(reputation.score / 10, 100)}%` }}
           />
         </div>
       </div>
@@ -111,7 +121,7 @@ export function ReputationCard({ userFid, className = '', compact = false }: Rep
       <div className="grid grid-cols-2 gap-4 text-center">
         <div>
           <div className="text-2xl font-bold text-green-600">
-            {reputation.total_loans}
+            {reputation.totalLoans}
           </div>
           <div className="text-xs text-gray-600">Total Loans</div>
         </div>
@@ -123,49 +133,51 @@ export function ReputationCard({ userFid, className = '', compact = false }: Rep
         </div>
         <div>
           <div className="text-2xl font-bold text-purple-600">
-            {reputation.repayment_streak}
+            {reputation.repaymentStreak}
           </div>
           <div className="text-xs text-gray-600">Current Streak</div>
         </div>
         <div>
           <div className="text-2xl font-bold text-orange-600">
-            {reputation.trust_score}
+            ${reputation.maxLoanAmount}
           </div>
-          <div className="text-xs text-gray-600">Trust Score</div>
+          <div className="text-xs text-gray-600">Max Loan</div>
         </div>
       </div>
 
-      {/* Financial Stats */}
+      {/* Account Info */}
       <div className="border-t pt-4">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="text-gray-600">Total Borrowed:</span>
-            <span className="font-medium ml-2">${reputation.total_borrowed?.toLocaleString() || '0'}</span>
+            <span className="text-gray-600">Account Age:</span>
+            <span className="font-medium ml-2">{reputation.accountAge} days</span>
           </div>
           <div>
-            <span className="text-gray-600">Total Lent:</span>
-            <span className="font-medium ml-2">${reputation.total_lent?.toLocaleString() || '0'}</span>
+            <span className="text-gray-600">Followers:</span>
+            <span className="font-medium ml-2">{reputation.followerCount}</span>
           </div>
-          {reputation.loans_defaulted > 0 && (
+          {reputation.defaultedLoans > 0 && (
             <div className="col-span-2">
               <span className="text-red-600">Defaults:</span>
-              <span className="font-medium ml-2">{reputation.loans_defaulted}</span>
+              <span className="font-medium ml-2">{reputation.defaultedLoans}</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Average Repayment */}
-      {reputation.avg_repayment_days !== null && (
+      {/* Last Score Change */}
+      {reputation.lastScoreChange !== 0 && (
         <div className="border-t pt-4">
           <div className="text-sm">
-            <span className="text-gray-600">Average Repayment:</span>
+            <span className="text-gray-600">Last Change:</span>
             <span className={`font-medium ml-2 ${
-              reputation.avg_repayment_days < 0 ? 'text-green-600' : 'text-orange-600'
+              reputation.lastScoreChange > 0 ? 'text-green-600' : 'text-red-600'
             }`}>
-              {Math.abs(reputation.avg_repayment_days).toFixed(0)} days{' '}
-              {reputation.avg_repayment_days < 0 ? 'early' : 'late'}
+              {reputation.lastScoreChange > 0 ? '+' : ''}{reputation.lastScoreChange} points
             </span>
+            <div className="text-xs text-gray-500 mt-1">
+              {reputation.lastScoreChangeReason}
+            </div>
           </div>
         </div>
       )}
@@ -174,13 +186,6 @@ export function ReputationCard({ userFid, className = '', compact = false }: Rep
       <div className="border-t pt-4">
         <h4 className="text-sm font-medium text-gray-700 mb-2">Achievement Badges</h4>
         <ReputationBadges badges={reputation.badges} />
-      </div>
-
-      {/* Tier Description */}
-      <div className="border-t pt-4">
-        <div className={`p-3 rounded-lg ${colors.bg}`}>
-          <p className={`text-sm ${colors.text}`}>{tierInfo.description}</p>
-        </div>
       </div>
     </div>
   )

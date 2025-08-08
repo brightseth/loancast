@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { reputationService } from '@/lib/reputation'
+import { getPublicReputationData } from '@/lib/reputation'
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
 
 export async function GET(
@@ -11,16 +11,16 @@ export async function GET(
   if (response) return response
 
   try {
-    const fid = parseInt(params.fid)
+    const fid = params.fid
 
-    if (isNaN(fid) || fid < 1) {
+    if (!fid) {
       return NextResponse.json(
-        { error: 'Invalid FID - must be a positive number' },
+        { error: 'Invalid FID' },
         { status: 400 }
       )
     }
 
-    const reputation = await reputationService.getUserReputation(fid)
+    const reputation = await getPublicReputationData(fid)
 
     if (!reputation) {
       return NextResponse.json(

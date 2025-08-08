@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/app/providers'
 import { Loan } from '@/lib/supabase'
-import { LoanCard } from '@/components/LoanCard'
+import LoanCard from '@/components/LoanCard'
 import Link from 'next/link'
 
 export default function MyLoans() {

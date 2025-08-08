@@ -13,7 +13,7 @@ interface LoanCardProps {
   userRole: 'borrower' | 'lender'
 }
 
-export function LoanCard({ loan, userRole }: LoanCardProps) {
+export default function LoanCard({ loan, userRole }: LoanCardProps) {
   const dueDate = new Date(loan.due_ts)
   const isOverdue = isPast(dueDate) && loan.status === 'open'
   

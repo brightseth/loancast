@@ -1,6 +1,6 @@
 import { getUserByFid } from '@/lib/neynar'
 import { supabase } from '@/lib/supabase'
-import { LoanCard } from '@/components/LoanCard'
+import LoanCard from '@/components/LoanCard'
 import { notFound } from 'next/navigation'
 
 // Force dynamic rendering
