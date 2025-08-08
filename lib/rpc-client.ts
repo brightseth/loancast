@@ -1,4 +1,4 @@
-import { createPublicClient, http, HttpTransport, PublicClient } from 'viem'
+import { createPublicClient, http, type PublicClient } from 'viem'
 import { base } from 'viem/chains'
 
 // RPC endpoints in order of preference
@@ -18,7 +18,7 @@ interface RpcClientConfig {
 }
 
 class MultiRpcClient {
-  private clients: PublicClient[]
+  private clients: any[] // Use any to avoid type conflicts
   private currentIndex: number = 0
   private maxRetries: number
   private timeoutMs: number
@@ -36,7 +36,7 @@ class MultiRpcClient {
   }
 
   private async executeWithFailover<T>(
-    operation: (client: PublicClient) => Promise<T>,
+    operation: (client: any) => Promise<T>,
     operationName: string = 'RPC call'
   ): Promise<T> {
     let lastError: Error | null = null
@@ -126,7 +126,7 @@ class MultiRpcClient {
   }
 
   // Get the current primary client for advanced operations
-  getCurrentClient(): PublicClient {
+  getCurrentClient(): any {
     return this.clients[this.currentIndex]
   }
 
