@@ -64,6 +64,7 @@ Cast on @loancast
           url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://loancast.app'}/explore`
         }
       ],
+      channelId: 'loancast',  // Post to /loancast channel
     })
     
     console.log('Cast created successfully:', cast.hash)
@@ -128,6 +129,7 @@ export async function createFundingCast(
           url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://loancast.app'}/explore`
         }
       ],
+      channelId: 'loancast',  // Post to /loancast channel
     })
     
     console.log('Funding cast created successfully:', cast.hash)
@@ -187,6 +189,7 @@ ${onTime ? '🏆 Perfect credit score!' : '📉 Credit score impact'}
           url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://loancast.app'}/explore`
         }
       ],
+      channelId: 'loancast',  // Post to /loancast channel
     })
     
     console.log('Repayment cast created successfully:', cast.hash)
