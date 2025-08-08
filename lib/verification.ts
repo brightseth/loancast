@@ -43,7 +43,7 @@ export async function verifyRepayment(
     }
 
     // Parse USDC transfer events
-    const transferEvents = receipt.logs
+    const transferEvents = (receipt as any).logs
       .filter(log => log.address.toLowerCase() === USDC_ADDRESS.toLowerCase())
       .map(log => {
         try {
