@@ -156,8 +156,13 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('=== Loans API Debug ===')
+    
     // Rate limiting
+    console.log('Checking rate limit...')
     const rateLimitResult = await checkRateLimit(request, '/api/loans')
+    console.log('Rate limit result:', rateLimitResult.allowed)
+    
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime },
@@ -166,9 +171,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Parse and validate query parameters
+    console.log('Parsing query parameters...')
     const searchParams = request.nextUrl.searchParams
     const queryData = Object.fromEntries(searchParams.entries())
+    console.log('Query data:', queryData)
+    
     const validatedQuery = LoanQuerySchema.parse(queryData)
+    console.log('Validated query:', validatedQuery)
 
     // Build query
     let query = supabaseAdmin
@@ -201,17 +210,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Apply limit and ordering
+    console.log('Executing Supabase query...')
     const limit = validatedQuery.limit || 20
     const { data: loans, error } = await query
       .order('created_at', { ascending: false })
       .limit(limit)
 
+    console.log('Supabase result:', { 
+      loansCount: loans?.length || 0, 
+      error: error ? { code: error.code, message: error.message } : null 
+    })
+
     if (error) {
-      // reportError(new Error(`Loan query failed: ${error.message}`), {
-      //   endpoint: 'GET /api/loans'
-      // })
+      console.error('Supabase error:', error)
       return NextResponse.json(
-        { error: 'Failed to fetch loans' },
+        { error: 'Failed to fetch loans', details: error.message },
         { status: 500 }
       )
     }
@@ -231,19 +244,20 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
+    console.error('Loans API error:', error)
+    
     if (error instanceof z.ZodError) {
+      console.log('Zod validation error:', error.errors)
       return NextResponse.json(
         { error: 'Invalid query parameters', details: error.errors },
         { status: 400 }
       )
     }
 
-    // reportError(error instanceof Error ? error : new Error('Unknown error'), {
-    //   endpoint: 'GET /api/loans'
-    // })
+    console.error('Unexpected error in loans API:', error)
     
     return NextResponse.json(
-      { error: 'Failed to fetch loans' },
+      { error: 'Failed to fetch loans', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
