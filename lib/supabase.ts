@@ -19,19 +19,22 @@ export type Loan = {
   id: string
   loan_number?: number
   cast_hash: string
+  origin_cast_hash?: string
   borrower_fid: number
   lender_fid: number | null
-  gross_usdc: number | null
-  net_usdc: number | null
-  yield_bps: number
-  repay_usdc: number
-  start_ts: string
+  borrower_addr?: string | null
+  lender_addr?: string | null
+  amount_usdc?: string | null
+  repay_expected_usdc?: string | null
+  gross_usdc?: number | null  // Legacy field for backwards compatibility
+  net_usdc?: number | null    // Legacy field for backwards compatibility
+  repay_usdc?: number | null  // Legacy field for backwards compatibility
+  yield_bps?: number
+  description?: string | null
   due_ts: string
-  status: 'open' | 'funded' | 'repaid' | 'default' | 'deleted'
-  tx_fund: string | null
-  tx_repay: string | null
-  funded_at: string | null
-  notes: string | null
+  status: 'seeking' | 'funded' | 'repaid' | 'defaulted' | 'draft'
+  repay_tx_hash?: string | null
+  verified_repayment?: boolean
   created_at: string
   updated_at: string
 }
