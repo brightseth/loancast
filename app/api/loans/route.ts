@@ -177,16 +177,17 @@ export async function GET(request: NextRequest) {
         id,
         loan_number,
         cast_hash,
-        origin_cast_hash,
         borrower_fid,
         lender_fid,
-        amount_usdc,
-        repay_expected_usdc,
-        status,
-        description,
+        gross_usdc,
+        net_usdc,
+        yield_bps,
+        repay_usdc,
+        start_ts,
         due_ts,
-        repay_tx_hash,
-        verified_repayment,
+        status,
+        tx_fund,
+        tx_repay,
         created_at,
         updated_at
       `)
@@ -214,11 +215,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Format amounts for client
+    // Format amounts for client  
     const formattedLoans = loans.map(loan => ({
       ...loan,
-      amount_usdc_formatted: loan.amount_usdc ? fmtUsdc(BigInt(loan.amount_usdc)) : '0.00',
-      repay_expected_formatted: loan.repay_expected_usdc ? fmtUsdc(BigInt(loan.repay_expected_usdc)) : '0.00'
+      amount_usdc_formatted: loan.gross_usdc ? loan.gross_usdc.toFixed(2) : '0.00',
+      repay_expected_formatted: loan.repay_usdc ? loan.repay_usdc.toFixed(2) : '0.00'
     }))
 
     return NextResponse.json(formattedLoans, {

@@ -66,12 +66,12 @@ export default function LendingDashboard() {
     })
   }, [loans, activeLoans.length, user?.fid])
   const totalEarnings = repaidLoans.reduce((sum, loan) => {
-    const principal = BigInt(loan.amount_usdc || '0')
-    const repayment = BigInt(loan.repay_expected_usdc || '0')
-    return sum + Number(repayment - principal) / 1e6
+    const principal = loan.gross_usdc || 0
+    const repayment = loan.repay_usdc || 0
+    return sum + (repayment - principal)
   }, 0)
 
-  const totalLent = loans.reduce((sum, loan) => sum + Number(BigInt(loan.amount_usdc || '0')) / 1e6, 0)
+  const totalLent = loans.reduce((sum, loan) => sum + (loan.gross_usdc || 0), 0)
   const upcomingRepayments = activeLoans.filter(loan => {
     const dueDate = new Date(loan.due_ts)
     const nextWeek = new Date()
@@ -144,12 +144,12 @@ export default function LendingDashboard() {
                       LOANCAST-{loan.loan_number?.toString().padStart(4, '0') || loan.id.slice(0, 6)}
                     </p>
                     <p className="text-sm text-gray-600">
-                      ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(0)} due {format(new Date(loan.due_ts), 'MMM dd')}
+                      ${loan.repay_usdc?.toFixed(0)} due {format(new Date(loan.due_ts), 'MMM dd')}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-green-600 font-medium">
-                      +${((Number(BigInt(loan.repay_expected_usdc || '0')) - Number(BigInt(loan.amount_usdc || '0'))) / 1e6).toFixed(2)} profit
+                      +${((loan.repay_usdc || 0) - (loan.gross_usdc || 0)).toFixed(2)} profit
                     </p>
                   </div>
                 </div>
@@ -184,15 +184,15 @@ export default function LendingDashboard() {
                       LOANCAST-{loan.loan_number?.toString().padStart(4, '0') || loan.id.slice(0, 6)}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Lent ${(Number(BigInt(loan.amount_usdc || '0')) / 1e6).toFixed(0)} • Due {format(new Date(loan.due_ts), 'MMM dd, yyyy')}
+                      Lent ${loan.gross_usdc?.toFixed(0)} • Due {format(new Date(loan.due_ts), 'MMM dd, yyyy')}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-green-600">
-                      ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(0)} expected
+                      ${loan.repay_usdc?.toFixed(0)} expected
                     </p>
                     <p className="text-sm text-gray-500">
-                      +${((Number(BigInt(loan.repay_expected_usdc || '0')) - Number(BigInt(loan.amount_usdc || '0'))) / 1e6).toFixed(2)} profit
+                      +${((loan.repay_usdc || 0) - (loan.gross_usdc || 0)).toFixed(2)} profit
                     </p>
                   </div>
                 </div>
@@ -220,10 +220,10 @@ export default function LendingDashboard() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-green-700">
-                      ✅ ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(0)} received
+                      ✅ ${loan.repay_usdc?.toFixed(0)} received
                     </p>
                     <p className="text-sm text-green-600">
-                      +${((Number(BigInt(loan.repay_expected_usdc || '0')) - Number(BigInt(loan.amount_usdc || '0'))) / 1e6).toFixed(2)} earned
+                      +${((loan.repay_usdc || 0) - (loan.gross_usdc || 0)).toFixed(2)} earned
                     </p>
                   </div>
                 </div>
