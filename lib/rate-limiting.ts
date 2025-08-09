@@ -32,17 +32,18 @@ export async function checkRateLimit(
   windowStart.setSeconds(windowStart.getSeconds() - config.window)
   
   try {
-    // Check if rate_limits table exists first
+    // For MVP: If rate_limits table doesn't exist, allow request but log warning
     const { error: tableCheckError } = await supabaseAdmin
       .from('rate_limits')
       .select('count')
       .limit(1)
     
-    // If table doesn't exist, fail open
+    // If table doesn't exist, fail open for MVP
     if (tableCheckError && tableCheckError.code === '42P01') {
+      console.warn('Rate limits table missing - allowing request for MVP')
       return {
         allowed: true,
-        remaining: config.requests - 1,
+        remaining: 999,
         resetTime: new Date(Date.now() + config.window * 1000),
         identifier
       }
