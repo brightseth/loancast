@@ -32,6 +32,22 @@ export async function checkRateLimit(
   windowStart.setSeconds(windowStart.getSeconds() - config.window)
   
   try {
+    // Check if rate_limits table exists first
+    const { error: tableCheckError } = await supabaseAdmin
+      .from('rate_limits')
+      .select('count')
+      .limit(1)
+    
+    // If table doesn't exist, fail open
+    if (tableCheckError && tableCheckError.code === '42P01') {
+      return {
+        allowed: true,
+        remaining: config.requests - 1,
+        resetTime: new Date(Date.now() + config.window * 1000),
+        identifier
+      }
+    }
+    
     // Clean up old entries first
     await supabaseAdmin
       .from('rate_limits')
@@ -50,7 +66,6 @@ export async function checkRateLimit(
       .single()
     
     if (error && error.code !== 'PGRST116') { // Not "no rows returned"
-      console.error('Rate limit check error:', error)
       // Fail open - allow request if we can't check rate limit
       return {
         allowed: true,
