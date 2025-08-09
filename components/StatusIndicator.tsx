@@ -71,7 +71,7 @@ export function StatusIndicator({ loan }: StatusIndicatorProps) {
     }
   }
 
-  if (loan.status !== 'open') {
+  if (loan.status !== 'seeking') {
     return null
   }
 

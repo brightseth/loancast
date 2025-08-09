@@ -24,7 +24,7 @@ export async function GET(
     }
     
     // If already funded, return current status
-    if (loan.status !== 'open') {
+    if (loan.status !== 'seeking') {
       return NextResponse.json({
         status: loan.status,
         funded: true,
@@ -78,7 +78,7 @@ export async function GET(
                   const amount = parseFloat(amountMatch[1])
                   
                   return NextResponse.json({
-                    status: 'open',
+                    status: 'seeking',
                     funded: false,
                     potential_collection: {
                       amount,
@@ -99,7 +99,7 @@ export async function GET(
     }
     
     return NextResponse.json({
-      status: 'open',
+      status: 'seeking',
       funded: false,
       message: 'No collection detected yet',
       cast_hash: loan.cast_hash,

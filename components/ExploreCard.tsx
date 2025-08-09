@@ -10,7 +10,7 @@ interface ExploreCardProps {
 export function ExploreCard({ loan }: ExploreCardProps) {
   const dueDate = new Date(loan.due_ts)
   const createdDate = new Date(loan.created_at)
-  const apr = loan.yield_bps / 100
+  const apr = (loan.yield_bps || 0) / 100
   const isFunded = loan.status === 'funded'
   const castHashDisplay = `#${loan.cast_hash.slice(0, 8)}`
   
@@ -88,7 +88,7 @@ export function ExploreCard({ loan }: ExploreCardProps) {
           <p className="text-xs text-gray-500 mb-2">📱 Farcaster Cast #{loan.cast_hash.slice(2, 8)}</p>
           <div className="bg-gray-50 rounded-md p-2 text-xs text-gray-700 border">
             🏦 ${(loan.repay_expected_usdc && loan.yield_bps ? 
-              (((Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6) * 10000) / (10000 + loan.yield_bps)).toFixed(0) : '0')} USDC loan
+              (((Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6) * 10000) / (10000 + (loan.yield_bps || 0))).toFixed(0) : '0')} USDC loan
             • 2% monthly • Due {format(dueDate, 'M/d')}
           </div>
         </div>

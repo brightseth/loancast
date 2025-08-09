@@ -21,7 +21,7 @@ export async function GET(
 
     const imageUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/loans/${id}/frame/image`
     const loanAmount = loan.repay_usdc && loan.yield_bps ? 
-      ((loan.repay_usdc * 10000) / (10000 + loan.yield_bps)).toFixed(0) : '0'
+      ((loan.repay_usdc * 10000) / (10000 + (loan.yield_bps || 0))).toFixed(0) : '0'
     
     return new NextResponse(
       `<!DOCTYPE html>

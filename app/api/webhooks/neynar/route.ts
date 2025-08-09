@@ -206,7 +206,7 @@ async function handleCastDeleted(data: any) {
     })
     
     // Only delete unfunded loans to avoid issues with active loans
-    if (loan.status === 'open') {
+    if (loan.status === 'seeking') {
       // Delete associated data first (cascading deletes)
       await supabaseAdmin
         .from('bids')

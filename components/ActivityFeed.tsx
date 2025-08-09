@@ -58,7 +58,7 @@ export function ActivityFeed() {
   }
 
   const getActivityText = (activity: ActivityItem) => {
-    const apr = activity.loan.yield_bps / 100
+    const apr = (activity.loan.yield_bps || 0) / 100
     const handle = `@${activity.user?.replace('User ', '').toLowerCase()}`
     const amount = `$${(Number(BigInt(activity.loan.repay_expected_usdc || '0')) / 1e6).toFixed(0) || '0'}`
     
@@ -110,14 +110,14 @@ export function ActivityFeed() {
       ) : (
         <div className="space-y-2 max-h-56 overflow-y-auto">
           {activities.map((activity) => {
-            const isExpired = activity.loan.status === 'open' && new Date(activity.loan.due_ts) < new Date()
+            const isExpired = activity.loan.status === 'seeking' && new Date(activity.loan.due_ts) < new Date()
             
             return (
               <div key={activity.id} className="flex items-center space-x-3 py-2">
                 {/* State dot */}
                 <span className="text-sm">
                   {activity.loan.status === 'repaid' ? '🟢' : 
-                   activity.loan.status === 'open' && !isExpired ? '🕑' : '🔴'}
+                   activity.loan.status === 'seeking' && !isExpired ? '🕑' : '🔴'}
                 </span>
                 
                 {/* Clean activity text */}

@@ -15,7 +15,7 @@ interface LoanCardProps {
 
 export default function LoanCard({ loan, userRole }: LoanCardProps) {
   const dueDate = new Date(loan.due_ts)
-  const isOverdue = isPast(dueDate) && loan.status === 'open'
+  const isOverdue = isPast(dueDate) && loan.status === 'seeking'
   
   // Use cast hash as identifier
   const castHashDisplay = `#${loan.cast_hash.slice(0, 8)}`
@@ -23,10 +23,10 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
   const getStatusColors = () => {
     const now = new Date()
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
-    const isDueSoon = dueDate <= threeDaysFromNow && loan.status === 'open'
+    const isDueSoon = dueDate <= threeDaysFromNow && loan.status === 'seeking'
     
     switch (loan.status) {
-      case 'open':
+      case 'seeking':
         if (isOverdue) return { ribbon: 'border-l-4 border-red-500', pill: 'bg-red-100 text-red-800' }
         if (isDueSoon) return { ribbon: 'border-l-4 border-yellow-500', pill: 'bg-yellow-100 text-yellow-800' }
         return { ribbon: 'border-l-4 border-green-500', pill: 'bg-green-100 text-green-800' }
@@ -34,7 +34,7 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
         return { ribbon: 'border-l-4 border-blue-500', pill: 'bg-blue-100 text-blue-800' }
       case 'repaid':
         return { ribbon: 'border-l-4 border-green-500', pill: 'bg-green-100 text-green-800' }
-      case 'default':
+      case 'defaulted':
         return { ribbon: 'border-l-4 border-red-500', pill: 'bg-red-100 text-red-800' }
       default:
         return { ribbon: '', pill: 'bg-gray-100 text-gray-800' }
@@ -44,11 +44,11 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
   const getStatusText = () => {
     const now = new Date()
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
-    const isDueSoon = dueDate <= threeDaysFromNow && loan.status === 'open'
+    const isDueSoon = dueDate <= threeDaysFromNow && loan.status === 'seeking'
     
-    if (loan.status === 'open' && isOverdue) return 'Default'
-    if (loan.status === 'open' && isDueSoon) return `Due <3d`
-    if (loan.status === 'open') return 'Open'
+    if (loan.status === 'seeking' && isOverdue) return 'Default'
+    if (loan.status === 'seeking' && isDueSoon) return `Due <3d`
+    if (loan.status === 'seeking') return 'Seeking'
     return loan.status.charAt(0).toUpperCase() + loan.status.slice(1)
   }
 
@@ -80,7 +80,7 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors.pill}`}>
             {getStatusText()}
           </span>
-          {(loan.status === 'open' || loan.status === 'funded') && userRole === 'borrower' && (
+          {(loan.status === 'seeking' || loan.status === 'funded') && userRole === 'borrower' && (
             <DropdownMenu
               items={[
                 ...(loan.status === 'funded' ? [{
@@ -120,7 +120,7 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
             <div className="font-medium">
               {format(dueDate, 'MMM dd, yyyy')}
             </div>
-            {loan.status === 'open' && (
+            {loan.status === 'seeking' && (
               <CountdownChip dueDate={dueDate} className="mt-1" />
             )}
           </div>

@@ -42,7 +42,7 @@ export async function POST(
       )
     }
 
-    if (loan.status !== 'open') {
+    if (loan.status !== 'seeking') {
       return NextResponse.json(
         { error: 'Loan is not open for funding' },
         { status: 400 }
@@ -82,18 +82,18 @@ export async function POST(
     const newFunding = currentFunding + Math.min(amount, remainingAmount) // Cap at required amount
     const fullyFunded = newFunding >= targetAmount
     
-    // ATOMIC UPDATE: Only update if loan is still 'open' to prevent race conditions
+    // ATOMIC UPDATE: Only update if loan is still 'seeking' to prevent race conditions
     const { data: updatedLoan, error: updateError } = await supabase
       .from('loans')
       .update({
         gross_usdc: newFunding,
         lender_fid: fullyFunded ? lenderFid : loan.lender_fid,
-        status: fullyFunded ? 'funded' : 'open',
+        status: fullyFunded ? 'funded' : 'seeking',
         tx_fund: txHash || null,
         updated_at: new Date().toISOString()
       })
       .eq('id', params.id)
-      .eq('status', 'open')  // CRITICAL: Only update if still open
+      .eq('status', 'seeking')  // CRITICAL: Only update if still seeking
       .select()
       .single()
 

@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Check if loan is already funded
-    if (loan.status !== 'open') {
+    if (loan.status !== 'seeking') {
       console.log('Loan already funded or closed:', loan.id)
       return NextResponse.json(
         { message: 'Loan is not open for funding' },
