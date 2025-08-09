@@ -1,285 +1,260 @@
-# 💸 LoanCast
+# LoanCast MVP
+Social lending on Farcaster. No credit checks, no collateral—just reputation.
 
-> Social lending on Farcaster. No credit checks, no collateral—just reputation.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/brightseth/loancast) [Live Demo](https://loancast.app) [Farcaster](https://warpcast.com/loancast)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/brightseth/loancast)
-[![Live Demo](https://img.shields.io/badge/demo-loancast.app-purple)](https://loancast.app)
-[![Farcaster](https://img.shields.io/badge/farcaster-@loancast-8A2BE2)](https://warpcast.com/loancast)
+## 🚀 MVP Overview
+LoanCast is a simplified peer-to-peer lending platform built on Farcaster, enabling trust-based loans using USDC. **This is the MVP version focused on core functionality only.**
 
-## 🚀 Overview
+## ✨ Core MVP Features
 
-LoanCast is a decentralized peer-to-peer lending platform built on [Farcaster](https://farcaster.xyz), enabling trust-based loans using USDC on Base blockchain. Users build reputation through successful loans, unlocking better terms over time.
-
-## ✨ Features
-
-### Core Functionality
+### Essential Functionality
 - 🏦 **P2P Lending** - Request and fund loans directly between users
-- 💳 **USDC Payments** - All transactions in USDC on Base L2
+- 💳 **USDC Payments** - All transactions in USDC on Base L2  
 - 📈 **Fixed 2% Monthly Rate** - Simple, transparent pricing
 - 🔐 **Sign In With Farcaster** - No passwords, just your Farcaster account
+- 📢 **Auto-post to Farcaster** - Loan requests become casts
 
-### Reputation System
-- 🏆 **Credit Scores** (0-1000 range)
-- 🎖️ **14 Achievement Badges** with rarity tiers
-- 📊 **Public Loan History** on profile pages
-- 🔥 **Repayment Streaks** tracking
+### Simplified Workflow
+1. **Create** - User posts loan request as Farcaster cast
+2. **Fund** - Lender funds via manual process (for now)
+3. **Repay** - Borrower repays via manual process (for now)
+4. **History** - Both parties see transaction records
 
-### Social Features
-- 📢 **Auto-post to Farcaster** when creating loans
-- 💬 **Quote-cast repayments** to build reputation
-- 👤 **Profile Pages** with loan history
-- 🔍 **Explore Feed** with search & filters
-
-### Notifications & Automation
-- 🔔 **Real-time notifications** for loan events
-- 📧 **Email reminders** (3 days, 1 day, overdue)
-- 🤖 **Automated default detection**
-- 📱 **Mobile-responsive** interface
-
-## 🛠️ Tech Stack
-
+## 🛠️ MVP Tech Stack
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes, Supabase (PostgreSQL)
 - **Auth**: Neynar SDK (Sign In With Farcaster)
 - **Blockchain**: Base L2, USDC
-- **Analytics**: PostHog, Sentry
-- **Email**: Resend/SendGrid
 - **Hosting**: Vercel
+- **Webhooks**: Secure Neynar integration with HMAC verification
 
 ## 📋 Requirements
-
-- **Node.js 20+** (18 and below deprecated by Supabase)
-- **npm 9+**
-- **Docker** (for local development with Supabase)
-- **Vercel account** (for deployment)
+- Node.js 20+ (18 and below deprecated by Supabase)
+- npm 9+
+- Vercel account (for deployment)
 
 ## 🏃 Quick Start
 
 ### Prerequisites
-
 - Node.js 20+
 - npm or yarn
 - Supabase account
 - Neynar API key
 
 ### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/brightseth/loancast.git
-cd loancast
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Copy the environment variables:
-```bash
-cp .env.example .env.local
-```
-
-4. Configure your environment variables:
-```env
-# Database (Supabase)
-DATABASE_URL=postgresql://...
-NEXT_PUBLIC_SUPABASE_URL=https://...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
-
-# Farcaster Integration (Neynar)
-NEYNAR_API_KEY=NEYNAR_...
-NEXT_PUBLIC_NEYNAR_CLIENT_ID=...
-
-# Optional Services
-NEXT_PUBLIC_POSTHOG_KEY=phc_...
-SENTRY_AUTH_TOKEN=...
-RESEND_API_KEY=re_...
-
-# App Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-CRON_SECRET=your-secret-key
-```
-
-5. Set up the database:
-   - Create a new Supabase project
-   - Run database migrations:
+1. **Clone the repository:**
    ```bash
-   npx supabase db push
+   git clone https://github.com/brightseth/loancast.git
+   cd loancast
    ```
 
-6. Start the development server:
-```bash
-npm run dev
-```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-Visit `http://localhost:3000` to see the app.
+3. **Copy environment variables:**
+   ```bash
+   cp .env.example .env.local
+   ```
 
-## 📁 Project Structure
+4. **Configure essential environment variables:**
+   ```bash
+   # Database (Supabase)
+   DATABASE_URL=postgresql://...
+   NEXT_PUBLIC_SUPABASE_URL=https://...
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+   SUPABASE_SERVICE_ROLE_KEY=eyJ...
 
+   # Farcaster Integration (Neynar)
+   NEYNAR_API_KEY=NEYNAR_...
+   NEXT_PUBLIC_NEYNAR_CLIENT_ID=...
+   NEYNAR_WEBHOOK_SECRET=your-webhook-secret
+   WEBHOOK_OPERATOR_SECRET=your-operator-secret
+
+   # App Configuration
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
+
+5. **Set up the database:**
+   - Create a new Supabase project
+   - Run database migrations:
+     ```bash
+     npx supabase db push
+     ```
+
+6. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+Visit http://localhost:3000 to see the app.
+
+## 📁 Simplified Project Structure
 ```
 loancast/
 ├── app/                    # Next.js app router pages
-│   ├── api/               # API routes
-│   │   ├── auth/          # Authentication
-│   │   ├── loans/         # Loan CRUD
-│   │   ├── cron/          # Scheduled jobs
-│   │   └── notifications/ # Notification system
+│   ├── api/               # Core API routes only
+│   │   ├── auth/neynar/   # Farcaster authentication
+│   │   ├── loans/         # Loan CRUD operations
+│   │   │   ├── route.ts   # Create/list loans
+│   │   │   └── [id]/      # Individual loan operations
+│   │   └── webhooks/      # Secure webhook handling
 │   ├── loans/             # Loan pages
-│   ├── profile/           # User profiles
-│   └── explore/           # Public feed
-├── components/            # React components
-│   ├── LoanCard.tsx      # Core loan display
-│   ├── ReputationCard.tsx # Badges & scoring
-│   └── NotificationBell.tsx # Real-time alerts
-├── lib/                   # Utility libraries
+│   │   ├── page.tsx       # Borrower dashboard
+│   │   ├── new/page.tsx   # Create loan
+│   │   └── [id]/page.tsx  # Loan details
+│   ├── explore/page.tsx   # Browse loans
+│   └── page.tsx           # Landing page
+├── components/            # Essential React components
+│   └── LoanCard.tsx      # Core loan display
+├── lib/                   # Core utilities only
 │   ├── supabase.ts       # Database client
 │   ├── neynar.ts         # Farcaster integration
-│   ├── reputation.ts     # Scoring algorithms
-│   └── email.ts          # Email service
+│   ├── usdc.ts           # USDC calculations
+│   ├── flags.ts          # Simple feature flags
+│   ├── rate-limit.ts     # In-memory rate limiting
+│   └── webhook-security.ts # Webhook security
 └── supabase/             # Database schemas
+    └── migrations/       # Database migrations
 ```
 
-## 🔄 Loan Lifecycle
+## 🔄 Simplified Loan Lifecycle
 
 ```mermaid
 graph LR
-    A[Create Request] --> B[Post to Farcaster]
-    B --> C[Open for Funding]
-    C --> D[Lender Funds]
-    D --> E[Borrower Repays]
-    E --> F[Reputation Updated]
+    A[Create Loan] --> B[Cast to Farcaster]
+    B --> C[Manual Funding]
+    C --> D[Manual Repayment]
+    D --> E[Complete]
 ```
 
-## 📊 API Endpoints (Consolidated)
+## 📊 MVP API Endpoints (Core Only)
 
-### Core Loan Operations
-| Method | Endpoint | Description | Rate Limit |
-|--------|----------|-------------|------------|
-| **POST** | `/api/loans` | Create loan request with Zod validation | 10/min, 5/min per FID |
-| **GET** | `/api/loans` | List loans (filter by borrower/lender/status) | 10/min |
-| **GET** | `/api/loans/:id` | Get loan details | 30/min |
-| **PATCH** | `/api/loans/:id` | Update loan (pre-funding only) | 10/min |
-
-### Secure Repayment Flow 🔒
-| Method | Endpoint | Description | Security |
-|--------|----------|-------------|----------|
-| **POST** | `/api/repay/:id/init` | Get wallet target (server-computed USDC) | Replay protection |
-| **POST** | `/api/repay/:id/confirm` | Verify on-chain tx + update status | Address verification |
-
-### Funding & Collection
-| Method | Endpoint | Description | Access |
+### Essential Loan Operations
+| Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| **POST** | `/api/loans/:id/fund` | Fund loan (validates origin cast) | Lender |
-| **POST** | `/api/webhooks/cast-collection` | Handle cast collections | HMAC verified |
+| `POST` | `/api/loans` | Create loan request | ✅ Active |
+| `GET` | `/api/loans` | List loans with filters | ✅ Active |
+| `GET` | `/api/loans/[id]` | Get loan details | ✅ Active |
+| `POST` | `/api/loans/[id]/fund` | Fund loan (manual for MVP) | ✅ Active |
+| `POST` | `/api/loans/[id]/mark-repaid` | Mark as repaid (manual for MVP) | ✅ Active |
 
-### User & Profile
-| Method | Endpoint | Description | Cache |
-|--------|----------|-------------|-------|
-| **GET** | `/api/profiles/:fid` | Get user profile + loan history | 5min |
-| **GET** | `/api/reputation/:fid` | Get reputation score + badges | 5min |
+### Authentication & Webhooks
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| `POST` | `/api/auth/neynar` | Farcaster authentication | ✅ Active |
+| `POST` | `/api/webhooks/neynar` | Secure webhook handling | ✅ Active |
 
-### Internal Operations
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| **GET** | `/api/cron/*` | Status engine, reminders, defaults | Bearer token |
-| **POST** | `/api/webhooks/neynar` | Cast events, reactions | HMAC verified |
+### Disabled for MVP
+| Feature | Status | Reason |
+|---------|--------|---------|
+| Admin Dashboard | 🚧 Disabled | Complexity reduction |
+| Analytics/Stats | 🚧 Disabled | Focus on core features |
+| Notifications | 🚧 Disabled | Simplified UX |
+| Automated Repayment | 🚧 Manual | Security & simplicity |
+| Credit Scoring | 🚧 Disabled | Over-engineered for MVP |
+| Badges/Achievements | 🚧 Disabled | Nice-to-have |
+| Email Reminders | 🚧 Disabled | Non-essential |
+| Cron Jobs | 🚧 Disabled | Manual processes |
 
-> **Note**: Removed `/api/loans/[id]/mark-repaid` - replaced with secure repay flow to prevent spoofing.
-
-## 🔐 Security Features
-
-### Payment Security
-- **Replay Attack Prevention** - Unique tx_hash constraint prevents double-spending  
-- **Address Verification** - Confirms sender/recipient match loan participants
-- **Amount Validation** - Exact repayment amounts verified on-chain
-- **Rate Limiting** - Protects against API abuse (10 loans/min, 5 repayments/5min)
-
-### Database Security  
-- **Row Level Security (RLS)** - Database-level access controls
-- **Status Transitions** - Atomic state changes with audit trails
-- **Notification Deduplication** - Prevents spam notifications
-- **BigInt Precision** - 6-decimal USDC math prevents rounding errors
+## 🔐 Security Features (Production-Ready)
 
 ### Webhook Security
-- **HMAC Verification** - Validates all Neynar webhook signatures  
-- **CRON Secret Protection** - Secures automated job endpoints
-- **Signature Validation** - Constant-time comparisons prevent timing attacks
+- ✅ **HMAC Verification** - All Neynar webhooks verified with timing-safe comparison
+- ✅ **Timestamp Validation** - Prevents replay attacks (5-minute window)
+- ✅ **Rate Limiting** - 30 webhooks/minute per FID
+- ✅ **Idempotency** - Duplicate events processed once only
+- ✅ **Abuse Detection** - Blocks obvious spam patterns
 
-## 🚢 Deployment
+### API Security
+- ✅ **In-Memory Rate Limiting** - Simple, database-independent
+- ✅ **Input Validation** - Zod schemas for all inputs
+- ✅ **Row Level Security** - Database-level access controls
+- ✅ **Audit Trail** - All loan state changes logged
+
+### Manual Processes (MVP Safety)
+- ✅ **Manual Funding** - Admin approval prevents auto-funding abuse
+- ✅ **Manual Repayment** - Verified processes prevent spoofing
+- ✅ **No Auto-Funding from Replies** - Prevents text-based exploits
+
+## 🚀 Deployment
+
+### Environment Variables Required
+```bash
+# Essential
+DATABASE_URL=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEYNAR_API_KEY=
+NEXT_PUBLIC_NEYNAR_CLIENT_ID=
+NEYNAR_WEBHOOK_SECRET=
+WEBHOOK_OPERATOR_SECRET=
+NEXT_PUBLIC_APP_URL=
+
+# Optional
+NEXT_PUBLIC_POSTHOG_KEY=
+SENTRY_AUTH_TOKEN=
+```
 
 ### Deploy to Vercel
+1. Push code to GitHub
+2. Connect Vercel to your repository
+3. Add environment variables in Vercel dashboard
+4. Deploy automatically
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/brightseth/loancast)
+## 📈 What's Next (Post-MVP)
 
-1. Click the button above
-2. Configure environment variables in Vercel dashboard
-3. Deploy!
+Once the MVP is stable and has real users:
 
-### Manual Deployment
+### Phase 2: Automation
+- Automated funding via collect events
+- On-chain repayment verification
+- Background job processing
 
-```bash
-# Build for production
-npm run build
+### Phase 3: Enhanced UX
+- Notification system
+- Advanced analytics
+- Reputation scoring
 
-# Start production server
-npm start
-```
+### Phase 4: Scale Features
+- Admin dashboard
+- Complex reputation system
+- Achievement badges
+- Email integration
 
-## 🧪 Testing
+## ❓ MVP FAQ
 
-```bash
-# Run tests (coming soon)
-npm test
+**Q: Why is funding manual?**
+A: Security and simplicity. Automated funding had too many edge cases and abuse vectors for MVP.
 
-# Test email templates locally
-open http://localhost:3000/api/test-email?days=3
+**Q: Where are the notifications?**
+A: Removed to focus on core workflow. Users check the app directly.
 
-# Test cron jobs
-curl -H "Authorization: Bearer your-cron-secret" \
-  http://localhost:3000/api/cron/email-reminders
-```
+**Q: What happened to the reputation system?**
+A: Simplified to basic completion tracking. Complex scoring comes later.
 
-## 🤝 Contributing
+**Q: Can I still see loan history?**
+A: Yes! Basic loan history and status tracking remains.
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+**Q: Is this production-ready?**
+A: Yes, with manual processes. The core is secure and stable for real users.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## 🛠️ Contributing
 
-## 📈 Current Status
+This MVP focuses on **simplicity and stability**. Before adding features:
 
-- ✅ All core features implemented
-- ✅ Production deployed at [loancast.app](https://loancast.app)
-- ✅ Real Farcaster posting working
-- ✅ Email reminders configured
-- ✅ Legal docs (Terms & Privacy)
-- ⏳ Comprehensive testing suite pending
+1. **Ask**: Does this belong in MVP or post-MVP?
+2. **Simple**: Can this be done more simply?
+3. **Core**: Does this serve the core user journey?
+4. **Safe**: Does this introduce security risks?
 
-## 📝 License
+## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🔗 Links
-
-- **Website**: [loancast.app](https://loancast.app)
-- **Farcaster**: [@loancast](https://warpcast.com/loancast)
-- **GitHub**: [brightseth/loancast](https://github.com/brightseth/loancast)
-
-## 💬 Support
-
-For support, reach out on Farcaster [@loancast](https://warpcast.com/loancast) or open an issue.
-
-## 🙏 Acknowledgments
-
-- Built on [Farcaster](https://farcaster.xyz)
-- Powered by [Neynar](https://neynar.com)
-- Deployed on [Vercel](https://vercel.com)
+MIT License - see LICENSE file for details.
 
 ---
 
-**⚠️ Disclaimer**: This is experimental software for social lending. Use at your own risk. Not financial advice.
+**MVP Principle**: Ship something simple that works rather than something complex that breaks. ✨
