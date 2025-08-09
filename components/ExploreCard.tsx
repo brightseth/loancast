@@ -9,7 +9,7 @@ interface ExploreCardProps {
 
 export function ExploreCard({ loan }: ExploreCardProps) {
   const dueDate = new Date(loan.due_ts)
-  const createdDate = new Date(loan.created_at || loan.start_ts)
+  const createdDate = new Date(loan.created_at)
   const apr = loan.yield_bps / 100
   const isFunded = loan.status === 'funded'
   const castHashDisplay = `#${loan.cast_hash.slice(0, 8)}`
@@ -30,7 +30,7 @@ export function ExploreCard({ loan }: ExploreCardProps) {
             )}
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-            ${loan.repay_usdc?.toFixed(2) || '0.00'}
+            ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(2) || '0.00'}
           </h3>
           <p className="text-xs sm:text-sm text-gray-500">Total repayment</p>
         </div>
@@ -65,18 +65,18 @@ export function ExploreCard({ loan }: ExploreCardProps) {
           </span>
         </div>
 
-        {loan.gross_usdc && (
+        {loan.amount_usdc && (
           <div className="pt-3 border-t">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Amount Funded</span>
               <span className="text-sm font-medium">
-                ${loan.gross_usdc.toFixed(2)}
+                ${(Number(BigInt(loan.amount_usdc || '0')) / 1e6).toFixed(2)}
               </span>
             </div>
             <div className="flex items-center justify-between mt-1">
               <span className="text-sm text-gray-600">Platform Fee</span>
               <span className="text-sm font-medium">
-                ${((loan.gross_usdc - (loan.net_usdc || 0))).toFixed(2)}
+                ${((Number(BigInt(loan.amount_usdc || '0')) / 1e6 - Number(BigInt(loan.amount_usdc || '0')) / 1e6)).toFixed(2)}
               </span>
             </div>
           </div>
@@ -87,8 +87,8 @@ export function ExploreCard({ loan }: ExploreCardProps) {
         <div className="mb-3">
           <p className="text-xs text-gray-500 mb-2">📱 Farcaster Cast #{loan.cast_hash.slice(2, 8)}</p>
           <div className="bg-gray-50 rounded-md p-2 text-xs text-gray-700 border">
-            🏦 ${(loan.repay_usdc && loan.yield_bps ? 
-              ((loan.repay_usdc * 10000) / (10000 + loan.yield_bps)).toFixed(0) : '0')} USDC loan
+            🏦 ${(loan.repay_expected_usdc && loan.yield_bps ? 
+              (((Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6) * 10000) / (10000 + loan.yield_bps)).toFixed(0) : '0')} USDC loan
             • 2% monthly • Due {format(dueDate, 'M/d')}
           </div>
         </div>

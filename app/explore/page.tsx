@@ -42,24 +42,24 @@ export default function Explore() {
       const searchLower = searchTerm.toLowerCase()
       const loanNumber = `#${loan.id.slice(0, 6).toUpperCase()}`
       if (!loanNumber.toLowerCase().includes(searchLower) && 
-          !loan.repay_usdc?.toString().includes(searchTerm)) {
+          !(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toString().includes(searchTerm)) {
         return false
       }
     }
 
     // Amount filters
-    if (minAmount && loan.repay_usdc && loan.repay_usdc < parseFloat(minAmount)) {
+    if (minAmount && loan.repay_expected_usdc && (Number(BigInt(loan.repay_expected_usdc)) / 1e6) < parseFloat(minAmount)) {
       return false
     }
-    if (maxAmount && loan.repay_usdc && loan.repay_usdc > parseFloat(maxAmount)) {
+    if (maxAmount && loan.repay_expected_usdc && (Number(BigInt(loan.repay_expected_usdc)) / 1e6) > parseFloat(maxAmount)) {
       return false
     }
 
     // Duration filter - calculate from dates
     if (duration) {
-      const startDate = new Date(loan.start_ts)
+      const createdDate = new Date(loan.created_at)
       const dueDate = new Date(loan.due_ts)
-      const diffMonths = Math.round((dueDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
+      const diffMonths = Math.round((dueDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24 * 30))
       if (diffMonths.toString() !== duration) {
         return false
       }

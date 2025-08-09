@@ -9,7 +9,7 @@ interface LoanSuccessProps {
     cast_hash: string
     cast_url?: string
     amount: number
-    repay_usdc: number
+    repay_expected_usdc: string
     due_ts: string
   }
   onNewLoan: () => void
@@ -36,7 +36,7 @@ export function LoanSuccess({ loan, onNewLoan }: LoanSuccessProps) {
 
   const shareText = `${isRealCast ? 'Cast posted. Auction live for 24 h.' : 'Ready to post your LoanCast!'}
 
-💰 Just ${isRealCast ? 'posted' : 'created'} a $${loan.amount} LoanCast
+💰 Just ${isRealCast ? 'posted' : 'created'} a $${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(0)} LoanCast
 🚀 View and bid: ${process.env.NEXT_PUBLIC_APP_URL || 'https://loancast.app'}/loans/${loan.id}
 
 ${isRealCast ? 'Recast to /loancast' : 'Post to Farcaster to start the auction!'}`

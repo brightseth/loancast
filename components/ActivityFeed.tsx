@@ -60,7 +60,7 @@ export function ActivityFeed() {
   const getActivityText = (activity: ActivityItem) => {
     const apr = activity.loan.yield_bps / 100
     const handle = `@${activity.user?.replace('User ', '').toLowerCase()}`
-    const amount = `$${activity.loan.repay_usdc?.toFixed(0) || '0'}`
+    const amount = `$${(Number(BigInt(activity.loan.repay_expected_usdc || '0')) / 1e6).toFixed(0) || '0'}`
     
     switch (activity.type) {
       case 'new_loan':

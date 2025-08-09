@@ -22,7 +22,7 @@ export function RepaymentCastComposer({
 
   const repaymentCastText = `✅ REPAYMENT COMPLETE
 
-💰 Repaid $${loan.repay_usdc?.toFixed(0)} USDC loan
+💰 Repaid $${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(0)} USDC loan
 📅 On time: ${format(new Date(loan.due_ts), 'M/d/yyyy')}
 🔗 TX: ${verification.txHash.slice(0, 10)}...
 

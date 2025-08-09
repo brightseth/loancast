@@ -64,7 +64,7 @@ export function CollectionStatus({
       
       if (data.loan?.status === 'funded' && data.loan?.funding_method === 'cast_collection') {
         setStatus('funded')
-        setCollectionAmount(data.loan.collection_amount_usd || data.loan.gross_usdc)
+        setCollectionAmount(data.loan.collection_amount_usd || Number(BigInt(data.loan.amount_usdc || '0')) / 1e6)
       }
     } catch (error) {
       console.error('Error checking collection:', error)

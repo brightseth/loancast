@@ -62,7 +62,7 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
             <span className="text-xs font-mono text-gray-500">{castHashDisplay}</span>
           </div>
           <h3 className="text-lg font-semibold">
-            ${loan.repay_usdc?.toFixed(0) || '0'} USDC
+            ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(0) || '0'} USDC
           </h3>
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-700">
@@ -102,7 +102,7 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
       {loan.status === 'funded' && userRole === 'borrower' && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
           <p className="text-sm text-green-800 mb-2">
-            💰 Loan funded! Ready to repay ${loan.repay_usdc?.toFixed(2)}
+            💰 Loan funded! Ready to repay ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(2)}
           </p>
           <button
             onClick={() => window.location.href = `/loans/${loan.id}`}
@@ -126,10 +126,10 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
           </div>
         </div>
 
-        {loan.gross_usdc && (
+        {loan.amount_usdc && (
           <div className="flex justify-between">
             <span className="text-gray-700">Amount Funded:</span>
-            <span className="font-medium">${loan.gross_usdc.toFixed(2)}</span>
+            <span className="font-medium">${(Number(BigInt(loan.amount_usdc || '0')) / 1e6).toFixed(2)}</span>
           </div>
         )}
 
