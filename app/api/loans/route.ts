@@ -3,164 +3,248 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { createLoanCast } from '@/lib/neynar'
 import { canCreateLoans } from '@/lib/feature-flags'
 import { canRequestLoan } from '@/lib/reputation'
+import { toUsdc, mul102, fmtUsdc, parseUsdc } from '@/lib/usdc'
+import { checkRateLimit } from '@/lib/rate-limiting'
+import { trackLoan, reportError } from '@/lib/observability'
 import { addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
-import { withErrorHandling, createApiError } from '@/lib/error-handler'
-import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
-import * as Sentry from '@sentry/nextjs'
+import { z } from 'zod'
+
+// Zod validation schema for loan creation
+const CreateLoanSchema = z.object({
+  amount: z.number().min(1).max(10000),
+  duration_months: z.number().int().min(1).max(3),
+  borrower_fid: z.number().int().positive(),
+  signer_uuid: z.string().optional(),
+  description: z.string().min(10).max(500).optional()
+})
+
+const LoanQuerySchema = z.object({
+  borrower_fid: z.string().optional(),
+  lender_fid: z.string().optional(), 
+  status: z.enum(['seeking', 'funded', 'due', 'overdue', 'repaid', 'defaulted']).optional(),
+  limit: z.string().transform(Number).pipe(z.number().int().min(1).max(100)).default('20').optional()
+})
 
 export async function POST(request: NextRequest) {
-  // Check kill switch first
-  const loanCheck = canCreateLoans()
-  if (!loanCheck.allowed) {
-    return NextResponse.json(
-      { error: loanCheck.reason },
-      { status: 503 }
-    )
-  }
+  try {
+    // Feature flag check
+    const loanCheck = canCreateLoans()
+    if (!loanCheck.allowed) {
+      return NextResponse.json(
+        { error: loanCheck.reason },
+        { status: 503 }
+      )
+    }
 
-  // Check rate limit
-  const { result, response } = await withRateLimit(request, rateLimiters.loanCreation)
-  if (response) return response
+    // Rate limiting
+    const rateLimitResult = await checkRateLimit(request, '/api/loans')
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime },
+        { status: 429 }
+      )
+    }
 
-  return withErrorHandling(async () => {
-    console.log('=== LOAN CREATION START ===')
-    
+    // Parse and validate request
     const body = await request.json()
-    console.log('Request body:', JSON.stringify(body, null, 2))
+    const validatedData = CreateLoanSchema.parse(body)
     
-    const { amount, duration_months, borrower_fid, signer_uuid } = body
+    const { amount, duration_months, borrower_fid, signer_uuid, description } = validatedData
 
-    // Add Sentry context for this loan creation
-    Sentry.setContext('loan_creation', {
-      amount,
-      duration_months,
-      borrower_fid,
-      has_signer: !!signer_uuid
-    })
+    // Convert amount to USDC wei for storage
+    const amountWei = parseUsdc(amount, 1, 10000)
+    const repaymentWei = mul102(amountWei)
+    const dueDate = addDays(new Date(), duration_months * 30)
 
-    // Validate all required fields
-    if (!amount || amount < 10) {
-      console.log('Invalid amount:', amount)
-      throw createApiError('Amount must be at least $10', 400, 'INVALID_AMOUNT')
-    }
-
-    if (!duration_months || duration_months < 1 || duration_months > 3) {
-      console.log('Invalid duration_months:', duration_months)
-      throw createApiError('Duration must be 1-3 months', 400, 'INVALID_DURATION')
-    }
-
-    if (!borrower_fid) {
-      console.log('Missing borrower_fid')
-      throw createApiError('Authentication required', 401, 'AUTH_REQUIRED')
-    }
-
-    // Check reputation and loan eligibility
+    // Check borrower eligibility
     const eligibility = await canRequestLoan(borrower_fid.toString(), amount)
     if (!eligibility.allowed) {
-      console.log(`Loan rejected for FID ${borrower_fid}:`, eligibility.reason)
-      throw createApiError(eligibility.reason || 'Loan request not allowed', 400, 'LOAN_NOT_ALLOWED')
+      return NextResponse.json(
+        { error: eligibility.reason || 'Loan request not allowed' },
+        { status: 400 }
+      )
     }
 
-    // Fixed 2% monthly rate for all early loans
-    const monthlyRate = 0.02
-    const yield_bps = 200 // 2% monthly rate in basis points (2% = 200 bps)
-    const totalInterest = amount * monthlyRate * duration_months
-    const repayAmount = amount + totalInterest
-    const dueDate = addDays(new Date(), duration_months * 30)
-    console.log('Calculated repayAmount:', repayAmount, 'dueDate:', dueDate, 'duration_months:', duration_months)
+    // Generate loan ID
+    const loanId = uuidv4()
 
-    // Generate UUID for loan (no longer need sequential numbers)
-    const uuid = uuidv4()
-    console.log('Generated loan UUID:', uuid)
-
-    // Try cast creation
-    let cast
-    let castSuccess = false
+    // Create Farcaster cast
+    let castHash: string
     try {
-      cast = await createLoanCast(
+      const cast = await createLoanCast(
         signer_uuid || 'default-signer',
         amount,
-        yield_bps,
+        200, // 2% monthly rate
         dueDate
-        // No longer pass loan ID to cast - using new template
       )
-      console.log('Cast created:', cast)
-      castSuccess = ((cast as any).success !== false) && !!cast.hash && !cast.hash.includes('failed-')
-      
-      // Track cast creation event
-      if (castSuccess && !cast.hash.includes('mock-') && !cast.hash.includes('failed-')) {
-        console.log('Real cast created successfully for loan UUID:', uuid)
-      }
-      
+      castHash = cast.hash
     } catch (castError) {
-      console.error('Cast creation error:', castError)
-      cast = { hash: `mock-${Date.now()}` } // fallback
-      castSuccess = false
+      console.error('Cast creation failed:', castError)
+      castHash = `mock-${Date.now()}`
     }
 
+    // Store loan in database
     const loanData = {
-      id: uuid,
-      loan_number: null, // No longer using sequential numbers
-      cast_hash: cast.hash,
+      id: loanId,
+      cast_hash: castHash,
+      origin_cast_hash: castHash, // NEW: for repayment verification
       borrower_fid,
-      yield_bps,
-      repay_usdc: repayAmount,
+      amount_usdc: amountWei.toString(),
+      repay_expected_usdc: repaymentWei.toString(), // NEW: exact repayment amount
+      description: description || `Loan for ${fmtUsdc(amountWei)} USDC`,
       due_ts: dueDate.toISOString(),
-      status: 'open',
+      status: 'seeking',
+      created_at: new Date().toISOString()
     }
 
-    console.log('Inserting loan data:', loanData)
-    
-    const { data: loan, error } = await supabaseAdmin.from('loans').insert(loanData).select().single()
+    const { data: loan, error } = await supabaseAdmin
+      .from('loans')
+      .insert(loanData)
+      .select()
+      .single()
 
     if (error) {
-      console.error('Supabase error details:', error)
-      throw createApiError(`Database error: ${error.message}`, 500, 'DATABASE_ERROR')
+      reportError(new Error(`Loan creation failed: ${error.message}`), {
+        loan_id: loanId,
+        fid: borrower_fid,
+        endpoint: 'POST /api/loans'
+      })
+      return NextResponse.json(
+        { error: 'Failed to create loan' },
+        { status: 500 }
+      )
     }
 
-    console.log('Loan created successfully:', loan)
+    // Track successful loan creation
+    trackLoan('loan_created', loanId, {
+      borrower_fid,
+      amount_usdc: amountWei.toString(),
+      duration_days: duration_months * 30,
+      cast_hash: castHash
+    })
+
+    return NextResponse.json({
+      ...loan,
+      amount_usdc_formatted: fmtUsdc(amountWei),
+      repay_expected_formatted: fmtUsdc(repaymentWei)
+    }, {
+      headers: {
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+        'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+      }
+    })
+
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid request data', details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    reportError(error instanceof Error ? error : new Error('Unknown error'), {
+      endpoint: 'POST /api/loans'
+    })
     
-    return NextResponse.json(loan)
-  }, { endpoint: 'POST /api/loans' })
+    return NextResponse.json(
+      { error: 'Failed to create loan' },
+      { status: 500 }
+    )
+  }
 }
 
 export async function GET(request: NextRequest) {
-  // Check rate limit first
-  const { result, response } = await withRateLimit(request, rateLimiters.api)
-  if (response) return response
+  try {
+    // Rate limiting
+    const rateLimitResult = await checkRateLimit(request, '/api/loans')
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime },
+        { status: 429 }
+      )
+    }
 
-  return withErrorHandling(async () => {
+    // Parse and validate query parameters
     const searchParams = request.nextUrl.searchParams
-    const borrowerFid = searchParams.get('borrower_fid')
-    const lenderFid = searchParams.get('lender_fid')
-    const status = searchParams.get('status')
+    const queryData = Object.fromEntries(searchParams.entries())
+    const validatedQuery = LoanQuerySchema.parse(queryData)
 
-    Sentry.setContext('loan_query', {
-      borrowerFid,
-      lenderFid,
-      status
-    })
+    // Build query
+    let query = supabaseAdmin
+      .from('loans')
+      .select(`
+        id,
+        loan_number,
+        cast_hash,
+        borrower_fid,
+        lender_fid,
+        borrower_addr,
+        lender_addr,
+        amount_usdc,
+        repay_expected_usdc,
+        status,
+        description,
+        due_ts,
+        created_at,
+        updated_at
+      `)
 
-    let query = supabaseAdmin.from('loans').select('*')
-
-    if (borrowerFid) {
-      query = query.eq('borrower_fid', borrowerFid)
+    if (validatedQuery.borrower_fid) {
+      query = query.eq('borrower_fid', validatedQuery.borrower_fid)
     }
-    if (lenderFid) {
-      query = query.eq('lender_fid', lenderFid)
+    if (validatedQuery.lender_fid) {
+      query = query.eq('lender_fid', validatedQuery.lender_fid)
     }
-    if (status) {
-      query = query.eq('status', status)
+    if (validatedQuery.status) {
+      query = query.eq('status', validatedQuery.status)
     }
 
-    const { data: loans, error } = await query.order('created_at', { ascending: false })
+    // Apply limit and ordering
+    const limit = validatedQuery.limit || 20
+    const { data: loans, error } = await query
+      .order('created_at', { ascending: false })
+      .limit(limit)
 
     if (error) {
-      console.error('Error fetching loans:', error)
-      throw createApiError(`Failed to fetch loans: ${error.message}`, 500, 'FETCH_ERROR')
+      reportError(new Error(`Loan query failed: ${error.message}`), {
+        endpoint: 'GET /api/loans'
+      })
+      return NextResponse.json(
+        { error: 'Failed to fetch loans' },
+        { status: 500 }
+      )
     }
 
-    return NextResponse.json(loans)
-  }, { endpoint: 'GET /api/loans' })
+    // Format amounts for client
+    const formattedLoans = loans.map(loan => ({
+      ...loan,
+      amount_usdc_formatted: loan.amount_usdc ? fmtUsdc(BigInt(loan.amount_usdc)) : '0.00',
+      repay_expected_formatted: loan.repay_expected_usdc ? fmtUsdc(BigInt(loan.repay_expected_usdc)) : '0.00'
+    }))
+
+    return NextResponse.json(formattedLoans, {
+      headers: {
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+        'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+      }
+    })
+
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid query parameters', details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    reportError(error instanceof Error ? error : new Error('Unknown error'), {
+      endpoint: 'GET /api/loans'
+    })
+    
+    return NextResponse.json(
+      { error: 'Failed to fetch loans' },
+      { status: 500 }
+    )
+  }
 }

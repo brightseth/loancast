@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
-// Rate limiting configuration
+// Rate limiting configuration - per FID and IP limits
 const RATE_LIMITS = {
-  '/api/loans': { requests: 10, window: 60 }, // 10 requests per minute
-  '/api/repay': { requests: 5, window: 300 }, // 5 requests per 5 minutes
+  '/api/loans': { requests: 10, window: 60, per_fid: 5 }, // 10/min total, 5/min per FID
+  '/api/repay': { requests: 20, window: 300, per_fid: 3 }, // 20/5min total, 3/5min per FID  
+  '/api/frame': { requests: 60, window: 60, per_fid: 10 }, // Frame interactions
   '/api/webhooks': { requests: 100, window: 60 }, // 100 webhooks per minute
   'default': { requests: 30, window: 60 } // 30 requests per minute default
 }
@@ -172,7 +173,7 @@ export function withRateLimit<T extends Function>(handler: T): T {
     }
     
     return response
-  }) as T
+  }) as unknown as T
 }
 
 // Clean up old rate limit entries (call from cron)

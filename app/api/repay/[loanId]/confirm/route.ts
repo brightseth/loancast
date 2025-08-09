@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { RepaymentConfirmSchema, PaymentError, LoanError, usdcToWei, weiToUsdc } from '@/lib/domain-types'
+import { RepaymentConfirmSchema, PaymentError, LoanError, usdcToWei, weiToUsdc, usdc } from '@/lib/domain-types'
+import { checkRateLimit } from '@/lib/rate-limiting'
 import { z } from 'zod'
 
 // Verify on-chain repayment and update loan status
@@ -9,6 +10,15 @@ export async function POST(
   { params }: { params: { loanId: string } }
 ) {
   try {
+    // Rate limiting for repayment confirmations
+    const rateLimitResult = await checkRateLimit(request, '/api/repay')
+    if (!rateLimitResult.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
     const body = await request.json()
     const { txHash, fromAddr, toAddr, amount, blockNumber } = RepaymentConfirmSchema.parse({
       ...body,
@@ -92,8 +102,8 @@ export async function POST(
       )
     }
     
-    // All checks passed - process repayment atomically
-    const { error: txError } = await supabaseAdmin.rpc('process_repayment', {
+    // All checks passed - process repayment atomically using database function
+    const { data: result, error: txError } = await supabaseAdmin.rpc('process_repayment', {
       loan_id_param: params.loanId,
       tx_hash_param: txHash,
       from_addr_param: fromAddr,
@@ -103,7 +113,12 @@ export async function POST(
     })
     
     if (txError) {
+      console.error('Database transaction failed:', txError)
       throw new Error(`Database transaction failed: ${txError.message}`)
+    }
+
+    if (!result || !result.success) {
+      throw new Error('Repayment processing failed')
     }
     
     // Create notifications
@@ -146,6 +161,11 @@ export async function POST(
         status: 'repaid',
         repaidAt: new Date().toISOString()
       }
+    }, {
+      headers: {
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+        'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+      }
     })
     
   } catch (error) {
@@ -156,8 +176,8 @@ export async function POST(
       // Server-side Sentry logging
       console.error('Repayment error with context:', {
         loanId: params.loanId,
-        error: error.message,
-        stack: error.stack
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
       })
     }
     

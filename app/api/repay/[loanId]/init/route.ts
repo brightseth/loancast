@@ -1,22 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { RepaymentInitSchema, weiToUsdc, usdcToWei, LoanError } from '@/lib/domain-types'
+import { 
+  RepaymentInitSchema, 
+  weiToUsdc, 
+  usdc,
+  formatUsdc,
+  LoanError, 
+  BASE_CHAIN_ID,
+  USDC_CONTRACT_ADDRESS 
+} from '@/lib/domain-types'
 import { z } from 'zod'
+import { checkRateLimit } from '@/lib/rate-limiting'
 
-// Initialize repayment - returns wallet deep link and expected amount
+// Initialize repayment - returns wallet target computed server-side
 export async function POST(
   request: NextRequest,
   { params }: { params: { loanId: string } }
 ) {
   try {
+    // Rate limiting
+    const rateLimitResult = await checkRateLimit(request, '/api/repay')
+    if (!rateLimitResult.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
     const body = await request.json()
-    const { borrowerAddr, lenderAddr } = RepaymentInitSchema.parse({
+    const validatedData = RepaymentInitSchema.parse({
       ...body,
       loanId: params.loanId,
-      expectedAmount: '0' // Will calculate
+      expectedAmount: '0' // Will calculate server-side
     })
     
-    // Get loan details
+    // Get loan details with required fields
     const { data: loan, error } = await supabaseAdmin
       .from('loans')
       .select('*')
@@ -28,7 +46,7 @@ export async function POST(
     }
     
     // Validate loan can be repaid
-    if (loan.status !== 'funded' && loan.status !== 'due' && loan.status !== 'overdue') {
+    if (!['funded', 'due', 'overdue'].includes(loan.status)) {
       throw new LoanError(
         `Cannot repay loan in status: ${loan.status}`, 
         'INVALID_LOAN_STATUS',
@@ -36,54 +54,72 @@ export async function POST(
       )
     }
     
-    // Verify borrower identity
-    if (loan.lender_addr && lenderAddr.toLowerCase() !== loan.lender_addr.toLowerCase()) {
+    // Verify addresses match loan data
+    if (loan.borrower_addr && validatedData.borrowerAddr.toLowerCase() !== loan.borrower_addr.toLowerCase()) {
+      throw new LoanError('Borrower address mismatch', 'BORROWER_MISMATCH', params.loanId)
+    }
+    
+    if (loan.lender_addr && validatedData.lenderAddr.toLowerCase() !== loan.lender_addr.toLowerCase()) {
       throw new LoanError('Lender address mismatch', 'LENDER_MISMATCH', params.loanId)
     }
     
-    // Calculate exact repayment amount
-    const expectedAmount = loan.repay_expected_usdc || BigInt(0)
-    const expectedUsdc = weiToUsdc(BigInt(expectedAmount))
+    // Calculate exact repayment amount server-side
+    let expectedAmount: bigint
+    if (loan.repay_expected_usdc) {
+      expectedAmount = BigInt(loan.repay_expected_usdc)
+    } else {
+      // Calculate from principal + 2% if not pre-calculated
+      const principal = BigInt(loan.amount_usdc || '0')
+      expectedAmount = (principal * BigInt(10200)) / BigInt(10000) // 2% interest
+    }
     
-    // Generate wallet deep link (Base network)
-    const deepLink = `https://wallet.coinbase.com/send?` + new URLSearchParams({
-      address: lenderAddr,
-      amount: expectedUsdc.toString(),
-      token: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC on Base
-      chainId: '8453' // Base
-    }).toString()
+    const expectedUsdc = weiToUsdc(expectedAmount)
     
-    // Store repayment intent (for tracking)
+    // Store repayment intent (atomic operation)
     const { error: intentError } = await supabaseAdmin
       .from('repayment_intents')
       .upsert({
         loan_id: params.loanId,
-        borrower_addr: borrowerAddr,
-        lender_addr: lenderAddr,
+        borrower_addr: validatedData.borrowerAddr,
+        lender_addr: validatedData.lenderAddr,
         expected_amount: expectedAmount.toString(),
         status: 'initiated',
         expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
+      }, {
+        onConflict: 'loan_id,status'
       })
     
     if (intentError) {
       console.error('Failed to store repayment intent:', intentError)
+      throw new Error('Failed to create repayment intent')
     }
     
+    // Return wallet target computed server-side
     return NextResponse.json({
       success: true,
+      target: {
+        to: validatedData.lenderAddr,
+        amount: formatUsdc(expectedAmount, 6), // Full precision
+        memo: `LoanCast repayment #${loan.loan_number}`,
+        chainId: BASE_CHAIN_ID,
+        token: USDC_CONTRACT_ADDRESS
+      },
       repayment: {
         loanId: params.loanId,
         expectedAmount: expectedAmount.toString(),
-        expectedUsdc,
-        borrowerAddr,
-        lenderAddr,
-        deepLink,
+        expectedUsdc: formatUsdc(expectedAmount, 2),
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
         instructions: [
-          'Click the wallet link below to open your wallet',
-          `Send exactly ${expectedUsdc} USDC to the lender`,
-          'Return here after sending to verify payment',
-          'Do not send from an exchange - use your personal wallet'
+          `Send exactly ${formatUsdc(expectedAmount, 2)} USDC to the lender address`,
+          'Use the wallet deep link or copy the details above',
+          'Return here after sending to verify payment on-chain',
+          'Payment must come from your registered wallet address'
         ]
+      }
+    }, {
+      headers: {
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+        'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
       }
     })
     

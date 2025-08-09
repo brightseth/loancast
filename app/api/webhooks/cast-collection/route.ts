@@ -1,10 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { verifyNeynarWebhook } from '@/lib/webhook-security'
 
 // Handle cast collection events (when someone collects a loan cast as NFT)
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    // Verify webhook signature
+    const signature = request.headers.get('x-neynar-signature')
+    const webhookSecret = process.env.NEYNAR_WEBHOOK_SECRET
+    
+    if (!webhookSecret) {
+      console.error('NEYNAR_WEBHOOK_SECRET not configured')
+      return NextResponse.json(
+        { error: 'Webhook secret not configured' },
+        { status: 500 }
+      )
+    }
+
+    const rawBody = await request.text()
+    const verification = verifyNeynarWebhook(rawBody, signature || '', webhookSecret)
+    
+    if (!verification.isValid) {
+      console.error('Invalid webhook signature for cast collection:', verification.error)
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      )
+    }
+
+    const body = JSON.parse(rawBody)
     console.log('Cast collection webhook received:', body)
     
     // Extract relevant data from collection event

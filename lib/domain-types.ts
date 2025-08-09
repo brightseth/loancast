@@ -16,13 +16,35 @@ export type NotificationKind =
 export const USDC_DECIMALS = 6
 export const USDC_UNIT = BigInt(10 ** USDC_DECIMALS) // 1,000,000
 
-// Money conversion helpers
+// Enhanced money helpers - all USDC operations in 6-decimal precision
+export function usdc(amount: string | number): bigint {
+  if (typeof amount === 'string') {
+    const cleaned = amount.replace(/[,$\s]/g, '')
+    if (!/^\d+(\.\d{1,6})?$/.test(cleaned)) {
+      throw new Error(`Invalid USDC amount format: ${amount}`)
+    }
+    
+    if (cleaned.includes('.')) {
+      const [whole, decimal] = cleaned.split('.')
+      const paddedDecimal = decimal.padEnd(6, '0').slice(0, 6)
+      return BigInt(whole) * USDC_UNIT + BigInt(paddedDecimal)
+    }
+    return BigInt(cleaned) * USDC_UNIT
+  }
+  return BigInt(Math.floor(amount * Number(USDC_UNIT)))
+}
+
 export function usdcToWei(usdc: number): bigint {
   return BigInt(Math.floor(usdc * Number(USDC_UNIT)))
 }
 
 export function weiToUsdc(wei: bigint): number {
   return Number(wei) / Number(USDC_UNIT)
+}
+
+export function formatUsdc(wei: bigint, decimals: number = 2): string {
+  const usdcAmount = weiToUsdc(wei)
+  return usdcAmount.toFixed(decimals)
 }
 
 // Interest calculation with precise math
@@ -84,18 +106,29 @@ export const WebhookSchema = z.object({
   data: z.record(z.any()) // Flexible for different webhook types
 })
 
-// Domain Models
+// Constants
+export const BASE_CHAIN_ID = 8453
+export const USDC_CONTRACT_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+export const DEFAULT_MONTHLY_RATE_BPS = 200 // 2%
+export const MAX_LOAN_DURATION_DAYS = 90
+export const MIN_LOAN_AMOUNT_USDC = usdc('1') // $1 minimum
+export const MAX_LOAN_AMOUNT_USDC = usdc('10000') // $10k maximum
+
+// Domain Models - Updated with new required fields
 export interface Loan {
   id: string
-  cast_hash: string
-  origin_cast_hash?: string
+  loan_number: number
+  cast_hash?: string
+  origin_cast_hash?: string // NEW: for repayment verification
   borrower_fid: number
   lender_fid?: number
-  lender_addr?: string
-  principal_usdc: bigint
-  repay_expected_usdc: bigint
+  borrower_addr?: string // NEW: for repayment verification
+  lender_addr?: string // NEW: for repayment verification
+  amount_usdc: string // Changed to string (bigint serialized)
+  repay_expected_usdc?: string // NEW: exact repayment amount as string
   rate_bps: number
   status: LoanStatus
+  description?: string
   due_ts: string
   fund_tx_hash?: string
   repay_tx_hash?: string

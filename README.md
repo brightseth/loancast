@@ -46,11 +46,18 @@ LoanCast is a decentralized peer-to-peer lending platform built on [Farcaster](h
 - **Email**: Resend/SendGrid
 - **Hosting**: Vercel
 
+## 📋 Requirements
+
+- **Node.js 20+** (18 and below deprecated by Supabase)
+- **npm 9+**
+- **Docker** (for local development with Supabase)
+- **Vercel account** (for deployment)
+
 ## 🏃 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - npm or yarn
 - Supabase account
 - Neynar API key
@@ -145,17 +152,60 @@ graph LR
     E --> F[Reputation Updated]
 ```
 
-## 📊 API Endpoints
+## 📊 API Endpoints (Consolidated)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/loans` | Create loan request |
-| GET | `/api/loans` | Get user's loans |
-| POST | `/api/loans/[id]/fund` | Fund a loan |
-| POST | `/api/loans/[id]/mark-repaid` | Mark as repaid |
-| GET | `/api/profiles/[fid]` | Get user profile |
-| GET | `/api/reputation/[fid]` | Get reputation score |
-| GET | `/api/notifications` | Get notifications |
+### Core Loan Operations
+| Method | Endpoint | Description | Rate Limit |
+|--------|----------|-------------|------------|
+| **POST** | `/api/loans` | Create loan request with Zod validation | 10/min, 5/min per FID |
+| **GET** | `/api/loans` | List loans (filter by borrower/lender/status) | 10/min |
+| **GET** | `/api/loans/:id` | Get loan details | 30/min |
+| **PATCH** | `/api/loans/:id` | Update loan (pre-funding only) | 10/min |
+
+### Secure Repayment Flow 🔒
+| Method | Endpoint | Description | Security |
+|--------|----------|-------------|----------|
+| **POST** | `/api/repay/:id/init` | Get wallet target (server-computed USDC) | Replay protection |
+| **POST** | `/api/repay/:id/confirm` | Verify on-chain tx + update status | Address verification |
+
+### Funding & Collection
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| **POST** | `/api/loans/:id/fund` | Fund loan (validates origin cast) | Lender |
+| **POST** | `/api/webhooks/cast-collection` | Handle cast collections | HMAC verified |
+
+### User & Profile
+| Method | Endpoint | Description | Cache |
+|--------|----------|-------------|-------|
+| **GET** | `/api/profiles/:fid` | Get user profile + loan history | 5min |
+| **GET** | `/api/reputation/:fid` | Get reputation score + badges | 5min |
+
+### Internal Operations
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| **GET** | `/api/cron/*` | Status engine, reminders, defaults | Bearer token |
+| **POST** | `/api/webhooks/neynar` | Cast events, reactions | HMAC verified |
+
+> **Note**: Removed `/api/loans/[id]/mark-repaid` - replaced with secure repay flow to prevent spoofing.
+
+## 🔐 Security Features
+
+### Payment Security
+- **Replay Attack Prevention** - Unique tx_hash constraint prevents double-spending  
+- **Address Verification** - Confirms sender/recipient match loan participants
+- **Amount Validation** - Exact repayment amounts verified on-chain
+- **Rate Limiting** - Protects against API abuse (10 loans/min, 5 repayments/5min)
+
+### Database Security  
+- **Row Level Security (RLS)** - Database-level access controls
+- **Status Transitions** - Atomic state changes with audit trails
+- **Notification Deduplication** - Prevents spam notifications
+- **BigInt Precision** - 6-decimal USDC math prevents rounding errors
+
+### Webhook Security
+- **HMAC Verification** - Validates all Neynar webhook signatures  
+- **CRON Secret Protection** - Secures automated job endpoints
+- **Signature Validation** - Constant-time comparisons prevent timing attacks
 
 ## 🚢 Deployment
 
