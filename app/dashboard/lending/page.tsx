@@ -9,6 +9,7 @@ export default function LendingDashboard() {
   const { user } = useAuth()
   const [loans, setLoans] = useState<Loan[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (user?.fid) {
@@ -18,6 +19,7 @@ export default function LendingDashboard() {
 
   const fetchLenderLoans = async (lenderFid: number) => {
     try {
+      setError(null)
       // Add timestamp to prevent caching issues
       const response = await fetch(`/api/loans?lender_fid=${lenderFid}&t=${Date.now()}`)
       console.log('API Response status:', response.status)
@@ -29,10 +31,12 @@ export default function LendingDashboard() {
       } else {
         const errorText = await response.text()
         console.error('API Error:', response.status, errorText)
+        setError(`Failed to load loans: ${response.status}`)
         setLoans([])
       }
-    } catch (error) {
-      console.error('Error fetching lender loans:', error)
+    } catch (err) {
+      console.error('Error fetching lender loans:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load loans')
       setLoans([])
     } finally {
       setLoading(false)

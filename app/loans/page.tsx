@@ -84,8 +84,8 @@ export default function MyLoans() {
     )
   }
 
-  const activeLoans = loans?.filter(loan => loan.status === 'open') || []
-  const completedLoans = loans?.filter(loan => loan.status !== 'open') || []
+  const activeLoans = loans?.filter(loan => loan.status === 'open' || loan.status === 'funded') || []
+  const completedLoans = loans?.filter(loan => loan.status === 'repaid' || loan.status === 'default') || []
   
 
   return (
