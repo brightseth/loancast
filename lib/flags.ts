@@ -16,7 +16,7 @@ export const FLAGS = {
   BADGES_VISUALS: false,
   DB_RATE_LIMITS: false,        // use in-memory fallback
   NOTIFICATIONS: false,
-  LENDING_DASHBOARD: false,      // too complex, not core
+  LENDING_DASHBOARD: true,       // re-enabled by user request
   CRON_JOBS: false,             // disable for now
   ANALYTICS: false,
   FEEDBACK: false,
