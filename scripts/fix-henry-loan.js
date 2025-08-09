@@ -2,7 +2,7 @@
 
 // Fix Henry's loan - mark as funded via cast collection
 async function fixHenryLoan() {
-  const API_URL = 'https://loancast.app/api/webhooks/cast-collection'
+  const API_URL = 'https://loancast.app/api/admin/manual-fund'
   
   // Henry's loan details from the database
   const loanData = {
@@ -25,7 +25,7 @@ async function fixHenryLoan() {
   
   try {
     const response = await fetch(API_URL, {
-      method: 'PUT',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
