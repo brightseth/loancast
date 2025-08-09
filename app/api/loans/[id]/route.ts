@@ -34,17 +34,17 @@ export async function GET(
         id,
         loan_number,
         cast_hash,
-        origin_cast_hash,
+        start_ts,
         borrower_fid,
         lender_fid,
         borrower_addr,
         lender_addr,
-        amount_usdc,
-        repay_expected_usdc,
+        gross_usdc,
+        repay_usdc,
         status,
         description,
         due_ts,
-        repay_tx_hash,
+        tx_repay,
         verified_repayment,
         created_at,
         updated_at
@@ -62,8 +62,8 @@ export async function GET(
     // Format loan for response
     const formattedLoan = {
       ...loan,
-      amount_usdc_formatted: loan.amount_usdc ? fmtUsdc(BigInt(loan.amount_usdc)) : '0.00',
-      repay_expected_formatted: loan.repay_expected_usdc ? fmtUsdc(BigInt(loan.repay_expected_usdc)) : '0.00'
+      amount_usdc_formatted: loan.gross_usdc ? loan.gross_usdc.toFixed(2) : '0.00',
+      repay_expected_formatted: loan.repay_usdc ? loan.repay_usdc.toFixed(2) : '0.00'
     }
 
     return NextResponse.json(formattedLoan, {
@@ -117,8 +117,8 @@ export async function PATCH(
       )
     }
 
-    // Only allow updates if status is 'seeking' or 'draft' 
-    if (!['seeking', 'draft'].includes(currentLoan.status)) {
+    // Only allow updates if status is 'open' or 'draft' 
+    if (!['open', 'draft'].includes(currentLoan.status)) {
       return NextResponse.json(
         { error: 'Cannot update loan after funding' },
         { status: 400 }
@@ -150,8 +150,8 @@ export async function PATCH(
     // Format response
     const formattedLoan = {
       ...updatedLoan,
-      amount_usdc_formatted: updatedLoan.amount_usdc ? fmtUsdc(BigInt(updatedLoan.amount_usdc)) : '0.00',
-      repay_expected_formatted: updatedLoan.repay_expected_usdc ? fmtUsdc(BigInt(updatedLoan.repay_expected_usdc)) : '0.00'
+      amount_usdc_formatted: updatedLoan.gross_usdc ? updatedLoan.gross_usdc.toFixed(2) : '0.00',
+      repay_expected_formatted: updatedLoan.repay_usdc ? updatedLoan.repay_usdc.toFixed(2) : '0.00'
     }
 
     return NextResponse.json(formattedLoan, {

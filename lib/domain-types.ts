@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 // Domain Types - Single source of truth for business logic
-export type LoanStatus = 'seeking' | 'funded' | 'due' | 'overdue' | 'default' | 'repaid' | 'cancelled' | 'deleted'
+export type LoanStatus = 'open' | 'funded' | 'due' | 'overdue' | 'default' | 'repaid' | 'cancelled' | 'deleted'
 
 export type NotificationKind = 
   | 'reminder_3d' 
@@ -10,7 +10,7 @@ export type NotificationKind =
   | 'overdue'
   | 'funded'
   | 'repaid'
-  | 'defaulted'
+  | 'default'
 
 // Money handling with bigint precision (USDC has 6 decimals)
 export const USDC_DECIMALS = 6
@@ -57,7 +57,7 @@ export function calculateRepayment(principal: bigint, monthlyRateBps: number = 2
 // Loan state machine
 export function canTransition(from: LoanStatus, to: LoanStatus): boolean {
   const validTransitions: Record<LoanStatus, LoanStatus[]> = {
-    seeking: ['funded', 'cancelled', 'deleted'],
+    open: ['funded', 'cancelled', 'deleted'],
     funded: ['due', 'repaid', 'overdue'],
     due: ['repaid', 'overdue'],
     overdue: ['repaid', 'default'],
@@ -119,19 +119,19 @@ export interface Loan {
   id: string
   loan_number: number
   cast_hash?: string
-  origin_cast_hash?: string // NEW: for repayment verification
+  start_ts?: string // Database field for start timestamp
   borrower_fid: number
   lender_fid?: number
   borrower_addr?: string // NEW: for repayment verification
   lender_addr?: string // NEW: for repayment verification
-  amount_usdc: string // Changed to string (bigint serialized)
-  repay_expected_usdc?: string // NEW: exact repayment amount as string
+  gross_usdc: number // Database field for gross USDC amount
+  repay_usdc?: number // Database field for repayment USDC amount
   rate_bps: number
   status: LoanStatus
   description?: string
   due_ts: string
-  fund_tx_hash?: string
-  repay_tx_hash?: string
+  tx_fund?: string
+  tx_repay?: string
   verified_funding: boolean
   verified_repayment: boolean
   created_at: string

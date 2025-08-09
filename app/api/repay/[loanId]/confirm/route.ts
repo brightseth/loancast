@@ -61,9 +61,9 @@ export async function POST(
     }
     
     // Verify payment details
-    const expectedAmount = BigInt(loan.repay_expected_usdc || '0')
-    const actualAmount = usdcToWei(parseFloat(amount))
-    const tolerance = usdcToWei(0.000001) // 1 micro-USDC tolerance
+    const expectedAmount = loan.repay_usdc || 0
+    const actualAmount = parseFloat(amount)
+    const tolerance = 0.000001 // 1 micro-USDC tolerance
     
     // Check sender is borrower (if we have their wallet)
     if (loan.borrower_addr && fromAddr.toLowerCase() !== loan.borrower_addr.toLowerCase()) {
@@ -86,14 +86,14 @@ export async function POST(
     // Check amount is sufficient
     if (actualAmount < expectedAmount - tolerance) {
       throw new PaymentError(
-        `Insufficient payment: expected ${weiToUsdc(expectedAmount)} USDC, got ${weiToUsdc(actualAmount)} USDC`,
+        `Insufficient payment: expected ${expectedAmount} USDC, got ${actualAmount} USDC`,
         'INSUFFICIENT_AMOUNT',
         txHash
       )
     }
     
     // Verify transaction on-chain (simplified - in production use proper RPC)
-    const isValidTx = await verifyTransaction(txHash, fromAddr, toAddr, actualAmount, blockNumber)
+    const isValidTx = await verifyTransaction(txHash, fromAddr, toAddr, BigInt(Math.floor(actualAmount * 1e6)), blockNumber)
     if (!isValidTx) {
       throw new PaymentError(
         'Transaction verification failed',
@@ -108,7 +108,7 @@ export async function POST(
       tx_hash_param: txHash,
       from_addr_param: fromAddr,
       to_addr_param: toAddr,
-      amount_param: actualAmount.toString(),
+      amount_param: Math.floor(actualAmount * 1e6).toString(),
       block_number_param: blockNumber
     })
     
@@ -130,7 +130,7 @@ export async function POST(
           user_fid: loan.borrower_fid,
           type: 'repayment_confirmed',
           title: 'Repayment Confirmed',
-          message: `Your repayment of ${weiToUsdc(actualAmount)} USDC has been confirmed. Loan is now complete!`,
+          message: `Your repayment of ${actualAmount} USDC has been confirmed. Loan is now complete!`,
           loan_id: params.loanId,
           created_at: new Date().toISOString()
         }),
@@ -142,7 +142,7 @@ export async function POST(
           user_fid: loan.lender_fid,
           type: 'repayment_received',
           title: 'Repayment Received',
-          message: `You received ${weiToUsdc(actualAmount)} USDC repayment. Loan completed successfully!`,
+          message: `You received ${actualAmount} USDC repayment. Loan completed successfully!`,
           loan_id: params.loanId,
           created_at: new Date().toISOString()
         })
@@ -153,7 +153,7 @@ export async function POST(
       repayment: {
         loanId: params.loanId,
         txHash,
-        amount: weiToUsdc(actualAmount),
+        amount: actualAmount,
         status: 'confirmed',
         verifiedAt: new Date().toISOString()
       },

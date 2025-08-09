@@ -15,7 +15,7 @@ interface LoanCardProps {
 
 export default function LoanCard({ loan, userRole }: LoanCardProps) {
   const dueDate = new Date(loan.due_ts)
-  const isOverdue = isPast(dueDate) && loan.status === 'seeking'
+  const isOverdue = isPast(dueDate) && loan.status === 'open'
   
   // Use cast hash as identifier
   const castHashDisplay = `#${loan.cast_hash.slice(0, 8)}`
@@ -23,10 +23,10 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
   const getStatusColors = () => {
     const now = new Date()
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
-    const isDueSoon = dueDate <= threeDaysFromNow && loan.status === 'seeking'
+    const isDueSoon = dueDate <= threeDaysFromNow && loan.status === 'open'
     
     switch (loan.status) {
-      case 'seeking':
+      case 'open':
         if (isOverdue) return { ribbon: 'border-l-4 border-red-500', pill: 'bg-red-100 text-red-800' }
         if (isDueSoon) return { ribbon: 'border-l-4 border-yellow-500', pill: 'bg-yellow-100 text-yellow-800' }
         return { ribbon: 'border-l-4 border-green-500', pill: 'bg-green-100 text-green-800' }
@@ -34,7 +34,7 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
         return { ribbon: 'border-l-4 border-blue-500', pill: 'bg-blue-100 text-blue-800' }
       case 'repaid':
         return { ribbon: 'border-l-4 border-green-500', pill: 'bg-green-100 text-green-800' }
-      case 'defaulted':
+      case 'default':
         return { ribbon: 'border-l-4 border-red-500', pill: 'bg-red-100 text-red-800' }
       default:
         return { ribbon: '', pill: 'bg-gray-100 text-gray-800' }
@@ -44,11 +44,11 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
   const getStatusText = () => {
     const now = new Date()
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
-    const isDueSoon = dueDate <= threeDaysFromNow && loan.status === 'seeking'
+    const isDueSoon = dueDate <= threeDaysFromNow && loan.status === 'open'
     
-    if (loan.status === 'seeking' && isOverdue) return 'Default'
-    if (loan.status === 'seeking' && isDueSoon) return `Due <3d`
-    if (loan.status === 'seeking') return 'Seeking'
+    if (loan.status === 'open' && isOverdue) return 'Default'
+    if (loan.status === 'open' && isDueSoon) return `Due <3d`
+    if (loan.status === 'open') return 'Open'
     return loan.status.charAt(0).toUpperCase() + loan.status.slice(1)
   }
 
@@ -62,7 +62,7 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
             <span className="text-xs font-mono text-gray-500">{castHashDisplay}</span>
           </div>
           <h3 className="text-lg font-semibold">
-            ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(0) || '0'} USDC
+            ${(loan.repay_usdc || 0).toFixed(0)} USDC
           </h3>
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-700">
@@ -80,7 +80,7 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors.pill}`}>
             {getStatusText()}
           </span>
-          {(loan.status === 'seeking' || loan.status === 'funded') && userRole === 'borrower' && (
+          {(loan.status === 'open' || loan.status === 'funded') && userRole === 'borrower' && (
             <DropdownMenu
               items={[
                 ...(loan.status === 'funded' ? [{
@@ -102,7 +102,7 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
       {loan.status === 'funded' && userRole === 'borrower' && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
           <p className="text-sm text-green-800 mb-2">
-            💰 Loan funded! Ready to repay ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(2)}
+            💰 Loan funded! Ready to repay ${(loan.repay_usdc || 0).toFixed(2)}
           </p>
           <button
             onClick={() => window.location.href = `/loans/${loan.id}`}
@@ -120,16 +120,16 @@ export default function LoanCard({ loan, userRole }: LoanCardProps) {
             <div className="font-medium">
               {format(dueDate, 'MMM dd, yyyy')}
             </div>
-            {loan.status === 'seeking' && (
+            {loan.status === 'open' && (
               <CountdownChip dueDate={dueDate} className="mt-1" />
             )}
           </div>
         </div>
 
-        {loan.amount_usdc && (
+        {loan.gross_usdc && (
           <div className="flex justify-between">
             <span className="text-gray-700">Amount Funded:</span>
-            <span className="font-medium">${(Number(BigInt(loan.amount_usdc || '0')) / 1e6).toFixed(2)}</span>
+            <span className="font-medium">${(loan.gross_usdc || 0).toFixed(2)}</span>
           </div>
         )}
 

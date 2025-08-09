@@ -22,7 +22,7 @@ const CreateLoanSchema = z.object({
 const LoanQuerySchema = z.object({
   borrower_fid: z.string().optional(),
   lender_fid: z.string().optional(), 
-  status: z.enum(['seeking', 'funded', 'due', 'overdue', 'repaid', 'defaulted']).optional(),
+  status: z.enum(['open', 'funded', 'due', 'overdue', 'repaid', 'default']).optional(),
   limit: z.string().transform(Number).pipe(z.number().int().min(1).max(100)).default('20').optional()
 })
 
@@ -88,13 +88,13 @@ export async function POST(request: NextRequest) {
     const loanData = {
       id: loanId,
       cast_hash: castHash,
-      origin_cast_hash: castHash, // NEW: for repayment verification
+      start_ts: new Date().toISOString(), // Database field for start timestamp
       borrower_fid,
-      amount_usdc: amountWei.toString(),
-      repay_expected_usdc: repaymentWei.toString(), // NEW: exact repayment amount
+      gross_usdc: amount,
+      repay_usdc: amount * 1.02, // 2% interest
       description: description || `Loan for ${fmtUsdc(amountWei)} USDC`,
       due_ts: dueDate.toISOString(),
-      status: 'seeking',
+      status: 'open',
       created_at: new Date().toISOString()
     }
 
@@ -126,8 +126,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       ...loan,
-      amount_usdc_formatted: fmtUsdc(amountWei),
-      repay_expected_formatted: fmtUsdc(repaymentWei)
+      amount_usdc_formatted: amount.toFixed(2),
+      repay_expected_formatted: (amount * 1.02).toFixed(2)
     }, {
       headers: {
         'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),

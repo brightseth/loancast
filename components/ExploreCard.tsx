@@ -30,7 +30,7 @@ export function ExploreCard({ loan }: ExploreCardProps) {
             )}
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-            ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(2) || '0.00'}
+            ${(loan.repay_usdc || 0).toFixed(2)}
           </h3>
           <p className="text-xs sm:text-sm text-gray-500">Total repayment</p>
         </div>
@@ -65,18 +65,18 @@ export function ExploreCard({ loan }: ExploreCardProps) {
           </span>
         </div>
 
-        {loan.amount_usdc && (
+        {loan.gross_usdc && (
           <div className="pt-3 border-t">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Amount Funded</span>
               <span className="text-sm font-medium">
-                ${(Number(BigInt(loan.amount_usdc || '0')) / 1e6).toFixed(2)}
+                ${(loan.gross_usdc || 0).toFixed(2)}
               </span>
             </div>
             <div className="flex items-center justify-between mt-1">
               <span className="text-sm text-gray-600">Platform Fee</span>
               <span className="text-sm font-medium">
-                ${((Number(BigInt(loan.amount_usdc || '0')) / 1e6 - Number(BigInt(loan.amount_usdc || '0')) / 1e6)).toFixed(2)}
+                ${(0).toFixed(2)}
               </span>
             </div>
           </div>
@@ -87,8 +87,8 @@ export function ExploreCard({ loan }: ExploreCardProps) {
         <div className="mb-3">
           <p className="text-xs text-gray-500 mb-2">📱 Farcaster Cast #{loan.cast_hash.slice(2, 8)}</p>
           <div className="bg-gray-50 rounded-md p-2 text-xs text-gray-700 border">
-            🏦 ${(loan.repay_expected_usdc && loan.yield_bps ? 
-              (((Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6) * 10000) / (10000 + (loan.yield_bps || 0))).toFixed(0) : '0')} USDC loan
+            🏦 ${(loan.repay_usdc && loan.yield_bps ? 
+              ((loan.repay_usdc * 10000) / (10000 + loan.yield_bps)).toFixed(0) : '0')} USDC loan
             • 2% monthly • Due {format(dueDate, 'M/d')}
           </div>
         </div>

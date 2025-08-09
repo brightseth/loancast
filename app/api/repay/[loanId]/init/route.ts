@@ -64,16 +64,16 @@ export async function POST(
     }
     
     // Calculate exact repayment amount server-side
-    let expectedAmount: bigint
-    if (loan.repay_expected_usdc) {
-      expectedAmount = BigInt(loan.repay_expected_usdc)
+    let expectedAmount: number
+    if (loan.repay_usdc) {
+      expectedAmount = loan.repay_usdc
     } else {
       // Calculate from principal + 2% if not pre-calculated
-      const principal = BigInt(loan.amount_usdc || '0')
-      expectedAmount = (principal * BigInt(10200)) / BigInt(10000) // 2% interest
+      const principal = loan.gross_usdc || 0
+      expectedAmount = principal * 1.02 // 2% interest
     }
     
-    const expectedUsdc = weiToUsdc(expectedAmount)
+    const expectedUsdc = expectedAmount
     
     // Store repayment intent (atomic operation)
     const { error: intentError } = await supabaseAdmin
@@ -99,7 +99,7 @@ export async function POST(
       success: true,
       target: {
         to: validatedData.lenderAddr,
-        amount: formatUsdc(expectedAmount, 6), // Full precision
+        amount: expectedAmount.toFixed(6), // Full precision
         memo: `LoanCast repayment #${loan.loan_number}`,
         chainId: BASE_CHAIN_ID,
         token: USDC_CONTRACT_ADDRESS
@@ -107,10 +107,10 @@ export async function POST(
       repayment: {
         loanId: params.loanId,
         expectedAmount: expectedAmount.toString(),
-        expectedUsdc: formatUsdc(expectedAmount, 2),
+        expectedUsdc: expectedAmount.toFixed(2),
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
         instructions: [
-          `Send exactly ${formatUsdc(expectedAmount, 2)} USDC to the lender address`,
+          `Send exactly ${expectedAmount.toFixed(2)} USDC to the lender address`,
           'Use the wallet deep link or copy the details above',
           'Return here after sending to verify payment on-chain',
           'Payment must come from your registered wallet address'

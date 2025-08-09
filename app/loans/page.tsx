@@ -84,8 +84,8 @@ export default function MyLoans() {
     )
   }
 
-  const activeLoans = loans?.filter(loan => loan.status === 'seeking') || []
-  const completedLoans = loans?.filter(loan => loan.status !== 'seeking') || []
+  const activeLoans = loans?.filter(loan => loan.status === 'open') || []
+  const completedLoans = loans?.filter(loan => loan.status !== 'open') || []
   
 
   return (

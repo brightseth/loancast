@@ -42,16 +42,16 @@ export default function Explore() {
       const searchLower = searchTerm.toLowerCase()
       const loanNumber = `#${loan.id.slice(0, 6).toUpperCase()}`
       if (!loanNumber.toLowerCase().includes(searchLower) && 
-          !(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toString().includes(searchTerm)) {
+          !(loan.repay_usdc || 0).toString().includes(searchTerm)) {
         return false
       }
     }
 
     // Amount filters
-    if (minAmount && loan.repay_expected_usdc && (Number(BigInt(loan.repay_expected_usdc)) / 1e6) < parseFloat(minAmount)) {
+    if (minAmount && loan.repay_usdc && loan.repay_usdc < parseFloat(minAmount)) {
       return false
     }
-    if (maxAmount && loan.repay_expected_usdc && (Number(BigInt(loan.repay_expected_usdc)) / 1e6) > parseFloat(maxAmount)) {
+    if (maxAmount && loan.repay_usdc && loan.repay_usdc > parseFloat(maxAmount)) {
       return false
     }
 
@@ -104,7 +104,7 @@ export default function Explore() {
       
       let filteredData = data || []
       if (filter === 'active') {
-        filteredData = (data || []).filter((loan: Loan) => loan.status === 'seeking')
+        filteredData = (data || []).filter((loan: Loan) => loan.status === 'open')
       } else if (filter === 'funded') {
         filteredData = (data || []).filter((loan: Loan) => loan.status === 'funded')
       }

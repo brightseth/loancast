@@ -118,10 +118,10 @@ export default function LoanDetail() {
   }
 
   const dueDate = new Date(loan.due_ts)
-  const isOverdue = isPast(dueDate) && loan.status === 'seeking'
+  const isOverdue = isPast(dueDate) && loan.status === 'open'
   const apr = (loan.yield_bps || 0) / 100
   const auctionEndTime = addDays(new Date(loan.created_at), 1)
-  const isAuctionActive = !isPast(auctionEndTime) && loan.status === 'seeking'
+  const isAuctionActive = !isPast(auctionEndTime) && loan.status === 'open'
 
   return (
     <div className="max-w-screen-md mx-auto p-4 py-12">
@@ -135,14 +135,14 @@ export default function LoanDetail() {
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6)?.toFixed(2) || '0.00'} USDC Loan
+              ${(loan.repay_usdc || 0).toFixed(2)} USDC Loan
             </h1>
             <p className="text-gray-600 mt-1">
               {apr.toFixed(2)}% APR • Due {format(dueDate, 'MMM dd, yyyy')}
             </p>
           </div>
           <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-            loan.status === 'seeking' 
+            loan.status === 'open' 
               ? isOverdue 
                 ? '🔴 bg-red-100 text-red-800' 
                 : '🟡 bg-yellow-100 text-yellow-800'
@@ -152,8 +152,8 @@ export default function LoanDetail() {
                 ? '🟢 bg-green-100 text-green-800'
                 : '🔴 bg-red-100 text-red-800'
           }`}>
-            {loan.status === 'seeking' && isOverdue ? '🔴 Overdue' : 
-             loan.status === 'seeking' ? '🟡 Seeking' : 
+            {loan.status === 'open' && isOverdue ? '🔴 Overdue' : 
+             loan.status === 'open' ? '🟡 Open' : 
              loan.status === 'funded' ? '💰 Funded' :
              loan.status === 'repaid' ? '🟢 Repaid' : '🔴 Default'}
           </span>
@@ -251,17 +251,17 @@ export default function LoanDetail() {
             <dl className="space-y-3">
               <div className="flex justify-between">
                 <dt className="text-gray-600">Loan Amount:</dt>
-                <dd className="font-medium">${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6) && loan.yield_bps ? 
-                  (((Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6) * 10000) / (10000 + loan.yield_bps)).toFixed(2) : '0.00'}</dd>
+                <dd className="font-medium">${loan.repay_usdc && loan.yield_bps ? 
+                  ((loan.repay_usdc * 10000) / (10000 + loan.yield_bps)).toFixed(2) : '0.00'}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-600">Interest:</dt>
-                <dd className="font-medium">${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6) && loan.yield_bps ? 
-                  ((Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6) - ((Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6) * 10000) / (10000 + loan.yield_bps)).toFixed(2) : '0.00'}</dd>
+                <dd className="font-medium">${loan.repay_usdc && loan.yield_bps ? 
+                  (loan.repay_usdc - (loan.repay_usdc * 10000) / (10000 + loan.yield_bps)).toFixed(2) : '0.00'}</dd>
               </div>
               <div className="flex justify-between border-t pt-3">
                 <dt className="text-gray-600 font-semibold">Total Repayment:</dt>
-                <dd className="font-bold text-lg">${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6)?.toFixed(2) || '0.00'}</dd>
+                <dd className="font-bold text-lg">${(loan.repay_usdc || 0).toFixed(2)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-600">APR:</dt>
@@ -312,9 +312,9 @@ export default function LoanDetail() {
                   <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
                   <div>
                     <p className="font-medium">Loan Repaid</p>
-                    {loan.repay_tx_hash && (
+                    {loan.tx_repay && (
                       <a
-                        href={`https://basescan.org/tx/${loan.repay_tx_hash}`}
+                        href={`https://basescan.org/tx/${loan.tx_repay}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-[#6936F5] hover:underline"
@@ -347,7 +347,7 @@ export default function LoanDetail() {
           </div>
         </div>
 
-        {loan.status === 'seeking' && !isOverdue && (
+        {loan.status === 'open' && !isOverdue && (
           <div className="mt-8 p-6 bg-blue-50 border-2 border-blue-200 rounded-lg">
             <h3 className="font-semibold text-blue-900 mb-2">💸 Payment Instructions</h3>
             <p className="text-sm text-blue-800 mb-3">
@@ -369,7 +369,7 @@ export default function LoanDetail() {
           <div className="mt-8 p-6 bg-green-50 border-2 border-green-200 rounded-lg">
             <h3 className="font-semibold text-green-900 mb-2">✅ Loan Funded - Ready for Repayment</h3>
             <p className="text-sm text-green-800 mb-4">
-              This loan has been funded and is ready for repayment. Send ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6)?.toFixed(2)} USDC to the lender.
+              This loan has been funded and is ready for repayment. Send ${(loan.repay_usdc || 0).toFixed(2)} USDC to the lender.
             </p>
             <div className="flex gap-3">
               <button

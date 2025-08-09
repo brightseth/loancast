@@ -71,7 +71,7 @@ export function RepaymentModal({ loan, lenderAddress, onClose }: RepaymentModalP
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <h3 className="font-medium text-blue-900 mb-2">Repayment Instructions</h3>
               <ol className="text-sm text-blue-800 space-y-1">
-                <li>1. Send ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(2)} USDC to the lender</li>
+                <li>1. Send ${(loan.repay_usdc || 0).toFixed(2)} USDC to the lender</li>
                 <li>2. Lender address: <code className="text-xs bg-blue-100 px-1 rounded">{lenderAddress.slice(0, 6)}…{lenderAddress.slice(-4)}</code></li>
                 <li>3. Enter the transaction hash below</li>
               </ol>
@@ -168,7 +168,7 @@ export function RepaymentModal({ loan, lenderAddress, onClose }: RepaymentModalP
               
               <button
                 onClick={() => {
-                  const text = `✅ Repaid $${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(0)} USDC loan on time via LoanCast.\n\nBuilding reputation on-chain. Social lending works.\n\n/loancast`
+                  const text = `✅ Repaid $${(loan.repay_usdc || 0).toFixed(0)} USDC loan on time via LoanCast.\n\nBuilding reputation on-chain. Social lending works.\n\n/loancast`
                   const warpcastUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`
                   window.open(warpcastUrl, '_blank')
                   setCastPosted(true)

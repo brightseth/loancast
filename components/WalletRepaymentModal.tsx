@@ -78,7 +78,7 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
     setError('')
 
     try {
-      const amount = Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6 || 0
+      const amount = loan.repay_usdc || 0
       const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' // USDC on Base
       
       // Check if we're in a browser with wallet support
@@ -253,7 +253,7 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Repayment Complete!</h3>
             <p className="text-gray-600 mb-4">
-              Successfully sent ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(2)} USDC to the lender
+              Successfully sent ${(loan.repay_usdc || 0).toFixed(2)} USDC to the lender
             </p>
             {txHash && (
               <div className="bg-gray-50 rounded-lg p-3 mb-4">
@@ -297,7 +297,7 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
           <div className="space-y-1 text-sm text-blue-800">
             <div className="flex justify-between">
               <span>Amount:</span>
-              <span className="font-medium">${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(2)} USDC</span>
+              <span className="font-medium">${(loan.repay_usdc || 0).toFixed(2)} USDC</span>
             </div>
             <div className="flex justify-between">
               <span>To:</span>
@@ -409,7 +409,7 @@ export function WalletRepaymentModal({ loan, lenderAddress, onClose }: WalletRep
             ) : (
               <>
                 <Wallet className="w-4 h-4" />
-                Send ${(Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6).toFixed(0)} USDC
+                Send ${(loan.repay_usdc || 0).toFixed(0)} USDC
               </>
             )}
           </button>

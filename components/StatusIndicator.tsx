@@ -15,8 +15,8 @@ export function StatusIndicator({ loan }: StatusIndicatorProps) {
   const [linkCopied, setLinkCopied] = useState(false)
   
   // Mock funding data - in production this would come from bids/funding table
-  const targetAmount = Number(BigInt(loan.repay_expected_usdc || '0')) / 1e6 || 0
-  const fundedAmount = Number(BigInt(loan.amount_usdc || '0')) / 1e6 || 0
+  const targetAmount = loan.repay_usdc || 0
+  const fundedAmount = loan.gross_usdc || 0
   const fundingProgress = targetAmount > 0 ? (fundedAmount / targetAmount) * 100 : 0
   
   // Calculate time left for funding (24h from creation)
@@ -71,7 +71,7 @@ export function StatusIndicator({ loan }: StatusIndicatorProps) {
     }
   }
 
-  if (loan.status !== 'seeking') {
+  if (loan.status !== 'open') {
     return null
   }
 
