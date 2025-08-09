@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
 import { getPlatformStats } from '@/lib/database-utils'
+import { checkApiEnabled } from '@/lib/api-flags'
 
 export async function GET(request: NextRequest) {
+  // Check if analytics endpoints are enabled
+  const flagCheck = checkApiEnabled('/api/stats')
+  if (flagCheck) return flagCheck
   // Check rate limit first - use readOnly limiter for public stats
   const { result, response } = await withRateLimit(request, rateLimiters.readOnly)
   if (response) return response

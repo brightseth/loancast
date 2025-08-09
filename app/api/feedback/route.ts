@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
 import * as Sentry from '@sentry/nextjs'
+import { checkApiEnabled } from '@/lib/api-flags'
 
 export async function POST(request: NextRequest) {
+  // Check if feedback endpoints are enabled
+  const flagCheck = checkApiEnabled('/api/feedback')
+  if (flagCheck) return flagCheck
   // Check rate limit first
   const { result, response } = await withRateLimit(request, rateLimiters.api)
   if (response) return response

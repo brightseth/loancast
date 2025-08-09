@@ -4,7 +4,7 @@ import { createLoanCast } from '@/lib/neynar'
 import { canCreateLoans } from '@/lib/feature-flags'
 import { canRequestLoan } from '@/lib/reputation'
 import { toUsdc, mul102, fmtUsdc, parseUsdc } from '@/lib/usdc'
-import { checkRateLimit } from '@/lib/rate-limiting'
+import { checkRateLimit } from '@/lib/rate-limit-memory'
 // import { trackLoan, // reportError } from '@/lib/observability'
 import { addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
@@ -37,11 +37,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Rate limiting
-    const rateLimitResult = await checkRateLimit(request, '/api/loans')
+    // Rate limiting (in-memory for MVP)
+    const ip = request.ip || 'unknown'
+    const rateLimitResult = await checkRateLimit(`${ip}-loans-post`)
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
-        { error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime },
+        { error: 'Rate limit exceeded' },
         { status: 429 }
       )
     }
@@ -130,8 +131,7 @@ export async function POST(request: NextRequest) {
       repay_expected_formatted: (amount * 1.02).toFixed(2)
     }, {
       headers: {
-        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-        'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
       }
     })
 
@@ -156,11 +156,12 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // Rate limiting
-    const rateLimitResult = await checkRateLimit(request, '/api/loans')
+    // Rate limiting (in-memory for MVP)
+    const ip = request.ip || 'unknown'
+    const rateLimitResult = await checkRateLimit(`${ip}-loans-get`)
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
-        { error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime },
+        { error: 'Rate limit exceeded' },
         { status: 429 }
       )
     }
@@ -224,8 +225,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(formattedLoans, {
       headers: {
-        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-        'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
       }
     })
 

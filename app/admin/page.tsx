@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { isEnabled } from '@/lib/flags'
 
 interface LoanStats {
   totalLoans: number
@@ -12,6 +13,37 @@ interface LoanStats {
 }
 
 export default function AdminDashboard() {
+  // Check if admin dashboard is enabled
+  if (!isEnabled('ADMIN_DASHBOARD')) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <div className="text-6xl mb-4">🚧</div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Admin Dashboard Disabled</h1>
+            <p className="text-gray-600 mb-6">
+              The admin dashboard has been temporarily disabled as part of our MVP stability improvements. 
+              Core application features continue to work normally.
+            </p>
+            <div className="space-y-2">
+              <a
+                href="/"
+                className="block w-full bg-[#6936F5] text-white px-4 py-2 rounded-lg hover:bg-[#5929cc] transition"
+              >
+                Return to App
+              </a>
+              <a
+                href="/explore"
+                className="block w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+              >
+                Browse Loans
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
   const [stats, setStats] = useState<LoanStats | null>(null)
   const [recentLoans, setRecentLoans] = useState([])
   const [upcomingRepayments, setUpcomingRepayments] = useState([])

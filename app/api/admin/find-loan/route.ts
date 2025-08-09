@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { checkApiEnabled } from '@/lib/api-flags'
 
 export async function GET(request: NextRequest) {
+  // Check if admin endpoints are enabled
+  const flagCheck = checkApiEnabled('/api/admin/find-loan')
+  if (flagCheck) return flagCheck
   try {
     const searchParams = request.nextUrl.searchParams
     const repayAmount = searchParams.get('repay_amount')

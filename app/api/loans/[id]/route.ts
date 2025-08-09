@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { fmtUsdc } from '@/lib/usdc'
-import { checkRateLimit } from '@/lib/rate-limiting'
+import { checkRateLimit } from '@/lib/rate-limit-memory'
 // import { // reportError } from '@/lib/observability'
 import { z } from 'zod'
 
@@ -16,11 +16,12 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Rate limiting
-    const rateLimitResult = await checkRateLimit(request, '/api/loans')
+    // Rate limiting (in-memory for MVP)
+    const ip = request.ip || 'unknown'
+    const rateLimitResult = await checkRateLimit(`${ip}-loans-get`)
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
-        { error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime },
+        { error: 'Rate limit exceeded' },
         { status: 429 }
       )
     }
@@ -67,8 +68,7 @@ export async function GET(
 
     return NextResponse.json(formattedLoan, {
       headers: {
-        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-        'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
       }
     })
   } catch (error) {
@@ -89,11 +89,12 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Rate limiting
-    const rateLimitResult = await checkRateLimit(request, '/api/loans')
+    // Rate limiting (in-memory for MVP)
+    const ip = request.ip || 'unknown'
+    const rateLimitResult = await checkRateLimit(`${ip}-loans-patch`)
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
-        { error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime },
+        { error: 'Rate limit exceeded' },
         { status: 429 }
       )
     }
@@ -155,8 +156,7 @@ export async function PATCH(
 
     return NextResponse.json(formattedLoan, {
       headers: {
-        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-        'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
       }
     })
 

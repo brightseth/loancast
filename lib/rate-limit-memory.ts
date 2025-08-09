@@ -1,0 +1,52 @@
+/**
+ * Simple in-memory rate limiter for MVP
+ * No database dependencies
+ */
+
+interface RateLimitEntry {
+  count: number
+  resetTime: number
+}
+
+// In-memory store (resets on deploy)
+const store = new Map<string, RateLimitEntry>()
+
+// Clean old entries every minute
+setInterval(() => {
+  const now = Date.now()
+  for (const [key, entry] of store.entries()) {
+    if (entry.resetTime < now) {
+      store.delete(key)
+    }
+  }
+}, 60000)
+
+export async function checkRateLimit(
+  identifier: string,
+  limit: number = 10,
+  windowMs: number = 60000
+): Promise<{ allowed: boolean; remaining: number }> {
+  const now = Date.now()
+  const key = identifier
+  
+  const entry = store.get(key)
+  
+  if (!entry || entry.resetTime < now) {
+    // New window
+    store.set(key, {
+      count: 1,
+      resetTime: now + windowMs
+    })
+    return { allowed: true, remaining: limit - 1 }
+  }
+  
+  if (entry.count >= limit) {
+    return { allowed: false, remaining: 0 }
+  }
+  
+  // Increment count
+  entry.count++
+  store.set(key, entry)
+  
+  return { allowed: true, remaining: limit - entry.count }
+}
