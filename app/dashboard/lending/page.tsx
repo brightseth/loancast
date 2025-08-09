@@ -54,13 +54,17 @@ export default function LendingDashboard() {
   const activeLoans = loans.filter(loan => loan.status === 'funded')
   const repaidLoans = loans.filter(loan => loan.status === 'repaid')
   
-  // Debug logging
-  console.log('Dashboard Debug:', {
-    totalLoans: loans.length,
-    activeLoans: activeLoans.length,
-    loanStatuses: loans.map(l => l.status),
-    userFid: user?.fid
-  })
+  // Debug logging (client-side only)
+  useEffect(() => {
+    if (loans.length > 0) {
+      console.log('Dashboard Debug:', {
+        totalLoans: loans.length,
+        activeLoans: activeLoans.length,
+        loanStatuses: loans.map(l => l.status),
+        userFid: user?.fid
+      })
+    }
+  }, [loans, activeLoans.length, user?.fid])
   const totalEarnings = repaidLoans.reduce((sum, loan) => {
     const principal = loan.gross_usdc || 0
     const repayment = loan.repay_usdc || 0
