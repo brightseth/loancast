@@ -119,7 +119,7 @@ export default function LoanDetail() {
 
   const dueDate = new Date(loan.due_ts)
   const isOverdue = isPast(dueDate) && loan.status === 'seeking'
-  const apr = loan.yield_bps / 100
+  const apr = (loan.yield_bps || 0) / 100
   const auctionEndTime = addDays(new Date(loan.created_at), 1)
   const isAuctionActive = !isPast(auctionEndTime) && loan.status === 'seeking'
 
