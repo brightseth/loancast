@@ -292,13 +292,13 @@ export default function LoanDetail() {
                 </div>
               </div>
               
-              {loan.funded_at && (
+              {loan.status === 'funded' && (
                 <div className="flex items-start space-x-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                   <div>
                     <p className="font-medium">Loan Funded</p>
                     <p className="text-sm text-gray-600">
-                      {format(new Date(loan.funded_at), 'MMM dd, yyyy HH:mm')}
+                      {format(new Date(loan.updated_at), 'MMM dd, yyyy HH:mm')}
                     </p>
                     {loan.lender_fid && (
                       <p className="text-sm text-gray-600">Lender FID: {loan.lender_fid}</p>
