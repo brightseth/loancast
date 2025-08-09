@@ -18,9 +18,11 @@ export default function LendingDashboard() {
 
   const fetchLenderLoans = async (lenderFid: number) => {
     try {
-      const response = await fetch(`/api/loans?lender_fid=${lenderFid}`)
+      // Add timestamp to prevent caching issues
+      const response = await fetch(`/api/loans?lender_fid=${lenderFid}&t=${Date.now()}`)
       if (response.ok) {
         const data = await response.json()
+        console.log('Fetched loan data:', data) // Debug logging
         setLoans(data)
       }
     } catch (error) {
@@ -53,6 +55,16 @@ export default function LendingDashboard() {
 
   const activeLoans = loans.filter(loan => loan.status === 'funded')
   const repaidLoans = loans.filter(loan => loan.status === 'repaid')
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('Dashboard state:', {
+      totalLoans: loans.length,
+      activeLoans: activeLoans.length,
+      loanStatuses: loans.map(l => ({ id: l.id.slice(0,8), status: l.status })),
+      userFid: user?.fid
+    })
+  }, [loans, activeLoans.length, user?.fid])
   const totalEarnings = repaidLoans.reduce((sum, loan) => {
     const principal = loan.gross_usdc || 0
     const repayment = loan.repay_usdc || 0

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { fmtUsdc } from '@/lib/usdc'
 import { checkRateLimit } from '@/lib/rate-limiting'
-import { reportError } from '@/lib/observability'
+// import { // reportError } from '@/lib/observability'
 import { z } from 'zod'
 
 // Schema for loan updates (only pre-funding)
@@ -73,10 +73,10 @@ export async function GET(
       }
     })
   } catch (error) {
-    reportError(error instanceof Error ? error : new Error('Unknown error'), {
-      loan_id: params.id,
-      endpoint: 'GET /api/loans/[id]'
-    })
+    // reportError(error instanceof Error ? error : new Error('Unknown error'), {
+    //   loan_id: params.id,
+    //   endpoint: 'GET /api/loans/[id]'
+    // })
     return NextResponse.json(
       { error: 'Failed to fetch loan' },
       { status: 500 }
@@ -137,10 +137,10 @@ export async function PATCH(
       .single()
 
     if (updateError) {
-      reportError(new Error(`Loan update failed: ${updateError.message}`), {
-        loan_id: id,
-        endpoint: 'PATCH /api/loans/[id]'
-      })
+      // reportError(new Error(`Loan update failed: ${updateError.message}`), {
+      //   loan_id: id,
+      //   endpoint: 'PATCH /api/loans/[id]'
+      // })
       return NextResponse.json(
         { error: 'Failed to update loan' },
         { status: 500 }
@@ -169,10 +169,10 @@ export async function PATCH(
       )
     }
 
-    reportError(error instanceof Error ? error : new Error('Unknown error'), {
-      loan_id: params.id,
-      endpoint: 'PATCH /api/loans/[id]'
-    })
+    // reportError(error instanceof Error ? error : new Error('Unknown error'), {
+    //   loan_id: params.id,
+    //   endpoint: 'PATCH /api/loans/[id]'
+    // })
     
     return NextResponse.json(
       { error: 'Failed to update loan' },

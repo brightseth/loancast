@@ -5,7 +5,7 @@ import { canCreateLoans } from '@/lib/feature-flags'
 import { canRequestLoan } from '@/lib/reputation'
 import { toUsdc, mul102, fmtUsdc, parseUsdc } from '@/lib/usdc'
 import { checkRateLimit } from '@/lib/rate-limiting'
-import { trackLoan, reportError } from '@/lib/observability'
+// import { trackLoan, // reportError } from '@/lib/observability'
 import { addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
 import { z } from 'zod'
@@ -105,11 +105,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      reportError(new Error(`Loan creation failed: ${error.message}`), {
-        loan_id: loanId,
-        fid: borrower_fid,
-        endpoint: 'POST /api/loans'
-      })
+      // reportError(new Error(`Loan creation failed: ${error.message}`), {
+      //   loan_id: loanId,
+      //   fid: borrower_fid,
+      //   endpoint: 'POST /api/loans'
+      // })
       return NextResponse.json(
         { error: 'Failed to create loan' },
         { status: 500 }
@@ -117,12 +117,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Track successful loan creation
-    trackLoan('loan_created', loanId, {
-      borrower_fid,
-      amount_usdc: amountWei.toString(),
-      duration_days: duration_months * 30,
-      cast_hash: castHash
-    })
+    // trackLoan('loan_created', loanId, {
+    //   borrower_fid,
+    //   amount_usdc: amountWei.toString(),
+    //   duration_days: duration_months * 30,
+    //   cast_hash: castHash
+    // })
 
     return NextResponse.json({
       ...loan,
@@ -143,9 +143,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    reportError(error instanceof Error ? error : new Error('Unknown error'), {
-      endpoint: 'POST /api/loans'
-    })
+    // reportError(error instanceof Error ? error : new Error('Unknown error'), {
+    //   endpoint: 'POST /api/loans'
+    // })
     
     return NextResponse.json(
       { error: 'Failed to create loan' },
@@ -207,9 +207,9 @@ export async function GET(request: NextRequest) {
       .limit(limit)
 
     if (error) {
-      reportError(new Error(`Loan query failed: ${error.message}`), {
-        endpoint: 'GET /api/loans'
-      })
+      // reportError(new Error(`Loan query failed: ${error.message}`), {
+      //   endpoint: 'GET /api/loans'
+      // })
       return NextResponse.json(
         { error: 'Failed to fetch loans' },
         { status: 500 }
@@ -238,9 +238,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    reportError(error instanceof Error ? error : new Error('Unknown error'), {
-      endpoint: 'GET /api/loans'
-    })
+    // reportError(error instanceof Error ? error : new Error('Unknown error'), {
+    //   endpoint: 'GET /api/loans'
+    // })
     
     return NextResponse.json(
       { error: 'Failed to fetch loans' },
