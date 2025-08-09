@@ -104,7 +104,7 @@ export default function Explore() {
       
       let filteredData = data || []
       if (filter === 'active') {
-        filteredData = (data || []).filter((loan: Loan) => loan.status === 'open')
+        filteredData = (data || []).filter((loan: Loan) => loan.status === 'seeking')
       } else if (filter === 'funded') {
         filteredData = (data || []).filter((loan: Loan) => loan.status === 'funded')
       }
