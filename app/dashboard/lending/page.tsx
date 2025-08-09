@@ -20,13 +20,20 @@ export default function LendingDashboard() {
     try {
       // Add timestamp to prevent caching issues
       const response = await fetch(`/api/loans?lender_fid=${lenderFid}&t=${Date.now()}`)
+      console.log('API Response status:', response.status)
       if (response.ok) {
         const data = await response.json()
         console.log('Fetched loan data:', data) // Debug logging
+        console.log('Setting loans state with:', data.length, 'loans')
         setLoans(data)
+      } else {
+        const errorText = await response.text()
+        console.error('API Error:', response.status, errorText)
+        setLoans([])
       }
     } catch (error) {
       console.error('Error fetching lender loans:', error)
+      setLoans([])
     } finally {
       setLoading(false)
     }
