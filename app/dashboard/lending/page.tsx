@@ -66,16 +66,6 @@ export default function LendingDashboard() {
 
   const activeLoans = loans.filter(loan => loan.status === 'funded')
   const repaidLoans = loans.filter(loan => loan.status === 'repaid')
-  
-  // Debug logging
-  useEffect(() => {
-    console.log('Dashboard state:', {
-      totalLoans: loans.length,
-      activeLoans: activeLoans.length,
-      loanStatuses: loans.map(l => ({ id: l.id.slice(0,8), status: l.status })),
-      userFid: user?.fid
-    })
-  }, [loans, user?.fid])
   const totalEarnings = repaidLoans.reduce((sum, loan) => {
     const principal = loan.gross_usdc || 0
     const repayment = loan.repay_usdc || 0
