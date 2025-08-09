@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { fmtUsdc } from '@/lib/usdc'
-import { checkRateLimit } from '@/lib/rate-limit-memory'
+import { checkRateLimit } from '@/lib/rate-limit'
 // import { // reportError } from '@/lib/observability'
 import { z } from 'zod'
 

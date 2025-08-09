@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { createLoanCast } from '@/lib/neynar'
-import { canCreateLoans } from '@/lib/feature-flags'
-import { canRequestLoan } from '@/lib/reputation'
+import { isEnabled } from '@/lib/flags'
 import { toUsdc, mul102, fmtUsdc, parseUsdc } from '@/lib/usdc'
-import { checkRateLimit } from '@/lib/rate-limit-memory'
+import { checkRateLimit } from '@/lib/rate-limit'
 // import { trackLoan, // reportError } from '@/lib/observability'
 import { addDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
@@ -28,11 +27,10 @@ const LoanQuerySchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // Feature flag check
-    const loanCheck = canCreateLoans()
-    if (!loanCheck.allowed) {
+    // Feature flag check  
+    if (!isEnabled('BORROW_FLOW')) {
       return NextResponse.json(
-        { error: loanCheck.reason },
+        { error: 'Loan creation disabled' },
         { status: 503 }
       )
     }
@@ -58,11 +56,10 @@ export async function POST(request: NextRequest) {
     const repaymentWei = mul102(amountWei)
     const dueDate = addDays(new Date(), duration_months * 30)
 
-    // Check borrower eligibility
-    const eligibility = await canRequestLoan(borrower_fid.toString(), amount)
-    if (!eligibility.allowed) {
+    // Simple eligibility check (replace complex reputation system)
+    if (amount > 1000) {
       return NextResponse.json(
-        { error: eligibility.reason || 'Loan request not allowed' },
+        { error: 'Amount too large for MVP' },
         { status: 400 }
       )
     }

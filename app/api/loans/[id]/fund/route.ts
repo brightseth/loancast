@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { createFundingCast, getUserByFid } from '@/lib/neynar'
-import { notificationService } from '@/lib/notifications'
-import { canFundLoans } from '@/lib/feature-flags'
+import { isEnabled } from '@/lib/flags'
 
 export async function POST(
   request: Request,
@@ -10,10 +9,10 @@ export async function POST(
 ) {
   try {
     // Check kill switch first
-    const fundingCheck = canFundLoans()
-    if (!fundingCheck.allowed) {
+    // Simple feature flag check
+    if (!isEnabled('BORROW_FLOW')) {
       return NextResponse.json(
-        { error: fundingCheck.reason },
+        { error: 'Funding disabled' },
         { status: 503 }
       )
     }
@@ -124,15 +123,7 @@ export async function POST(
         const borrowerName = (borrowerData as any)?.display_name || (borrowerData as any)?.username || `FID ${loan.borrower_fid}`
         const loanId = `LOANCAST-${loan.loan_number.toString().padStart(4, '0')}`
         
-        // Send notification to borrower
-        await notificationService.notifyLoanFunded(
-          loan.borrower_fid,
-          params.id,
-          lenderName,
-          amount,
-          signerUuid,
-          loan.cast_hash
-        )
+        // Notifications removed for MVP simplicity
         
         // Create funding cast if we have the necessary data
         if (loan.cast_hash && signerUuid) {

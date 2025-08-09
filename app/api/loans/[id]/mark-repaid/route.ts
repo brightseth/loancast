@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import { notificationService } from '@/lib/notifications'
 import { getUserByFid } from '@/lib/neynar'
-import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(
   request: NextRequest,
