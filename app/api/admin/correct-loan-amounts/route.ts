@@ -12,6 +12,21 @@ export async function POST(request: NextRequest) {
       actualRepayAmount 
     })
     
+    // First check if loan exists and get current data
+    const { data: currentLoan, error: fetchError } = await supabaseAdmin
+      .from('loans')
+      .select('*')
+      .eq('id', loanId)
+      .single()
+    
+    if (fetchError || !currentLoan) {
+      console.error('Loan not found:', loanId, fetchError)
+      return NextResponse.json(
+        { error: 'Loan not found', details: fetchError?.message },
+        { status: 404 }
+      )
+    }
+    
     // Update the loan with correct amounts
     const { data: updated, error: updateError } = await supabaseAdmin
       .from('loans')
@@ -19,7 +34,6 @@ export async function POST(request: NextRequest) {
         gross_usdc: actualLoanAmount,  // The bid amount
         net_usdc: actualLoanAmount * 0.9, // After 10% platform fee
         repay_usdc: actualRepayAmount, // Principal + 2%
-        notes: `Corrected: Actual loan based on $${actualLoanAmount} collection bid, not the max request`,
         updated_at: new Date().toISOString()
       })
       .eq('id', loanId)
