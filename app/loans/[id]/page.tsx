@@ -312,9 +312,9 @@ export default function LoanDetail() {
                   <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
                   <div>
                     <p className="font-medium">Loan Repaid</p>
-                    {loan.tx_repay && (
+                    {loan.repay_tx_hash && (
                       <a
-                        href={`https://basescan.org/tx/${loan.tx_repay}`}
+                        href={`https://basescan.org/tx/${loan.repay_tx_hash}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-[#6936F5] hover:underline"
