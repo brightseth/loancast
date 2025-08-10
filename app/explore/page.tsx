@@ -89,7 +89,7 @@ export default function Explore() {
     setLoading(true)
     try {
       console.log('Fetching loans with filter:', filter)
-      const response = await fetch('/api/loans/list')
+      const response = await fetch('/api/loans')
       
       if (!response.ok) {
         console.error('Loans list API error:', response.status, response.statusText)
