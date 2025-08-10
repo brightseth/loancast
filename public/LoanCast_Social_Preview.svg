@@ -1,0 +1,18 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F5F7FA"/>
+      <stop offset="1" stop-color="#E8ECEF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(80,120) scale(1.1)">
+    <polygon fill="#2878F2" points="120,180 300,110 300,250" />
+    <rect x="300" y="140" width="70" height="100" rx="14" fill="#2878F2"/>
+    <rect x="335" y="200" width="28" height="90" rx="10" fill="#2878F2"/>
+    <line x1="100" y1="150" x2="45" y2="120" stroke="#2878F2" stroke-width="16" stroke-linecap="round"/>
+    <line x1="100" y1="210" x2="45" y2="245" stroke="#2878F2" stroke-width="16" stroke-linecap="round"/>
+  </g>
+  <text x="420" y="300" fill="#1B2A41" font-family="Sora, Inter, Arial, sans-serif" font-size="80" font-weight="700">LoanCast</text>
+  <text x="420" y="375" fill="#1B2A41" font-family="Inter, Arial, sans-serif" font-size="34" opacity="0.9">Trust‑based lending on Farcaster</text>
+</svg>

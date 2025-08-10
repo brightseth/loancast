@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .megaphone { fill: #2878F2; }
+      .text { fill: #1B2A41; font-family: 'Satoshi', 'Inter', Arial, sans-serif; font-weight: 600; }
+    </style>
+  </defs>
+  
+  <!-- Blue Megaphone Icon -->
+  <path class="megaphone" d="M76 390c-45.5 0-82.4 36.9-82.4 82.4v35.2c0 45.5 36.9 82.4 82.4 82.4h52.8c45.5 0 82.4-36.9 82.4-82.4V472.4c0-45.5-36.9-82.4-82.4-82.4H76z" transform="rotate(-25 150 500) scale(1.2)"/>
+  
+  <!-- Megaphone opening -->
+  <ellipse class="megaphone" cx="280" cy="500" rx="40" ry="80" transform="rotate(-25 280 500)"/>
+  
+  <!-- LoanCast Text -->
+  <text class="text" x="330" y="520" font-size="120" font-weight="600">LoanCast</text>
+</svg>

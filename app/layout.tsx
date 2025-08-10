@@ -11,17 +11,29 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'LoanCast - Social Lending on Farcaster',
-  description: 'Social lending with no credit check, no collateral. Fixed 2% monthly rate.',
+  description: 'Borrow from friends. No banks, no credit checks, no collateral. Fixed 2% monthly rate.',
   openGraph: {
-    title: 'LoanCast - Social Lending on Farcaster',
-    description: 'Social lending with no credit check, no collateral. Fixed 2% monthly rate.',
-    images: [`${process.env.NEXT_PUBLIC_APP_URL}/api/frame/image`],
+    title: 'LoanCast - Trust-based lending on Farcaster',
+    description: 'Borrow from friends. No banks, no credit checks, no collateral. Fixed 2% monthly rate.',
+    images: [
+      {
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/api/frame/image`,
+        width: 1200,
+        height: 630,
+        alt: 'LoanCast - Trust-based lending on Farcaster',
+      },
+    ],
+    type: 'website',
+    url: `${process.env.NEXT_PUBLIC_APP_URL}`,
+    siteName: 'LoanCast',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'LoanCast',
-    description: 'Social lending with no credit check, no collateral',
+    title: 'LoanCast - Trust-based lending on Farcaster',
+    description: 'Borrow from friends. No banks, no credit checks, no collateral.',
     images: [`${process.env.NEXT_PUBLIC_APP_URL}/api/frame/image`],
+    creator: '@loancast',
+    site: '@loancast',
   },
   other: {
     'fc:frame': 'vNext',

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { ImageResponse } from 'next/og'
 
-export const runtime = 'edge'
+// Remove edge runtime to fix Supabase compatibility
+// export const runtime = 'edge'
 
 export async function GET(
   request: NextRequest,
@@ -26,6 +27,7 @@ export async function GET(
     const repayAmount = loan.repay_usdc || 0
     const dueDate = new Date(loan.due_ts).toLocaleDateString()
     const loanId = loan.id.slice(0, 6).toUpperCase()
+    const description = loan.description || null
 
     return new ImageResponse(
       (
@@ -105,6 +107,26 @@ export async function GET(
                 LOANCAST-{loanId}
               </div>
             </div>
+
+            {/* Description */}
+            {description && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 20,
+                  padding: '12px 20px',
+                  backgroundColor: '#f3f4f6',
+                  borderRadius: 8,
+                }}
+              >
+                <span style={{ fontSize: 22, marginRight: 8 }}>💬</span>
+                <span style={{ fontSize: 20, color: '#4b5563', fontStyle: 'italic' }}>
+                  {description}
+                </span>
+              </div>
+            )}
 
             {/* Amount */}
             <div
