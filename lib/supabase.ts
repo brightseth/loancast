@@ -21,8 +21,9 @@ export type Loan = {
   cast_hash: string
   borrower_fid: number
   lender_fid: number | null
-  gross_usdc: number | null
-  net_usdc: number | null
+  requested_usdc: number | null  // Original amount requested
+  gross_usdc: number | null      // Actual amount funded after auction
+  net_usdc: number | null        // Net amount after fees
   yield_bps: number
   repay_usdc: number | null
   start_ts: string

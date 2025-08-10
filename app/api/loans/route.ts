@@ -89,7 +89,8 @@ export async function POST(request: NextRequest) {
       cast_hash: castHash,
       start_ts: new Date().toISOString(),
       borrower_fid,
-      gross_usdc: amount,
+      requested_usdc: amount, // Original requested amount
+      gross_usdc: null, // Will be set when funded (after auction)
       yield_bps: 200, // 2% monthly = 200 basis points
       repay_usdc: amount * 1.02, // 2% interest
       due_ts: dueDate.toISOString(),
