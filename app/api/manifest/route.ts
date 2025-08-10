@@ -21,6 +21,11 @@ export async function GET() {
     author: {
       name: "LoanCast",
       url: process.env.NEXT_PUBLIC_APP_URL
+    },
+    accountAssociation: {
+      header: "eyJmaWQiOjUwNDYsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg1MDFhYzdFMzJDOUVhNUE4ZjA2ODRjZTJBMTdFOTkwZDgzMzVGQjY0In0",
+      payload: "eyJkb21haW4iOiJsb2FuY2FzdC5hcHAifQ",
+      signature: "MHgyNmIwNDFmMzkyYWQwYjdkMDU5NzBkY2UwMmY0YTFhZTU2ZGZhYWZjZWI3YWE3ODM5YjM3ZGQ2OTQ3NmU3YjcyM2ZjNTM3NDI0MWU5NWM3MjE3ODk5YTE3NTc0MjE4YWE4MjZkM2NjY2VkYTQ3OWQ5NTU1NWY5NzM0YjAzOTJlZjFj"
     }
   }
 
