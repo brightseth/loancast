@@ -1,0 +1,22 @@
+{
+  "version": "1",
+  "name": "LoanCast",
+  "iconUrl": "https://loancast.app/brand/LoanCast_Icon_Square.png",
+  "splashImageUrl": "https://loancast.app/brand/LoanCast_Social_Preview.png",
+  "splashBackgroundColor": "#6936F5",
+  "homeUrl": "https://loancast.app/miniapp",
+  "description": "Borrow from friends. No banks, no credit checks, no collateral. Fixed 2% monthly rate on USDC.",
+  "shortName": "LoanCast",
+  "colors": {
+    "primary": "#6936F5",
+    "primaryText": "#FFFFFF",
+    "secondary": "#F3F4F6",
+    "secondaryText": "#1F2937"
+  },
+  "webhookUrl": "https://loancast.app/api/webhooks/miniapp",
+  "categories": ["finance", "social"],
+  "author": {
+    "name": "LoanCast",
+    "url": "https://loancast.app"
+  }
+}

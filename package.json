@@ -13,6 +13,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@farcaster/miniapp-sdk": "^0.1.8",
     "@hookform/resolvers": "^5.2.1",
     "@neynar/nodejs-sdk": "^1.16.0",
     "@neynar/react": "^1.2.7",

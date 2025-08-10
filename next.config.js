@@ -6,6 +6,14 @@ const nextConfig = {
   images: {
     domains: ['res.cloudinary.com', 'i.imgur.com'],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/.well-known/farcaster.json',
+        destination: '/api/manifest',
+      },
+    ]
+  },
 }
 
 const sentryWebpackPluginOptions = {
