@@ -120,7 +120,38 @@ export default function NewLoan() {
 
   return (
     <div className="max-w-screen-md mx-auto p-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">New Loan Request</h1>
+      {/* Progress Steps */}
+      <div className="mb-8">
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+              1
+            </div>
+            <span className="text-sm font-medium text-purple-600">Create Request</span>
+          </div>
+          <div className="w-8 h-px bg-gray-300"></div>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm">
+              2
+            </div>
+            <span className="text-sm text-gray-500">Post to Farcaster</span>
+          </div>
+          <div className="w-8 h-px bg-gray-300"></div>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-sm">
+              3
+            </div>
+            <span className="text-sm text-gray-500">Get Funded</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-4">Create Your Loan Request</h1>
+        <p className="text-gray-600 max-w-md mx-auto">
+          Tell your Farcaster friends what you need. Start small to build trust and unlock larger loans.
+        </p>
+      </div>
       
       {/* Error Display */}
       {error && (

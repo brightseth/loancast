@@ -3,6 +3,8 @@
 import { useAuth } from './providers'
 import Link from 'next/link'
 import { ActivityFeed } from '@/components/ActivityFeed'
+import { LoanCalculator } from '@/components/LoanCalculator'
+import { SocialProofFeed } from '@/components/SocialProofFeed'
 import { useEffect, useState } from 'react'
 
 export default function Home() {
@@ -74,8 +76,16 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Right side - Real LoanCast example */}
+        {/* Right side - Interactive Calculator */}
         <div className="flex-1 max-w-sm">
+          <LoanCalculator />
+        </div>
+      </div>
+
+      {/* Previous loan example moved to testimonial section */}
+      <div className="max-w-4xl mx-auto py-16">
+        <h2 className="text-2xl font-bold text-center mb-8">Real Success Story</h2>
+        <div className="max-w-md mx-auto">
           <p className="text-xs text-zinc-400 text-center mb-3">LOANCAST-001 (funded for $789):</p>
           <a 
             href="https://basescan.org/tx/0x019650f986916936dae462ccef30d5a8b9b41d3d6e2212dc088b622db44a06e5" 
@@ -128,9 +138,12 @@ export default function Home() {
       </div>
 
       {/* How It Works Section */}
-      <div className="max-w-4xl mx-auto py-16">
+      <div className="max-w-6xl mx-auto py-16">
         <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-        <div className="grid md:grid-cols-3 gap-8">
+        
+        <div className="grid lg:grid-cols-4 gap-8">
+          {/* Steps 1-3 */}
+          <div className="lg:col-span-3 grid md:grid-cols-3 gap-8">
           <div className="text-center">
             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl">📱</span>
@@ -153,6 +166,12 @@ export default function Home() {
             </div>
             <h3 className="text-xl font-semibold mb-2">3. Repay & Build Trust</h3>
             <p className="text-gray-600">Repay on time to build your reputation and unlock access to larger loans.</p>
+          </div>
+          </div>
+          
+          {/* Activity Feed */}
+          <div className="lg:col-span-1">
+            <SocialProofFeed />
           </div>
         </div>
 

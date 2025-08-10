@@ -52,3 +52,24 @@ export async function checkRateLimit(
   
   return { allowed: true, remaining: limit - entry.count }
 }
+
+// Higher-order function wrapper for API routes
+export function withRateLimit(handler: Function, limit: number = 10, windowMs: number = 60000) {
+  return async (req: Request, ...args: any[]) => {
+    const identifier = req.headers.get('x-forwarded-for') || 'anonymous'
+    const { allowed } = await checkRateLimit(identifier, limit, windowMs)
+    
+    if (!allowed) {
+      return new Response('Rate limit exceeded', { status: 429 })
+    }
+    
+    return handler(req, ...args)
+  }
+}
+
+// Common rate limiters
+export const rateLimiters = {
+  api: (limit = 60, window = 60000) => withRateLimit(null, limit, window),
+  feedback: (limit = 5, window = 60000) => withRateLimit(null, limit, window),
+  strict: (limit = 10, window = 60000) => withRateLimit(null, limit, window)
+}

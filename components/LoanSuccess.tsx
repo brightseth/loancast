@@ -94,6 +94,46 @@ ${isRealCast ? 'Recast to /loancast' : 'Post to Farcaster to start the auction!'
         </p>
       </div>
 
+      {/* Progress Steps */}
+      <div className="mb-6 bg-gray-50 rounded-lg p-4">
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">What happens next:</h3>
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
+              isRealCast ? 'bg-green-600 text-white' : 'bg-purple-600 text-white'
+            }`}>
+              1
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-900">
+                {isRealCast ? '✅ Posted to Farcaster' : '📱 Post to Farcaster'}
+              </p>
+              <p className="text-xs text-gray-600">
+                {isRealCast ? 'Your loan request is live' : 'Click the button below to share with your network'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold bg-gray-300 text-gray-600">
+              2
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-600">⏳ Friends bid to fund you</p>
+              <p className="text-xs text-gray-500">Highest bidder becomes your lender</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold bg-gray-300 text-gray-600">
+              3
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-600">💰 Get funded & repay</p>
+              <p className="text-xs text-gray-500">Build trust for larger loans</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-gray-50 rounded-lg p-4 mb-6">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-700">Cast Hash</span>
