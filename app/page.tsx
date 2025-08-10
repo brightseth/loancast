@@ -15,7 +15,7 @@ export default function Home() {
 
   useEffect(() => {
     // Fetch platform statistics
-    fetch('/api/loans/list')
+    fetch('/api/loans')
       .then(res => res.json())
       .then(loans => {
         const funded = loans.filter((loan: any) => loan.status === 'funded')
@@ -63,14 +63,8 @@ export default function Home() {
           
           {/* Trust signal - real platform stats */}
           <p className="text-sm text-zinc-500">
-            {stats.totalLoans > 0 ? (
-              <>
-                {stats.totalFunded > 0 && `$${stats.totalVolume.toLocaleString()} funded • `}
-                {stats.totalLoans} loan{stats.totalLoans === 1 ? '' : 's'} created
-              </>
-            ) : (
-              'Join the trust-based lending community'
-            )}
+            {stats.totalFunded > 0 && `$${stats.totalVolume.toLocaleString()} funded • `}
+            {stats.totalLoans} loan{stats.totalLoans === 1 ? '' : 's'} created
           </p>
         </div>
 
