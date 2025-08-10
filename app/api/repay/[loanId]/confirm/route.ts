@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { RepaymentConfirmSchema, PaymentError, LoanError, usdcToWei, weiToUsdc, usdc } from '@/lib/domain-types'
-import { checkRateLimit } from '@/lib/rate-limiting'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 // Verify on-chain repayment and update loan status
@@ -11,10 +11,11 @@ export async function POST(
 ) {
   try {
     // Rate limiting for repayment confirmations
-    const rateLimitResult = await checkRateLimit(request, '/api/repay')
+    const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
+    const rateLimitResult = await checkRateLimit(identifier, 10, 60000)
     if (!rateLimitResult.allowed) {
       return new Response(
-        JSON.stringify({ error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime }),
+        JSON.stringify({ error: 'Rate limit exceeded' }),
         { status: 429, headers: { 'Content-Type': 'application/json' } }
       )
     }
@@ -163,8 +164,7 @@ export async function POST(
       }
     }, {
       headers: {
-        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-        'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
       }
     })
     

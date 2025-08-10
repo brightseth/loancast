@@ -24,15 +24,14 @@ export function ReputationBadges({ badges, showAll = false, className = '' }: Re
     <div className={`space-y-2 ${className}`}>
       <div className="flex flex-wrap gap-2">
         {displayBadges.map((badge) => {
-          const badgeInfo = getBadgeInfo(badge)
           return (
             <div
-              key={badge}
+              key={badge.id}
               className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
-              title={badgeInfo.description}
+              title={badge.description}
             >
-              <span>{badgeInfo.icon}</span>
-              <span>{badgeInfo.name}</span>
+              <span>{badge.icon}</span>
+              <span>{badge.name}</span>
             </div>
           )
         })}
@@ -62,18 +61,17 @@ export function BadgeShowcase({ badges }: BadgeShowcaseProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {badges.map((badge) => {
-        const badgeInfo = getBadgeInfo(badge)
         return (
           <div
-            key={badge}
+            key={badge.id}
             className="p-4 rounded-lg border border-purple-200 bg-purple-50 hover:scale-105 transition-transform cursor-help"
-            title={badgeInfo.description}
+            title={badge.description}
           >
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-2xl">{badgeInfo.icon}</span>
-              <span className="font-medium text-sm text-purple-900">{badgeInfo.name}</span>
+              <span className="text-2xl">{badge.icon}</span>
+              <span className="font-medium text-sm text-purple-900">{badge.name}</span>
             </div>
-            <p className="text-xs text-purple-700">{badgeInfo.description}</p>
+            <p className="text-xs text-purple-700">{badge.description}</p>
           </div>
         )
       })}

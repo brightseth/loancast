@@ -10,7 +10,7 @@ import {
   USDC_CONTRACT_ADDRESS 
 } from '@/lib/domain-types'
 import { z } from 'zod'
-import { checkRateLimit } from '@/lib/rate-limiting'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 // Initialize repayment - returns wallet target computed server-side
 export async function POST(
@@ -19,10 +19,11 @@ export async function POST(
 ) {
   try {
     // Rate limiting
-    const rateLimitResult = await checkRateLimit(request, '/api/repay')
+    const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
+    const rateLimitResult = await checkRateLimit(identifier, 10, 60000)
     if (!rateLimitResult.allowed) {
       return new Response(
-        JSON.stringify({ error: 'Rate limit exceeded', resetTime: rateLimitResult.resetTime }),
+        JSON.stringify({ error: 'Rate limit exceeded' }),
         { status: 429, headers: { 'Content-Type': 'application/json' } }
       )
     }
@@ -118,8 +119,7 @@ export async function POST(
       }
     }, {
       headers: {
-        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-        'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString()
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString()
       }
     })
     

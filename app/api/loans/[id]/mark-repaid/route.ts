@@ -8,8 +8,11 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   // Rate limiting
-  const { result, response } = await withRateLimit(request, rateLimiters.api)
-  if (response) return response
+  const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
+  const { allowed } = await checkRateLimit(identifier, 10, 60000)
+  if (!allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+  }
   
   // Add CORS headers for browser requests
   const headers = {
@@ -113,15 +116,16 @@ export async function POST(
         const lenderName = (lenderData as any)?.display_name || (lenderData as any)?.username || `FID ${loan.lender_fid}`
 
         // Notify lender about repayment
-        await notificationService.notifyLoanRepaid(
-          loan.lender_fid,
-          params.id,
-          borrowerName,
-          loan.repay_usdc || 0,
-          isOnTime,
-          undefined, // signerUuid - would need to be passed from frontend
-          loan.cast_hash
-        )
+        // Notification service disabled for MVP
+        // await notificationService.notifyLoanRepaid(
+        //   loan.lender_fid,
+        //   params.id,
+        //   borrowerName,
+        //   loan.repay_usdc || 0,
+        //   isOnTime,
+        //   undefined, // signerUuid - would need to be passed from frontend
+        //   loan.cast_hash
+        // )
 
         console.log(`Sent repayment notification to lender FID ${loan.lender_fid}`)
       } catch (notificationError) {

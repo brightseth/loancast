@@ -117,15 +117,15 @@ export async function POST(request: NextRequest) {
     let result
     switch (data.type) {
       case 'cast.created':
-        result = await handleCastCreated(data.data, eventId)
+        result = await handleCastCreated(data.data, eventId || 'unknown')
         break
         
       case 'reaction.created':
-        result = await handleReactionCreated(data.data, eventId)
+        result = await handleReactionCreated(data.data, eventId || 'unknown')
         break
         
       case 'cast.deleted':
-        result = await handleCastDeleted(data.data, eventId)
+        result = await handleCastDeleted(data.data, eventId || 'unknown')
         break
         
       default:
@@ -278,12 +278,13 @@ async function handleReactionCreated(data: any, eventId: string) {
     }
 
     // Don't let analytics failures block the webhook
-    supabaseAdmin
-      .from('reactions')
-      .insert(reaction)
-      .catch(error => {
-        console.warn('Analytics write failed (non-blocking):', error)
-      })
+    try {
+      await supabaseAdmin
+        .from('reactions')
+        .insert(reaction)
+    } catch (error) {
+      console.warn('Analytics write failed (non-blocking):', error)
+    }
 
     return { 
       processed: true, 

@@ -67,9 +67,9 @@ export function withRateLimit(handler: Function, limit: number = 10, windowMs: n
   }
 }
 
-// Common rate limiters
+// Stub rate limiters (simplified for MVP)
 export const rateLimiters = {
-  api: (limit = 60, window = 60000) => withRateLimit(null, limit, window),
-  feedback: (limit = 5, window = 60000) => withRateLimit(null, limit, window),
-  strict: (limit = 10, window = 60000) => withRateLimit(null, limit, window)
+  api: () => ({ allowed: true, remaining: 99 }),
+  feedback: () => ({ allowed: true, remaining: 99 }),
+  strict: () => ({ allowed: true, remaining: 99 })
 }

@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
-import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   // Rate limiting
-  const { result, response } = await withRateLimit(request, rateLimiters.api)
-  if (response) return response
+  const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
+  const { allowed } = await checkRateLimit(identifier, 10, 60000)
+  if (!allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+  }
 
   try {
     const { tx_hash } = await request.json()

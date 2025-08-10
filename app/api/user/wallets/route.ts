@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { withRateLimit, rateLimiters } from '@/lib/rate-limit'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { getUserByFid } from '@/lib/neynar'
 
 export async function GET(request: NextRequest) {
-  const { result, response } = await withRateLimit(request, rateLimiters.api)
-  if (response) return response
+  const identifier = request.headers.get('x-forwarded-for') || 'anonymous'
+  const { allowed } = await checkRateLimit(identifier, 60, 60000)
+  if (!allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+  }
 
   try {
     // Get FID from query param or session cookie
