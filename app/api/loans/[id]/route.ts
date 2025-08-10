@@ -47,12 +47,13 @@ export async function GET(
         tx_fund,
         tx_repay,
         created_at,
-        updated_at
+        updated_at,
+        listing_deleted_at
       `)
       .eq('id', id)
       .single()
 
-    if (loanError || !loan) {
+    if (loanError || !loan || loan.listing_deleted_at) {
       return NextResponse.json(
         { error: 'Loan not found' },
         { status: 404 }

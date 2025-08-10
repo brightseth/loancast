@@ -347,23 +347,6 @@ export default function LoanDetail() {
           </div>
         </div>
 
-        {loan.status === 'open' && !isOverdue && (
-          <div className="mt-8 p-6 bg-blue-50 border-2 border-blue-200 rounded-lg">
-            <h3 className="font-semibold text-blue-900 mb-2">💸 Payment Instructions</h3>
-            <p className="text-sm text-blue-800 mb-3">
-              To fund this loan, reply to the Farcaster cast with your bid amount (e.g., "$500").
-              The highest bidder at auction end will be selected as the lender.
-            </p>
-            <a
-              href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-[#6936F5] text-white px-4 py-2 rounded-lg hover:bg-[#5929cc] transition"
-            >
-              Place Bid on Farcaster
-            </a>
-          </div>
-        )}
 
         {loan.status === 'funded' && (
           <div className="mt-8 p-6 bg-green-50 border-2 border-green-200 rounded-lg">

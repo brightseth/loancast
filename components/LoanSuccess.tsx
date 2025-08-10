@@ -61,7 +61,7 @@ ${isRealCast ? 'Recast to /loancast' : 'Post to Farcaster to start the auction!'
     <>
       {showSnackBar && (
         <SnackBar 
-          message={isRealCast ? "LoanCast posted to Farcaster 🎉" : isMockCast ? "LoanCast created (mock mode) ⚡" : "LoanCast created 🎯"}
+          message={isRealCast ? "Loan posted to Farcaster 🎉" : isMockCast ? "Loan created (mock mode) ⚡" : "Loan created 🎯"}
           type={isRealCast ? "success" : "info"}
           onClose={() => setShowSnackBar(false)}
         />
@@ -82,7 +82,7 @@ ${isRealCast ? 'Recast to /loancast' : 'Post to Farcaster to start the auction!'
           )}
         </div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">
-          {isRealCast ? 'Cast posted to Farcaster!' : 
+          {isRealCast ? 'Loan posted to Farcaster!' : 
            isFailedCast ? 'Loan created (cast failed)' : 
            isMockCast ? 'Loan created (dev mode)' : 'Loan created successfully!'}
         </h2>
@@ -206,7 +206,7 @@ ${isRealCast ? 'Recast to /loancast' : 'Post to Farcaster to start the auction!'
           onClick={onNewLoan}
           className="w-full text-[#6936F5] py-2 px-4 rounded-lg font-medium hover:bg-[#6936F5]/5 transition"
         >
-          New LoanCast
+          Create Another Loan
         </button>
       </div>
 

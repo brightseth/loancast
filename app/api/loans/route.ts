@@ -188,6 +188,7 @@ export async function GET(request: NextRequest) {
         created_at,
         updated_at
       `)
+// Note: listing_deleted_at column doesn't exist in current schema
 
     if (validatedQuery.borrower_fid) {
       query = query.eq('borrower_fid', validatedQuery.borrower_fid)

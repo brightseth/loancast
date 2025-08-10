@@ -124,7 +124,7 @@ Cast on @loancast
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Lender yield (fixed for early cohorts)
+          Lender yield
         </label>
         <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
           <div className="flex items-center justify-between mb-3">
@@ -138,9 +138,6 @@ Cast on @loancast
             </div>
           </div>
           
-          <div className="p-2 bg-blue-50 rounded text-xs text-blue-700">
-            <span className="text-lg">🔒</span> All early LoanCasts pay 2% lender yield for 30 days.
-          </div>
         </div>
       </div>
 
@@ -216,9 +213,6 @@ Cast on @loancast
           <div className="flex justify-between text-red-600">
             <span>🏛️ Farcaster Fee (10%):</span>
             <span className="font-medium">-${farcasterFee.toFixed(0)}</span>
-          </div>
-          <div className="text-xs text-orange-600 italic mt-1">
-            💡 Fee under negotiation—target 2% soon
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">💰 You Receive:</span>
