@@ -12,7 +12,7 @@ export default function Explore() {
   const searchParams = useSearchParams()
   const [loans, setLoans] = useState<Loan[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'active' | 'funded'>('active')
+  const [filter, setFilter] = useState<'all' | 'active' | 'funded'>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [minAmount, setMinAmount] = useState('')
   const [maxAmount, setMaxAmount] = useState('')
