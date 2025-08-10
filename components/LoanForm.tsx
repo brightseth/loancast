@@ -140,9 +140,6 @@ Cast on @loancast
           
           <div className="p-2 bg-blue-50 rounded text-xs text-blue-700">
             <span className="text-lg">🔒</span> All early LoanCasts pay 2% lender yield for 30 days.
-            <div className="mt-1 text-blue-600">
-              We'll unlock dynamic yields after we've published three full months of performance data.
-            </div>
           </div>
         </div>
       </div>
