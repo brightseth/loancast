@@ -86,14 +86,13 @@ export async function POST(request: NextRequest) {
     const loanData = {
       id: loanId,
       cast_hash: castHash,
-      start_ts: new Date().toISOString(), // Database field for start timestamp
+      start_ts: new Date().toISOString(),
       borrower_fid,
       gross_usdc: amount,
+      yield_bps: 200, // 2% monthly = 200 basis points
       repay_usdc: amount * 1.02, // 2% interest
-      description: description || `Loan for ${fmtUsdc(amountWei)} USDC`,
       due_ts: dueDate.toISOString(),
-      status: 'open',
-      created_at: new Date().toISOString()
+      status: 'open'
     }
 
     const { data: loan, error } = await supabaseAdmin

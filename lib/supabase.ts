@@ -28,7 +28,7 @@ export type Loan = {
   start_ts: string
   due_ts: string
   funded_ts: string | null
-  status: 'open' | 'funded' | 'repaid' | 'default' | 'deleted'
+  status: 'open' | 'funded' | 'repaid' | 'default'
   tx_fund: string | null
   tx_repay: string | null
   created_at: string
