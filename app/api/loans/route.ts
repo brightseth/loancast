@@ -22,6 +22,7 @@ const LoanQuerySchema = z.object({
   borrower_fid: z.string().optional(),
   lender_fid: z.string().optional(), 
   status: z.enum(['open', 'funded', 'due', 'overdue', 'repaid', 'default']).optional(),
+  include_deleted: z.string().transform(val => val === 'true').default('false').optional(),
   limit: z.string().transform(Number).pipe(z.number().int().min(1).max(100)).default('20').optional()
 })
 
@@ -182,13 +183,14 @@ export async function GET(request: NextRequest) {
         repay_usdc,
         start_ts,
         due_ts,
+        listing_deleted_at,
         status,
         tx_fund,
         tx_repay,
         created_at,
         updated_at
       `)
-// Note: listing_deleted_at column doesn't exist in current schema
+      .is('listing_deleted_at', null) // Exclude deleted loans
 
     if (validatedQuery.borrower_fid) {
       query = query.eq('borrower_fid', validatedQuery.borrower_fid)
@@ -198,6 +200,11 @@ export async function GET(request: NextRequest) {
     }
     if (validatedQuery.status) {
       query = query.eq('status', validatedQuery.status)
+    }
+    
+    // Filter out deleted listings by default (unless explicitly requested)
+    if (!validatedQuery.include_deleted) {
+      query = query.is('listing_deleted_at', null)
     }
 
     // Apply limit and ordering
