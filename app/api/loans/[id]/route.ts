@@ -44,6 +44,7 @@ export async function GET(
         start_ts,
         due_ts,
         status,
+        description,
         tx_fund,
         tx_repay,
         created_at,

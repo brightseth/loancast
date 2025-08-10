@@ -15,7 +15,7 @@ const CreateLoanSchema = z.object({
   duration_months: z.number().int().min(1).max(3),
   borrower_fid: z.number().int().positive(),
   signer_uuid: z.string().optional(),
-  description: z.string().min(10).max(500).optional()
+  description: z.string().max(100).optional()
 })
 
 const LoanQuerySchema = z.object({
@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
       yield_bps: 200, // 2% monthly = 200 basis points
       repay_usdc: amount * 1.02, // 2% interest
       due_ts: dueDate.toISOString(),
+      description: description || null,
       status: 'open'
     }
 
@@ -184,6 +185,7 @@ export async function GET(request: NextRequest) {
         start_ts,
         due_ts,
         listing_deleted_at,
+        description,
         status,
         tx_fund,
         tx_repay,

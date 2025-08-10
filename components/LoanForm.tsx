@@ -15,6 +15,10 @@ const loanSchema = z.object({
     .number({ invalid_type_error: 'Duration must be selected' })
     .min(1, 'Minimum duration is 1 month')
     .max(3, 'Maximum duration is 3 months'),
+  description: z
+    .string()
+    .max(100, 'Description must be 100 characters or less')
+    .optional(),
 })
 
 type LoanFormData = z.infer<typeof loanSchema>
@@ -38,11 +42,13 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
     defaultValues: {
       amount: 100,
       duration_months: 1,
+      description: '',
     },
   })
 
   const amount = watch('amount') || 0
   const durationMonths = watch('duration_months') || 1
+  const description = watch('description') || ''
   
   // Fixed 2% monthly rate for all early loans
   const monthlyRate = 0.02 // 2% monthly rate
@@ -54,7 +60,7 @@ export function LoanForm({ onSubmit, isSubmitting }: LoanFormProps) {
   const dueDate = addDays(new Date(), durationMonths * 30)
 
   const castText = `┏━━━━ 💰 LOAN REQUEST ━━━━┓
-
+${description ? `\n💬 ${description}\n` : ''}
 🏦 Borrow ≤ ${amount?.toLocaleString() || '0'} USDC
 📅 ${durationMonths * 30} days • due ${format(dueDate, 'MMM d, yyyy')}
 📈 Yield 2% monthly → repay ${repayAmount.toFixed(0)} USDC
@@ -119,6 +125,28 @@ Cast on @loancast
         </div>
         {errors.amount && (
           <p className="mt-1 text-sm text-red-600">{errors.amount.message}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          What's this for? (optional)
+        </label>
+        <div className="mt-1">
+          <input
+            type="text"
+            {...register('description')}
+            className="focus:ring-[#6936F5] focus:border-[#6936F5] block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2"
+            placeholder="e.g. 🏠 rent help, 💻 laptop repair, 📚 course fees"
+            maxLength={100}
+          />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+          <span>💡 Like Venmo - helps lenders understand your need</span>
+          <span>{(description?.length || 0)}/100</span>
+        </div>
+        {errors.description && (
+          <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
         )}
       </div>
 
