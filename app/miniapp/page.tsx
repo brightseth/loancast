@@ -2,31 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { MiniAppLoanForm } from '../../components/MiniAppLoanForm'
-import { LoanCard } from '../../components/LoanCard'
+import LoanCard from '../../components/LoanCard'
 import { ReputationCard } from '../../components/ReputationCard'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
-
-interface Loan {
-  id: string
-  amount: number
-  interestRate: number
-  dueDate: string
-  purpose: string
-  borrower: {
-    username: string
-    reputation: number
-    totalRepaid: number
-    totalLoans: number
-  }
-  status: 'active' | 'funded' | 'repaid'
-}
+import { Loan } from '../../lib/supabase'
 
 export default function MiniApp() {
   const [activeTab, setActiveTab] = useState<'borrow' | 'lend' | 'profile'>('borrow')
   const [loans, setLoans] = useState<Loan[]>([])
   const [userReputation, setUserReputation] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<any>(null)
 
   // Initialize Farcaster SDK
   useEffect(() => {
@@ -39,13 +25,13 @@ export default function MiniApp() {
         await sdk.actions.ready()
         
         // Get user context
-        const context = await sdk.context.get()
-        setUser(context.user)
+        const context = await sdk.context
+        setUser(context)
         
         // Fetch user's loans and reputation
         await Promise.all([
           fetchLoans(),
-          fetchUserReputation(context.user?.fid)
+          fetchUserReputation(context?.user?.fid?.toString())
         ])
       } catch (error) {
         console.error('Failed to initialize SDK:', error)
@@ -89,17 +75,16 @@ export default function MiniApp() {
       const { sdk } = await import('@farcaster/miniapp-sdk')
       
       // Request wallet interaction
-      await sdk.wallet.sendTransaction({
-        to: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS,
-        value: '0',
-        data: `0xa9059cbb${loanId.padStart(64, '0')}${amount.toString(16).padStart(64, '0')}`
+      await sdk.actions.sendToken({
+        token: process.env.NEXT_PUBLIC_USDC_CONTRACT_ADDRESS!,
+        amount: amount.toString()
       })
       
       // Update loan status
       await fetch(`/api/loans/${loanId}/fund`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, fid: user?.fid })
+        body: JSON.stringify({ amount, fid: user?.user?.fid })
       })
       
       fetchLoans()
@@ -125,7 +110,7 @@ export default function MiniApp() {
             <h1 className="text-xl font-bold text-[#6936F5]">LoanCast</h1>
             {user && (
               <div className="text-sm text-gray-600">
-                @{user.username}
+                @{user?.user?.username}
               </div>
             )}
           </div>
@@ -179,8 +164,7 @@ export default function MiniApp() {
                 <LoanCard
                   key={loan.id}
                   loan={loan}
-                  onFund={handleFundLoan}
-                  showFundButton={true}
+                  userRole="lender"
                 />
               ))
             )}
@@ -190,8 +174,8 @@ export default function MiniApp() {
         {activeTab === 'profile' && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-800">Your Reputation</h2>
-            {userReputation ? (
-              <ReputationCard reputation={userReputation} />
+            {user?.user?.fid ? (
+              <ReputationCard userFid={user.user.fid} />
             ) : (
               <div className="bg-white rounded-lg p-6 text-center">
                 <p className="text-gray-500">No reputation data yet</p>

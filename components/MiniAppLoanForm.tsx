@@ -37,9 +37,9 @@ export function MiniAppLoanForm({ onSuccess }: MiniAppLoanFormProps) {
     try {
       // Get Farcaster context
       const { sdk } = await import('@farcaster/miniapp-sdk')
-      const context = await sdk.context.get()
+      const context = await sdk.context
 
-      if (!context.user?.fid) {
+      if (!context?.user?.fid) {
         throw new Error('Please sign in with Farcaster')
       }
 
@@ -49,7 +49,7 @@ export function MiniAppLoanForm({ onSuccess }: MiniAppLoanFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
-          borrowerFid: context.user.fid,
+          borrowerFid: context?.user?.fid,
           interestRate: 0.02, // 2% monthly
         }),
       })
