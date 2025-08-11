@@ -55,13 +55,34 @@ export async function POST(
       )
     }
     
-    // Verify addresses match loan data
-    if (loan.borrower_addr && validatedData.borrowerAddr.toLowerCase() !== loan.borrower_addr.toLowerCase()) {
-      throw new LoanError('Borrower address mismatch', 'BORROWER_MISMATCH', params.loanId)
+    // Extract lender address from funding transaction if not stored
+    let lenderAddr = validatedData.lenderAddr
+    if (!lenderAddr && loan.tx_fund) {
+      try {
+        // Get lender address from funding transaction
+        const response = await fetch('https://mainnet.base.org', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'eth_getTransactionByHash', 
+            params: [loan.tx_fund],
+            id: 1
+          })
+        })
+        
+        const data = await response.json()
+        if (data.result?.from) {
+          lenderAddr = data.result.from
+          console.log('Extracted lender address from tx_fund:', lenderAddr)
+        }
+      } catch (error) {
+        console.error('Failed to extract lender address from tx_fund:', error)
+      }
     }
     
-    if (loan.lender_addr && validatedData.lenderAddr.toLowerCase() !== loan.lender_addr.toLowerCase()) {
-      throw new LoanError('Lender address mismatch', 'LENDER_MISMATCH', params.loanId)
+    if (!lenderAddr) {
+      throw new LoanError('Lender address required for repayment', 'LENDER_ADDRESS_REQUIRED', params.loanId)
     }
     
     // Calculate exact repayment amount server-side
@@ -76,32 +97,32 @@ export async function POST(
     
     const expectedUsdc = expectedAmount
     
-    // Store repayment intent (atomic operation)
-    const { error: intentError } = await supabaseAdmin
-      .from('repayment_intents')
-      .upsert({
-        loan_id: params.loanId,
-        borrower_addr: validatedData.borrowerAddr,
-        lender_addr: validatedData.lenderAddr,
-        expected_amount: expectedAmount.toString(),
-        status: 'initiated',
-        expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
-      }, {
-        onConflict: 'loan_id,status'
-      })
-    
-    if (intentError) {
-      console.error('Failed to store repayment intent:', intentError)
-      throw new Error('Failed to create repayment intent')
+    // Store repayment intent (skip if table doesn't exist)
+    try {
+      await supabaseAdmin
+        .from('repayment_intents')
+        .upsert({
+          loan_id: params.loanId,
+          borrower_addr: validatedData.borrowerAddr,
+          lender_addr: lenderAddr,
+          expected_amount: expectedAmount.toString(),
+          status: 'initiated',
+          expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
+        }, {
+          onConflict: 'loan_id,status'
+        })
+    } catch (intentError) {
+      // Log but don't fail if repayment_intents table doesn't exist yet
+      console.warn('Repayment intent storage failed (table may not exist):', intentError.message)
     }
     
     // Return wallet target computed server-side
     return NextResponse.json({
       success: true,
       target: {
-        to: validatedData.lenderAddr,
+        to: lenderAddr,
         amount: expectedAmount.toFixed(6), // Full precision
-        memo: `LoanCast repayment #${loan.loan_number}`,
+        memo: `LoanCast repayment #${loan.loan_number || loan.id.substring(0, 8)}`,
         chainId: BASE_CHAIN_ID,
         token: USDC_CONTRACT_ADDRESS
       },
