@@ -9,6 +9,7 @@ import {
   BASE_CHAIN_ID,
   USDC_CONTRACT_ADDRESS 
 } from '@/lib/domain-types'
+import { getVerifiedRepaymentAddress } from '@/lib/cast-nft-lookup'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
 
@@ -31,8 +32,7 @@ export async function POST(
     const body = await request.json()
     const validatedData = RepaymentInitSchema.parse({
       ...body,
-      loanId: params.loanId,
-      expectedAmount: '0' // Will calculate server-side
+      loanId: params.loanId
     })
     
     // Get loan details with required fields
@@ -55,35 +55,22 @@ export async function POST(
       )
     }
     
-    // Extract lender address from funding transaction if not stored
-    let lenderAddr = validatedData.lenderAddr
-    if (!lenderAddr && loan.tx_fund) {
-      try {
-        // Get lender address from funding transaction
-        const response = await fetch('https://mainnet.base.org', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            method: 'eth_getTransactionByHash', 
-            params: [loan.tx_fund],
-            id: 1
-          })
-        })
-        
-        const data = await response.json()
-        if (data.result?.from) {
-          lenderAddr = data.result.from
-          console.log('Extracted lender address from tx_fund:', lenderAddr)
-        }
-      } catch (error) {
-        console.error('Failed to extract lender address from tx_fund:', error)
-      }
+    // Get verified repayment address from Cast NFT holder
+    console.log('Looking up NFT holder for repayment address...')
+    const repaymentResult = await getVerifiedRepaymentAddress(loan.cast_hash, loan.lender_fid)
+    
+    if (!repaymentResult.verified) {
+      console.error('Repayment address verification failed:', repaymentResult.error)
+      throw new LoanError(
+        repaymentResult.error || 'Could not verify repayment address from Cast NFT holder',
+        'REPAYMENT_ADDRESS_VERIFICATION_FAILED',
+        params.loanId
+      )
     }
     
-    if (!lenderAddr) {
-      throw new LoanError('Lender address required for repayment', 'LENDER_ADDRESS_REQUIRED', params.loanId)
-    }
+    const lenderAddr = repaymentResult.repaymentAddress
+    console.log('Verified repayment address:', lenderAddr)
+    console.log('NFT holder verified against connected addresses:', repaymentResult.connectedAddresses)
     
     // Calculate exact repayment amount server-side
     let expectedAmount: number

@@ -88,8 +88,8 @@ export const FundLoanSchema = z.object({
 export const RepaymentInitSchema = z.object({
   loanId: z.string().uuid(),
   borrowerAddr: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
-  lenderAddr: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(), // Optional - can be extracted from tx_fund
-  expectedAmount: z.string() // BigInt as string
+  // lenderAddr now completely optional - will be extracted from Cast NFT holder
+  expectedAmount: z.string().optional() // Will be calculated server-side
 })
 
 export const RepaymentConfirmSchema = z.object({
