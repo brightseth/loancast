@@ -59,7 +59,7 @@ export function ProfileBadge({ fid, className = '', showStats = true }: ProfileB
   if (!profile) {
     return (
       <div className={`text-sm text-gray-500 ${className}`}>
-        FID {fid}
+        FID {fid} • Profile data unavailable
       </div>
     )
   }

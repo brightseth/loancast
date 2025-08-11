@@ -33,42 +33,29 @@ export interface UserReputation {
   [key: string]: any // Allow any other properties
 }
 
-export async function getUserReputation(fid: number): Promise<UserReputation> {
-  // Generate mock reputation based on FID
-  const score = Math.min(950, 600 + (fid % 350))
-  const successfulLoans = Math.floor(fid % 25) + 1
-  const totalLoans = successfulLoans + Math.floor(fid % 3)
-  const repaidLoans = successfulLoans
-  const repaymentRate = Math.min(100, 70 + (fid % 30))
-  const repaymentStreak = Math.floor(fid % 12) + 1
-  const mutualConnections = Math.floor(fid % 15) + 1
-  const maxLoanAmount = Math.min(5000, 100 + (successfulLoans * 200))
-  const accountAge = Math.floor(fid % 365) + 30
-  const followers = Math.floor(fid % 1000) + 50
-  const following = Math.floor(fid % 500) + 25
-  const badges: Badge[] = successfulLoans > 10 ? [
-    { id: 'trusted-lender', name: 'Trusted Lender', icon: '🏆', description: 'Completed 10+ loans' },
-    { id: 'repayment-champion', name: 'Repayment Champion', icon: '💯', description: 'Perfect repayment streak' }
-  ] : []
-  
-  let riskLevel: 'low' | 'medium' | 'high' = 'high'
-  if (score >= 850 && repaymentRate >= 95) riskLevel = 'low'
-  else if (score >= 750 && repaymentRate >= 85) riskLevel = 'medium'
-  
-  return {
-    fid,
-    score,
-    successfulLoans,
-    totalLoans,
-    repaidLoans,
-    repaymentRate,
-    repaymentStreak,
-    mutualConnections,
-    maxLoanAmount,
-    accountAge,
-    followers,
-    following,
-    riskLevel,
-    badges
+export async function getUserReputation(fid: number): Promise<UserReputation | null> {
+  try {
+    // TODO: Replace with actual database queries
+    // For now, return null to indicate no real data available
+    // This will cause components to show "No reputation data available"
+    
+    // Example of what real implementation would look like:
+    // const { data: loans } = await supabaseAdmin
+    //   .from('loans')
+    //   .select('*')
+    //   .or(`borrower_fid.eq.${fid},lender_fid.eq.${fid}`)
+    
+    // const { data: user } = await supabaseAdmin
+    //   .from('users')
+    //   .select('*')
+    //   .eq('fid', fid)
+    //   .single()
+    
+    // Calculate real metrics from actual loan history
+    
+    return null // No fake data - show real message instead
+  } catch (error) {
+    console.error('Error fetching user reputation:', error)
+    return null
   }
 }

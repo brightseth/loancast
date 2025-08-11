@@ -17,17 +17,16 @@ export function ExploreCard({ loan }: ExploreCardProps) {
   // Check if loan is new (created within last 24 hours)
   const isNew = Date.now() - createdDate.getTime() < 24 * 60 * 60 * 1000
   
-  // Generate realistic trust signals based on FID
+  // Get actual user data from database instead of fake calculations
   const borrowerFid = loan.borrower_fid || 0
-  const trustScore = Math.min(950, 600 + (borrowerFid % 350)) // 600-950 range
-  const successfulLoans = Math.floor(borrowerFid % 25) + 1 // 1-25 previous loans
-  const repaymentRate = Math.min(100, 70 + (borrowerFid % 30)) // 70-100% range
-  const mutualConnections = Math.floor(borrowerFid % 15) + 1 // 1-15 mutual friends
   
-  // Risk level based on trust signals
+  // TODO: Replace with real user reputation data from users table
+  // For now, show basic loan status without fake metrics
   const getRiskLevel = () => {
-    if (trustScore >= 850 && repaymentRate >= 95) return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50', icon: '🟢' }
-    if (trustScore >= 750 && repaymentRate >= 85) return { level: 'Medium', color: 'text-yellow-600', bg: 'bg-yellow-50', icon: '🟡' }
+    // Simple risk based on loan amount and duration only
+    const loanAmount = loan.gross_usdc || (loan.repay_usdc ? loan.repay_usdc / 1.02 : 0)
+    if (loanAmount <= 10) return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50', icon: '🟢' }
+    if (loanAmount <= 100) return { level: 'Medium', color: 'text-yellow-600', bg: 'bg-yellow-50', icon: '🟡' }
     return { level: 'High', color: 'text-red-600', bg: 'bg-red-50', icon: '🔴' }
   }
   
@@ -59,22 +58,12 @@ export function ExploreCard({ loan }: ExploreCardProps) {
         </span>
       </div>
 
-      {/* Trust & Risk Section */}
+      {/* Risk Level - Based on Loan Amount */}
       <div className="mb-4 p-3 rounded-lg border border-gray-100 bg-gray-50">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-sm">{risk.icon}</span>
-            <span className={`text-sm font-medium ${risk.color}`}>{risk.level} Risk</span>
-          </div>
-          <div className="text-right">
-            <div className="text-sm font-semibold text-gray-900">{trustScore}</div>
-            <div className="text-xs text-gray-500">Trust Score</div>
-          </div>
-        </div>
-        
-        <div className="flex items-center justify-between text-xs text-gray-600">
-          <span>🤝 {mutualConnections} mutual friends</span>
-          <span>✅ {repaymentRate}% repay rate ({successfulLoans} loans)</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm">{risk.icon}</span>
+          <span className={`text-sm font-medium ${risk.color}`}>{risk.level} Risk</span>
+          <span className="text-xs text-gray-500">• Based on loan amount</span>
         </div>
       </div>
 
@@ -148,7 +137,7 @@ export function ExploreCard({ loan }: ExploreCardProps) {
           <a
             href={`/profile/${loan.borrower_fid}`}
             className="px-2 sm:px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition text-center flex items-center justify-center"
-            title={`View @user${borrowerFid.toString().slice(-3)} profile • ${trustScore} trust score`}
+            title={`View FID ${borrowerFid} profile`}
           >
             <span className="text-sm">👤</span>
           </a>

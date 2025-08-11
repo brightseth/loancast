@@ -59,56 +59,11 @@ export function SocialProofFeed({ className = '' }: { className?: string }) {
             })
           }
 
-          // Add some simulated repaid loans for social proof
-          if (Math.random() > 0.7 && loan.status === 'funded') {
-            recentActivities.push({
-              id: `${loan.id}-repaid`,
-              type: 'loan_repaid',
-              user: `@user${loan.borrower_fid?.toString().slice(-3) || 'xxx'}`,
-              amount: loan.repay_usdc || loan.gross_usdc || 0,
-              timeAgo: '2 days ago',
-              icon: '✅',
-              color: 'text-emerald-600'
-            })
-          }
+          // TODO: Add real repaid loan activities when repayment tracking is implemented
         })
 
-      // Mix in some sample activities for better social proof
-      const sampleActivities: Activity[] = [
-        {
-          id: 'sample-1',
-          type: 'loan_repaid',
-          user: '@alice',
-          amount: 150,
-          timeAgo: '3 hours ago',
-          icon: '✅',
-          color: 'text-emerald-600'
-        },
-        {
-          id: 'sample-2',
-          type: 'loan_funded',
-          user: '@bob',
-          amount: 300,
-          timeAgo: '5 hours ago',
-          icon: '💚',
-          color: 'text-green-600'
-        },
-        {
-          id: 'sample-3',
-          type: 'loan_repaid',
-          user: '@charlie',
-          amount: 510,
-          timeAgo: '1 day ago',
-          icon: '✅',
-          color: 'text-emerald-600'
-        }
-      ]
-
-      const combined = [...recentActivities, ...sampleActivities]
-        .sort(() => Math.random() - 0.5) // Randomize order
-        .slice(0, 6)
-
-      setActivities(combined)
+      // Only show real activities from actual loans
+      setActivities(recentActivities.slice(0, 6))
     } catch (error) {
       console.error('Failed to fetch activity:', error)
     } finally {
@@ -189,7 +144,7 @@ export function SocialProofFeed({ className = '' }: { className?: string }) {
       
       <div className="mt-4 pt-3 border-t border-gray-200">
         <p className="text-xs text-center text-gray-500">
-          💰 $12,340 lent this month • ⭐ 94% repayment rate
+          💰 Early beta • Building trust through transparency
         </p>
       </div>
     </div>

@@ -54,7 +54,11 @@ export function ReputationCard({ userFid, className = '', compact = false }: Rep
     return (
       <div className={`bg-white rounded-lg border p-4 ${className}`}>
         <div className="text-center text-gray-500">
-          <p className="text-sm">{error || 'No reputation data available'}</p>
+          <div className="text-3xl mb-2">📊</div>
+          <p className="text-sm font-medium">Reputation System Coming Soon</p>
+          <p className="text-xs mt-1">
+            {error || 'Real loan history and trust metrics will be calculated from actual platform activity.'}
+          </p>
         </div>
       </div>
     )
