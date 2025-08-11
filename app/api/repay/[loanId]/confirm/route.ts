@@ -167,7 +167,7 @@ export async function POST(
           console.log('Repayment cast created:', repaymentCast.hash)
           
           // Store cast hash in loan for reference
-          if (repaymentCast.success) {
+          if ('success' in repaymentCast && repaymentCast.success) {
             await supabaseAdmin
               .from('loans')
               .update({ 

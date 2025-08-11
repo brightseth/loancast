@@ -113,7 +113,8 @@ export async function POST(
         })
     } catch (intentError) {
       // Log but don't fail if repayment_intents table doesn't exist yet
-      console.warn('Repayment intent storage failed (table may not exist):', intentError.message)
+      console.warn('Repayment intent storage failed (table may not exist):', 
+        intentError instanceof Error ? intentError.message : String(intentError))
     }
     
     // Return wallet target computed server-side
