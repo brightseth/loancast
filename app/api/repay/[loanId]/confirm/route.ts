@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { RepaymentConfirmSchema, PaymentError, LoanError, usdcToWei, weiToUsdc, usdc } from '@/lib/domain-types'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { createRepaymentCast } from '@/lib/neynar'
 import { z } from 'zod'
 
 // Verify on-chain repayment and update loan status
@@ -122,7 +123,7 @@ export async function POST(
       throw new Error('Repayment processing failed')
     }
     
-    // Create notifications
+    // Create notifications and cast
     await Promise.all([
       // Notify borrower
       supabaseAdmin
@@ -146,7 +147,41 @@ export async function POST(
           message: `You received ${actualAmount} USDC repayment. Loan completed successfully!`,
           loan_id: params.loanId,
           created_at: new Date().toISOString()
-        })
+        }),
+        
+      // Create public repayment cast
+      (async () => {
+        try {
+          const isOnTime = new Date() <= new Date(loan.due_ts)
+          const borrowerName = `@user${loan.borrower_fid.toString().slice(-3)}`
+          
+          const repaymentCast = await createRepaymentCast(
+            process.env.LOANCAST_SIGNER_UUID || 'default-signer',
+            params.loanId,
+            loan.cast_hash,
+            borrowerName,
+            actualAmount,
+            isOnTime
+          )
+          
+          console.log('Repayment cast created:', repaymentCast.hash)
+          
+          // Store cast hash in loan for reference
+          if (repaymentCast.success) {
+            await supabaseAdmin
+              .from('loans')
+              .update({ 
+                repayment_cast_hash: repaymentCast.hash,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', params.loanId)
+          }
+          
+        } catch (castError) {
+          // Don't fail repayment if cast creation fails
+          console.error('Failed to create repayment cast:', castError)
+        }
+      })()
     ])
     
     return NextResponse.json({
