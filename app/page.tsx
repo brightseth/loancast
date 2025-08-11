@@ -17,7 +17,11 @@ export default function Home() {
     // Fetch platform statistics
     fetch('/api/loans')
       .then(res => res.json())
-      .then(loans => {
+      .then(data => {
+        // Handle both array response and object with loans property
+        const loans = Array.isArray(data) ? data : (data.loans || [])
+        console.log('Fetched loans:', loans) // Debug log
+        
         const funded = loans.filter((loan: any) => loan.status === 'funded')
         const totalVolume = funded.reduce((sum: number, loan: any) => sum + (loan.gross_usdc || 0), 0)
         
