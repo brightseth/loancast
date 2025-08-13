@@ -2,6 +2,7 @@
 
 import { Loan } from '@/lib/supabase'
 import { format, formatDistanceToNow } from 'date-fns'
+import { useBorrowerStats } from '@/hooks/useBorrowerStats'
 
 interface ExploreCardProps {
   loan: Loan
@@ -18,8 +19,9 @@ export function ExploreCard({ loan }: ExploreCardProps) {
   // Check if loan is new (created within last 24 hours)
   const isNew = Date.now() - createdDate.getTime() < 24 * 60 * 60 * 1000
   
-  // Get actual user data from database instead of fake calculations
-  const borrowerFid = loan.borrower_fid || 0
+  // Get borrower stats for trust indicators (only for open loans)
+  const shouldFetchStats = !isFunded && !isRepaid && loan.borrower_fid
+  const { stats, loading: loadingCredit } = useBorrowerStats(shouldFetchStats ? loan.borrower_fid : null)
   
   // TODO: Replace with real user reputation data from users table
   // For now, show basic loan status without fake metrics
@@ -61,14 +63,57 @@ export function ExploreCard({ loan }: ExploreCardProps) {
         </span>
       </div>
 
-      {/* Risk Level - Based on Loan Amount */}
-      <div className="mb-4 p-3 rounded-lg border border-gray-100 bg-gray-50">
-        <div className="flex items-center gap-2">
-          <span className="text-sm">{risk.icon}</span>
-          <span className={`text-sm font-medium ${risk.color}`}>{risk.level} Risk</span>
-          <span className="text-xs text-gray-500">• Based on loan amount</span>
+      {/* Trust Chips & Credit Score */}
+      {!isFunded && !isRepaid && (
+        <div className="mb-4 p-2">
+          {loadingCredit ? (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+              <span className="text-sm text-gray-500">Loading credit...</span>
+            </div>
+          ) : stats ? (
+            <div className="flex flex-wrap gap-2">
+              {/* Score/Tier Chip */}
+              <span className="rounded-full bg-blue-50 text-blue-700 px-2 py-0.5 text-xs font-semibold">
+                Score {stats.score} / Tier {stats.tier}
+              </span>
+              
+              {/* Repayment Rate Chip */}
+              {stats.loans_total > 0 && (
+                <span className="rounded-full bg-emerald-50 text-emerald-700 px-2 py-0.5 text-xs">
+                  ✅ Repaid {stats.loans_repaid}/{stats.loans_total} on time {Math.round(stats.on_time_rate * 100)}%
+                </span>
+              )}
+              
+              {/* Streak Badge */}
+              {stats.longest_on_time_streak > 1 && (
+                <span className="rounded-full bg-orange-50 text-orange-700 px-2 py-0.5 text-xs">
+                  🔥 {stats.longest_on_time_streak} streak
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="p-2 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">{risk.icon}</span>
+                <span className={`text-sm font-medium ${risk.color}`}>{risk.level} Risk</span>
+                <span className="text-xs text-gray-500">• Based on loan amount</span>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      )}
+      
+      {/* Risk Level - Only for funded/repaid loans */}
+      {(isFunded || isRepaid) && (
+        <div className="mb-4 p-3 rounded-lg border border-gray-100 bg-gray-50">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">{risk.icon}</span>
+            <span className={`text-sm font-medium ${risk.color}`}>{risk.level} Risk</span>
+            <span className="text-xs text-gray-500">• Based on loan amount</span>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">

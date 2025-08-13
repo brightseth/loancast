@@ -157,15 +157,14 @@ export async function createRepaymentCast(
   const statusEmoji = onTime ? '✅' : '⚠️'
   const statusText = onTime ? 'ON TIME' : 'LATE'
   
-  const castText = `${statusEmoji} ${loanId} repaid ${statusText}!
+  const castText = `${statusEmoji} LOAN REPAID ${statusText}
 
-💸 ${borrowerName} repaid ${amount.toLocaleString()} USDC
-📈 Lender earned their yield
-🎯 Another successful trust-based transaction
+💰 $${amount.toFixed(2)} USDC repaid
+📅 ${onTime ? 'Paid on time' : 'Late payment'}
+🔗 Original loan: #${originalCastHash.slice(0, 8)}
+🤝 Trust-based lending works!
 
-${onTime ? '🏆 Perfect credit score!' : '📉 Credit score impact'}
-
-#LoanCast #Repaid #TrustNetwork`
+Cast on @loancast`
 
   try {
     const hasValidSigner = signerUuid && 

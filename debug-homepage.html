@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug LoanCast Homepage API</title>
+</head>
+<body>
+    <h1>Debug LoanCast API</h1>
+    <div id="results"></div>
+
+    <script>
+        async function debugAPI() {
+            const results = document.getElementById('results');
+            results.innerHTML = 'Testing API...<br>';
+
+            try {
+                console.log('Fetching /api/loans...');
+                const response = await fetch('https://loancast.app/api/loans');
+                
+                results.innerHTML += `Status: ${response.status}<br>`;
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Raw API response:', data);
+                results.innerHTML += `Raw response type: ${typeof data}<br>`;
+                results.innerHTML += `Is array: ${Array.isArray(data)}<br>`;
+                
+                const loans = Array.isArray(data) ? data : (data.loans || []);
+                results.innerHTML += `Loans count: ${loans.length}<br>`;
+                
+                if (loans.length > 0) {
+                    results.innerHTML += `Sample loan status: ${loans[0].status}<br>`;
+                    const funded = loans.filter(loan => loan.status === 'funded');
+                    results.innerHTML += `Funded loans: ${funded.length}<br>`;
+                    
+                    const totalVolume = funded.reduce((sum, loan) => sum + (loan.gross_usdc || 0), 0);
+                    results.innerHTML += `Total volume: $${totalVolume}<br>`;
+                }
+                
+                results.innerHTML += '<br>Success! API is working correctly.';
+                
+            } catch (error) {
+                console.error('API Error:', error);
+                results.innerHTML += `<br>ERROR: ${error.message}`;
+            }
+        }
+
+        // Run test when page loads
+        debugAPI();
+    </script>
+</body>
+</html>

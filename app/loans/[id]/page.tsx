@@ -62,10 +62,17 @@ export default function LoanDetail() {
 
   const fetchLenderWallet = async () => {
     try {
-      const response = await fetch(`/api/loans/${id}/lender-wallet`)
+      // Use the new NFT-based repayment system
+      const response = await fetch(`/api/repay/${id}/init`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          borrowerAddr: '0x0000000000000000000000000000000000000000' // Placeholder
+        })
+      })
       if (response.ok) {
         const data = await response.json()
-        setLenderWallet(data.wallet)
+        setLenderWallet(data.target?.to || null)
       }
     } catch (error) {
       console.error('Error fetching lender wallet:', error)

@@ -201,7 +201,70 @@ async function handleCastCreated(data: any, eventId: string) {
     // Parse potential bid amount (but don't trust it for funding)
     const bidAmount = parseBidAmount(data.text || '')
 
-    // Store as bid proposal for DISCOVERY only
+    // Only process valid bid amounts
+    if (bidAmount && bidAmount > 0) {
+      // Store in the comprehensive bids table
+      try {
+        // Check for existing active bid from this bidder
+        const { data: existingBid } = await supabaseAdmin
+          .from('bids')
+          .select('id, bid_amount')
+          .eq('loan_id', loan.id)
+          .eq('bidder_fid', data.author.fid)
+          .eq('status', 'active')
+          .single()
+
+        if (existingBid) {
+          // Update existing bid
+          const { error: updateError } = await supabaseAdmin
+            .from('bids')
+            .update({
+              bid_amount: bidAmount,
+              cast_hash: data.hash,
+              bid_timestamp: new Date(data.timestamp).toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existingBid.id)
+
+          if (updateError) {
+            console.error('Error updating bid:', updateError)
+          } else {
+            console.log('Bid updated:', {
+              loan_id: loan.id,
+              bidder_fid: data.author.fid,
+              old_amount: existingBid.bid_amount,
+              new_amount: bidAmount
+            })
+          }
+        } else {
+          // Create new bid
+          const { error: insertError } = await supabaseAdmin
+            .from('bids')
+            .insert({
+              loan_id: loan.id,
+              bidder_fid: data.author.fid,
+              bid_amount: bidAmount,
+              bid_timestamp: new Date(data.timestamp).toISOString(),
+              cast_hash: data.hash,
+              status: 'active'
+            })
+
+          if (insertError) {
+            console.error('Error storing bid:', insertError)
+          } else {
+            console.log('New bid stored:', {
+              loan_id: loan.id,
+              bidder_fid: data.author.fid,
+              amount: bidAmount
+            })
+          }
+        }
+      } catch (bidError) {
+        console.error('Bid processing error:', bidError)
+      }
+    }
+
+    // Also store as bid proposal for legacy compatibility (DISCOVERY only)
     const proposal = {
       loan_id: loan.id,
       proposer_fid: data.author.fid,
@@ -217,12 +280,6 @@ async function handleCastCreated(data: any, eventId: string) {
 
     if (error) {
       console.error('Error storing bid proposal:', error)
-    } else {
-      console.log('Bid proposal stored (discovery only):', {
-        loan_id: loan.id,
-        amount: bidAmount,
-        proposer: data.author.fid
-      })
     }
 
     // Record audit event
