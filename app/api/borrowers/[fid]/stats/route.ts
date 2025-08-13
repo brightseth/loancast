@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase"
 
 const Params = z.object({ fid: z.string().regex(/^\d+$/) })
 
-export async function GET(_: Request, { params }: { params: unknown }) {
+export async function GET(request: Request, { params }: { params: unknown }) {
   try {
     const { fid } = Params.parse(params)
     
