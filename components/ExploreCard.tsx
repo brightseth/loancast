@@ -12,6 +12,7 @@ export function ExploreCard({ loan }: ExploreCardProps) {
   const createdDate = new Date(loan.created_at)
   const apr = (loan.yield_bps || 0) / 100
   const isFunded = loan.status === 'funded'
+  const isRepaid = loan.status === 'repaid'
   const castHashDisplay = `#${loan.cast_hash.slice(0, 8)}`
   
   // Check if loan is new (created within last 24 hours)
@@ -50,11 +51,13 @@ export function ExploreCard({ loan }: ExploreCardProps) {
           <p className="text-xs sm:text-sm text-gray-500">Total repayment</p>
         </div>
         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-          isFunded 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-yellow-100 text-yellow-800'
+          isRepaid
+            ? 'bg-blue-100 text-blue-800'
+            : isFunded 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-yellow-100 text-yellow-800'
         }`}>
-          {isFunded ? 'Funded' : 'Open'}
+          {isRepaid ? 'Repaid' : isFunded ? 'Funded' : 'Open'}
         </span>
       </div>
 
@@ -123,16 +126,18 @@ export function ExploreCard({ loan }: ExploreCardProps) {
             target="_blank"
             rel="noopener noreferrer"
             className={`flex-1 py-2 px-3 sm:px-4 rounded-md font-medium transition text-center block text-sm ${
-              isFunded 
-                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
-                : risk.level === 'Low'
-                  ? 'bg-green-600 text-white hover:bg-green-700'
-                  : risk.level === 'Medium'
-                    ? 'bg-yellow-600 text-white hover:bg-yellow-700'
-                    : 'bg-red-600 text-white hover:bg-red-700'
+              isRepaid
+                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                : isFunded 
+                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
+                  : risk.level === 'Low'
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : risk.level === 'Medium'
+                      ? 'bg-yellow-600 text-white hover:bg-yellow-700'
+                      : 'bg-red-600 text-white hover:bg-red-700'
             }`}
           >
-            {isFunded ? 'View Cast' : `Fund ${risk.level} Risk`}
+            {isRepaid ? 'View Cast' : isFunded ? 'View Cast' : `Fund ${risk.level} Risk`}
           </a>
           <a
             href={`/profile/${loan.borrower_fid}`}
