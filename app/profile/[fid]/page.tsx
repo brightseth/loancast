@@ -29,12 +29,18 @@ async function getProfileData(fid: string) {
       cache: 'no-store'
     })
     
+    console.log(`Profile fallback for FID ${fid}: Response status ${loansResponse.status}`)
+    
     if (!loansResponse.ok) {
+      console.log(`Failed to fetch loans for FID ${fid}`)
       return null
     }
     
     const loans = await loansResponse.json()
+    console.log(`Found ${loans?.length || 0} loans for FID ${fid}`)
+    
     if (!loans || loans.length === 0) {
+      console.log(`No loans found for FID ${fid}, returning null`)
       return null
     }
     
