@@ -128,7 +128,8 @@ export async function GET(
     }
     
     // Get user's loan history
-    const { data: loans, error: loansError } = await supabaseAdmin
+    let loans = []
+    const { data: loansData, error: loansError } = await supabaseAdmin
       .from('loans')
       .select('*')
       .or(`borrower_fid.eq.${fid},lender_fid.eq.${fid}`)
@@ -137,6 +138,8 @@ export async function GET(
     if (loansError) {
       console.error('Error fetching loans:', loansError)
       loans = []
+    } else {
+      loans = loansData || []
     }
 
     // If user has no loans, return 404

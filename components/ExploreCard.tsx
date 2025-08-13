@@ -187,7 +187,7 @@ export function ExploreCard({ loan }: ExploreCardProps) {
           <a
             href={`/profile/${loan.borrower_fid}`}
             className="px-2 sm:px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition text-center flex items-center justify-center"
-            title={`View FID ${borrowerFid} profile`}
+            title={`View FID ${loan.borrower_fid} profile`}
           >
             <span className="text-sm">👤</span>
           </a>
