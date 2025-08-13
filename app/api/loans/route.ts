@@ -57,6 +57,29 @@ export async function POST(request: NextRequest) {
     const repaymentWei = mul102(amountWei)
     const dueDate = addDays(new Date(), duration_months * 30)
 
+    // Check for existing active loans (prevent multiple active loans per user)
+    const { data: existingLoans, error: existingError } = await supabaseAdmin
+      .from('loans')
+      .select('id, status')
+      .eq('borrower_fid', borrower_fid)
+      .in('status', ['open', 'funded'])
+      .is('listing_deleted_at', null)
+
+    if (existingError) {
+      console.error('Error checking existing loans:', existingError)
+      return NextResponse.json(
+        { error: 'Failed to validate loan eligibility' },
+        { status: 500 }
+      )
+    }
+
+    if (existingLoans && existingLoans.length > 0) {
+      return NextResponse.json(
+        { error: 'You already have an active loan. Please repay your existing loan before requesting a new one.' },
+        { status: 400 }
+      )
+    }
+
     // Simple eligibility check (replace complex reputation system)
     if (amount > 1000) {
       return NextResponse.json(
