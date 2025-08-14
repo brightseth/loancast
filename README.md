@@ -18,7 +18,10 @@ Cast your loan → Friends see it → They fund you → You repay & build rep
 - 💰 **USDC on Base** - Real money, low fees, fast settlement
 - 📈 **2% Monthly** - Fixed rate, no surprises
 - 🔐 **Sign in with Farcaster** - Your social identity is your credit
-- 📊 **Public Reputation** - Every repayment builds your score
+- 📊 **Credit Scoring** - 0-900 point system based on repayment history
+- 🏆 **Trust Indicators** - Score, tier, and repayment rate displayed on loans
+- 👤 **Profile Pages** - View borrower history and credibility
+- 🛡️ **One Loan Limit** - Users must repay before borrowing again
 
 ### For Borrowers
 ```bash
@@ -28,7 +31,7 @@ Cast your loan → Friends see it → They fund you → You repay & build rep
 
 ### For Lenders  
 ```bash
-# See: Friend needs $500, has repaid 8/8 previous loans
+# See: "seth" needs $500, Credit Score 850/900, Tier A, 100% repayment rate
 # Action: One click to fund via USDC
 ```
 
@@ -61,18 +64,20 @@ Hosting      → Vercel
 
 ### Core Database
 ```sql
-loans(id, cast_hash, borrower_fid, lender_fid, amount, status)
-users(fid, username, reputation_score)  
+loans(id, cast_hash, borrower_fid, lender_fid, amount, status, due_ts, repay_usdc)
+borrower_stats(fid, score, tier, loans_total, loans_repaid, on_time_rate)
 loan_events(loan_id, event_type, timestamp)  # audit trail
 ```
 
-### API Endpoints (21 total)
+### API Endpoints
 ```bash
-POST /api/loans              # Create loan request  
-GET  /api/loans              # Browse/filter loans
-GET  /api/loans/[id]         # Loan details
-POST /api/loans/[id]/fund    # Fund a loan
-POST /api/webhooks/neynar    # Farcaster events
+POST /api/loans                        # Create loan request  
+GET  /api/loans                        # Browse/filter loans
+GET  /api/loans/[id]                   # Loan details
+POST /api/loans/[id]/fund              # Fund a loan
+GET  /api/borrowers/[fid]/stats        # Borrower credit data
+GET  /api/profiles/[fid]               # User profile with history
+POST /api/webhooks/neynar              # Farcaster events
 ```
 
 **Security**: HMAC-verified webhooks, rate limiting, manual funding approval.
@@ -85,6 +90,8 @@ POST /api/webhooks/neynar    # Farcaster events
 ✅ **Audit Trail** - Every loan state change logged  
 ✅ **Rate Limiting** - Protects against API abuse  
 ✅ **Input Validation** - Zod schemas on all inputs  
+✅ **Credit System** - Deterministic scoring algorithm with materialized stats
+✅ **Loan Limits** - One active loan per user prevents overleveraging
 
 ### What's Manual (MVP Safety)
 👤 **Funding Approval** - Prevents text-based exploits  
@@ -92,6 +99,31 @@ POST /api/webhooks/neynar    # Farcaster events
 👤 **Admin Actions** - Controlled access only  
 
 **Production ready**: Yes, with manual processes for safety.
+
+## 📊 Credit Scoring System
+
+### How It Works
+```bash
+Base Score: 200 points
++ Repayment Rate: up to 400 points (100% = full points)
++ On-Time Payments: up to 200 points  
++ Volume Bonus: up to 100 points ($1000+ = max)
+- Defaults: -300 points each
+= Final Score: 0-900 points
+```
+
+### Credit Tiers
+- **Tier A (750-900)**: $1000 loan cap, Excellent borrower
+- **Tier B (650-749)**: $700 loan cap, Good borrower  
+- **Tier C (550-649)**: $400 loan cap, Fair borrower
+- **Tier D (0-549)**: $200 loan cap, New/risky borrower
+
+### Trust Indicators
+✅ **Score & Tier** - Displayed on all open loan cards  
+✅ **Repayment Rate** - Shows X/Y loans repaid on time  
+✅ **Streak Badge** - Consecutive on-time repayments  
+✅ **Profile History** - Full borrowing and lending history  
+✅ **Real-Time Updates** - Stats recompute on every loan change
 
 ## 🚀 Deploy Your Own
 
@@ -150,7 +182,7 @@ NEXT_PUBLIC_APP_URL=https://yourapp.vercel.app
 4. Would users pay for this?
 ```
 
-**Roadmap**: Automated funding → Advanced reputation → Mobile app
+**Roadmap**: Automated funding → Tier-based loan caps → Mobile app → Advanced reputation features
 
 ## 📄 License & Contact
 
