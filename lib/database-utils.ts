@@ -10,7 +10,7 @@ export async function getStats() {
     if (error) throw error
     
     const totalLoans = loans?.length || 0
-    const fundedLoans = loans?.filter(loan => loan.status === 'funded') || []
+    const fundedLoans = loans?.filter(loan => loan.status === 'funded' || loan.status === 'repaid') || []
     const totalVolume = fundedLoans.reduce((sum, loan) => sum + (loan.gross_usdc || 0), 0)
     
     return {

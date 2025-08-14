@@ -22,7 +22,7 @@ export default function Home() {
         const loans = Array.isArray(data) ? data : (data.loans || [])
         console.log('Fetched loans:', loans) // Debug log
         
-        const funded = loans.filter((loan: any) => loan.status === 'funded')
+        const funded = loans.filter((loan: any) => loan.status === 'funded' || loan.status === 'repaid')
         const totalVolume = funded.reduce((sum: number, loan: any) => sum + (loan.gross_usdc || 0), 0)
         
         setStats({

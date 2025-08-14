@@ -18,7 +18,7 @@ export const FLAGS = {
   NOTIFICATIONS: false,
   LENDING_DASHBOARD: true,       // re-enabled by user request
   CRON_JOBS: false,             // disable for now
-  ANALYTICS: false,
+  ANALYTICS: true,
   FEEDBACK: false,
 } as const
 
