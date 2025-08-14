@@ -3,6 +3,7 @@
 import { Loan } from '@/lib/supabase'
 import { format, formatDistanceToNow } from 'date-fns'
 import { useBorrowerStats } from '@/hooks/useBorrowerStats'
+import { useState, useEffect } from 'react'
 
 interface ExploreCardProps {
   loan: Loan
@@ -22,6 +23,41 @@ export function ExploreCard({ loan }: ExploreCardProps) {
   // Get borrower stats for trust indicators (only for open loans)
   const shouldFetchStats = !isFunded && !isRepaid && loan.borrower_fid
   const { stats, loading: loadingCredit } = useBorrowerStats(shouldFetchStats ? loan.borrower_fid : null)
+  
+  // Get borrower info for displaying name
+  const [borrowerName, setBorrowerName] = useState<string | null>(null)
+  const [borrowerAvatar, setBorrowerAvatar] = useState<string | null>(null)
+  const [loadingBorrower, setLoadingBorrower] = useState(false)
+
+  useEffect(() => {
+    if (!loan.borrower_fid) return
+
+    const fetchBorrowerName = async () => {
+      setLoadingBorrower(true)
+      try {
+        // Try borrower stats first (already has names from database)
+        const statsResponse = await fetch(`/api/borrowers/${loan.borrower_fid}/stats`)
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json()
+          if (statsData.display_name) {
+            setBorrowerName(statsData.display_name)
+            setBorrowerAvatar(statsData.pfp_url)
+            return
+          }
+        }
+        
+        // Fallback to basic display
+        setBorrowerName(`User ${loan.borrower_fid}`)
+      } catch (error) {
+        console.error('Error fetching borrower name:', error)
+        setBorrowerName(`User ${loan.borrower_fid}`)
+      } finally {
+        setLoadingBorrower(false)
+      }
+    }
+
+    fetchBorrowerName()
+  }, [loan.borrower_fid])
   
   // TODO: Replace with real user reputation data from users table
   // For now, show basic loan status without fake metrics
@@ -50,7 +86,26 @@ export function ExploreCard({ loan }: ExploreCardProps) {
           <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
             ${(loan.repay_usdc || 0).toFixed(2)}
           </h3>
-          <p className="text-xs sm:text-sm text-gray-500">Total repayment</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs sm:text-sm text-gray-500">Total repayment</p>
+            {borrowerName && (
+              <>
+                <span className="text-gray-300">•</span>
+                <div className="flex items-center gap-1">
+                  {borrowerAvatar && (
+                    <img 
+                      src={borrowerAvatar} 
+                      alt={borrowerName}
+                      className="w-4 h-4 rounded-full"
+                    />
+                  )}
+                  <span className="text-xs sm:text-sm text-gray-600 font-medium">
+                    {loadingBorrower ? 'Loading...' : borrowerName}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
           isRepaid
