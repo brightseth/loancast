@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { createServerClient } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const maxAmount = Number(url.searchParams.get("maxAmount") ?? 10_000_000); // 10k USDC cents (6dp)
   const duration = Number(url.searchParams.get("dur") ?? 0);
 
-  const db = createServerClient();
+  const db = supabaseAdmin;
   // join loans with borrower_stats.score if you have it; otherwise return raw loans
   let q = db.from("loans").select("id, borrower_fid, borrower_type, principal_usdc_6, duration_days, status").eq("status","seeking");
   const { data, error } = await q;

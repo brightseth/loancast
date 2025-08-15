@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { createServerClient } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { getSession } from "@/lib/agent/session";
 import { evaluatePolicy } from "@/lib/agent/policy";
 import { observability, logInfo, logError } from "@/lib/observability";
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const sess = await getSession(body.session_token);
   if (!sess || Number(sess.agent_fid) !== body.agent_fid) return new Response("unauthorized", { status: 401 });
 
-  const db = createServerClient();
+  const db = supabaseAdmin;
   const { data: agent } = await db.from("agents").select("*").eq("agent_fid", body.agent_fid).single();
   if (!agent?.active) return new Response("agent_inactive", { status: 403 });
 
@@ -34,7 +34,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   // gather velocity counters cheaply (P1: last 24h queries)
   const sinceIso = new Date(Date.now()-24*3600e3).toISOString();
   const fundedToday = await db.from("agent_loans").select("id, loan_id").eq("lender_agent_fid", body.agent_fid).gte("created_at", sinceIso);
-  const spendToday = await db.rpc("sum_agent_spend_last24h", { p_agent_fid: body.agent_fid }).single().catch(()=>({ data: { sum: 0 }}));
+  const { data: spendData } = await db.rpc("sum_agent_spend_last24h", { p_agent_fid: body.agent_fid }).single();
+  const spendToday = spendData as { sum?: number } || { sum: 0 };
 
   const limits = {
     max_loans_per_day: agent.policy?.daily_loan_limit ?? 10,
@@ -55,8 +56,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     strategy: agent.strategy,
     limits,
     todayLoans: fundedToday.data?.length ?? 0,
-    todaySpend_6: BigInt(spendToday.data?.sum ?? 0),
-    todayCounterparty_6: 0n,
+    todaySpend_6: BigInt(spendToday?.sum ?? 0),
+    todayCounterparty_6: BigInt(0),
     allowAutoFund: true
   });
 

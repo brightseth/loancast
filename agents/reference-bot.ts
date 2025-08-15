@@ -28,19 +28,19 @@ async function main() {
       policy: { daily_usdc_cap: 1000, per_tx_cap: 700, per_counterparty_cap: 500, allow_autofund: true },
       manifest_signature })
   });
-  const auth = await r.json();
+  const auth = await r.json() as { session_token: string };
   const token = auth.session_token;
 
   for (;;) {
     const q = new URLSearchParams({ minScore: "650", maxAmount: "700000000" }); // 700 USDC * 1e6
     const res = await fetch(`${BASE}/api/loans/available?${q.toString()}`);
-    const ops = await res.json();
+    const ops = await res.json() as Array<{ id: string }>;
     for (const op of ops) {
       const resp = await fetch(`${BASE}/api/loans/${op.id}/auto-fund`, {
         method: "POST", headers: { "content-type":"application/json" },
         body: JSON.stringify({ session_token: token, agent_fid })
       });
-      const out = await resp.json();
+      const out = await resp.json() as { ok: boolean; [key: string]: any };
       if (out.ok) console.log("Funded intent:", op.id, out);
       await sleep(500); // be polite
     }

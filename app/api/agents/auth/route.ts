@@ -3,7 +3,7 @@ import { z } from "zod";
 import { verifyMessage } from "viem";
 import { Strategy } from "@/lib/agent/policy";
 import { newSessionToken, storeSession } from "@/lib/agent/session";
-import { createServerClient } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { createHash } from "node:crypto";
 
 const Body = z.object({
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
                  .catch(() => false);
   if (!ok) return new Response(JSON.stringify({ error: "bad_signature" }), { status: 401 });
 
-  const db = createServerClient();
+  const db = supabaseAdmin;
 
   const strategy_hash = createHash("sha256").update(JSON.stringify(b.strategy)).digest("hex");
   const agentRow = {
@@ -44,7 +44,11 @@ export async function POST(req: NextRequest) {
     verified_at: new Date().toISOString(), active: true
   };
   await db.from("agents").upsert(agentRow).eq("agent_fid", b.agent_fid);
-  await db.from("agent_limits").insert({ agent_fid: b.agent_fid }).onConflict('agent_fid').ignore();
+  // Insert agent_limits if not exists (manual upsert since onConflict not available)
+  const { data: existingLimit } = await db.from("agent_limits").select("agent_fid").eq("agent_fid", b.agent_fid).single();
+  if (!existingLimit) {
+    await db.from("agent_limits").insert({ agent_fid: b.agent_fid });
+  }
 
   const { token, hash } = newSessionToken();
   const expires_at = await storeSession(b.agent_fid, hash, 24);

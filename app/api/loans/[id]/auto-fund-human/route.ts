@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { createServerClient } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 import { evaluateFundingPolicy } from "@/lib/agent/policy";
 import { getHumanSession } from "@/lib/auth/humanSession";
 import { observability, logInfo, logError } from "@/lib/observability";
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (process.env.HUMAN_AUTOLEND_ENABLED !== "true")
     return new Response("killswitch", { status: 403 });
 
-  const db = createServerClient();
+  const db = supabaseAdmin;
 
   // Resolve human identity
   const sess = await getHumanSession(req).catch(() => null);
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     .select("id").eq("lender_fid", human_fid).eq("lender_type",'human')
     .gte("created_at", sinceIso);
   // Sum spend via repayments/fund txs later; in P1, approximate to intent amounts
-  const todaySpend_6 = 0n; // TODO: compute from actual funding source if available
+  const todaySpend_6 = BigInt(0); // TODO: compute from actual funding source if available
 
   // Fairness caps - check how much this borrower has received today from all lenders
   const borrowerTodayFunding = await db.from("funding_intents")
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     .gte("created_at", sinceIso);
     
   let borrowerDailyLoans = 0;
-  let borrowerDailyAmount_6 = 0n;
+  let borrowerDailyAmount_6 = BigInt(0);
   
   if (borrowerTodayFunding.data) {
     const loanIds = borrowerTodayFunding.data.map(f => f.loan_id);
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         borrowerDailyLoans = borrowerLoans.data.length;
         borrowerDailyAmount_6 = borrowerLoans.data.reduce(
           (sum, l) => sum + BigInt(l.principal_usdc_6), 
-          0n
+          BigInt(0)
         );
       }
     }
@@ -85,8 +85,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     {
       lenderKind: 'human',
       allowKinds: (prefs.allow_human && prefs.allow_agent) ? 'both' : 
-                  (prefs.allow_human ? 'human' : 
-                  (prefs.allow_agent ? 'agent' : 'none')),
+                  (prefs.allow_human ? 'human' : 'agent'),
       minScore: prefs.min_score ?? 0,
       maxAmount_6: BigInt((prefs.max_amount_usdc ?? 100) * 1e6),
       preferredDuration: [prefs.max_duration_days ?? 30],
@@ -98,7 +97,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       },
       todayLoans: fundedToday.data?.length ?? 0,
       todaySpend_6,
-      todayCounterparty_6: 0n,  // TODO: compute
+      todayCounterparty_6: BigInt(0),  // TODO: compute
       allowAutoFund: true,
       holdbackWindowMinutes: 15,  // Give manual funders 15 minutes first
       fairnessCaps: {

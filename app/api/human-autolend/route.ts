@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createServerClient } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { getHumanSession } from '@/lib/auth/humanSession'
 
 const AutolendPrefsSchema = z.object({
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const db = createServerClient()
+    const db = supabaseAdmin
     const { data: prefs, error } = await db
       .from('human_autolend_prefs')
       .select('*')
@@ -69,7 +69,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json()
     const prefs = AutolendPrefsSchema.parse(body)
 
-    const db = createServerClient()
+    const db = supabaseAdmin
     
     // Upsert preferences
     const { data, error } = await db
@@ -110,7 +110,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const db = createServerClient()
+    const db = supabaseAdmin
     const { error } = await db
       .from('human_autolend_prefs')
       .delete()

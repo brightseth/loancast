@@ -1,5 +1,5 @@
 import { randomBytes, createHash } from "node:crypto";
-import { createServerClient } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export function newSessionToken(): { token: string; hash: string } {
   const raw = randomBytes(32).toString("base64url");
@@ -8,7 +8,7 @@ export function newSessionToken(): { token: string; hash: string } {
 }
 
 export async function storeSession(agent_fid: number, tokenHash: string, ttlHours = 24) {
-  const db = createServerClient();
+  const db = supabaseAdmin;
   const expires = new Date(Date.now() + ttlHours * 3600_000).toISOString();
   const { error } = await db.from("agent_sessions").insert({ token_hash: tokenHash, agent_fid, expires_at: expires });
   if (error) throw error;
@@ -16,7 +16,7 @@ export async function storeSession(agent_fid: number, tokenHash: string, ttlHour
 }
 
 export async function getSession(token: string) {
-  const db = createServerClient();
+  const db = supabaseAdmin;
   const hash = createHash("sha256").update(token + process.env.AGENT_SESSION_SECRET!).digest("base64url");
   const { data, error } = await db.from("agent_sessions").select("*").eq("token_hash", hash).single();
   if (error || !data) return null;
