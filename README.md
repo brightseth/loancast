@@ -5,7 +5,7 @@
 
 > **"What if lending worked like Venmo, but for real money?"**
 
-LoanCast turns Farcaster casts into loan requests. Post what you need, friends fund it, everyone sees the reputation you build. Simple social lending with USDC on Base.
+LoanCast turns Farcaster casts into loan requests. Post what you need, friends fund it, everyone sees the reputation you build. Simple social lending with USDC on Base—now supporting both human and AI agent participants.
 
 ## ✨ How It Works
 
@@ -15,13 +15,16 @@ Cast your loan → Friends see it → They fund you → You repay & build rep
 
 ### Core Features
 - 🎯 **Cast to Borrow** - Turn any Farcaster cast into a loan request
-- 💰 **USDC on Base** - Real money, low fees, fast settlement
+- 💰 **USDC on Base** - Native USDC (0x833589...2913) on Base (chainId 8453)
 - 📈 **2% Monthly** - Fixed rate, no surprises
 - 🔐 **Sign in with Farcaster** - Your social identity is your credit
 - 📊 **Credit Scoring** - 0-900 point system based on repayment history
 - 🏆 **Trust Indicators** - Score, tier, and repayment rate displayed on loans
 - 👤 **Profile Pages** - View borrower history and credibility
 - 🛡️ **One Loan Limit** - Users must repay before borrowing again
+- 🤖 **Agent Support** - AI agents can participate as borrowers and lenders
+- ⏱️ **Holdback Windows** - 15-minute human priority on new loans
+- 🎛️ **Fairness Caps** - Max 3 loans/$1000 per borrower per day
 
 ### For Borrowers
 ```bash
@@ -57,30 +60,50 @@ npm run dev  # http://localhost:3000
 ```bash
 Frontend     → Next.js 14 + TypeScript + Tailwind
 Backend      → Supabase (PostgreSQL) + Next.js API
-Auth         → Farcaster via Neynar
-Payments     → USDC on Base L2
+Auth         → Farcaster FIDs (on-chain Id/Key registries)
+Payments     → Native USDC on Base (chainId 8453)
+Agents       → ERC-4337 smart accounts + EIP-712 typed intents
 Hosting      → Vercel
 ```
 
 ### Core Database
 ```sql
-loans(id, cast_hash, borrower_fid, lender_fid, amount, status, due_ts, repay_usdc)
+loans(id, cast_hash, borrower_fid, lender_fid, amount, status, due_ts, repay_usdc, 
+      borrower_type, lender_type)  # human or agent
 borrower_stats(fid, score, tier, loans_total, loans_repaid, on_time_rate)
+agents(agent_fid, controller_fid, wallet, agent_type, strategy, policy)
+agent_sessions(agent_fid, session_hash, expires_at)
+human_autolend_prefs(lender_fid, active, min_score, max_amount_usdc)
+funding_intents(loan_id, lender_fid, lender_type)  # provenance tracking
 loan_events(loan_id, event_type, timestamp)  # audit trail
 ```
 
 ### API Endpoints
 ```bash
+# Core Lending
 POST /api/loans                        # Create loan request  
 GET  /api/loans                        # Browse/filter loans
 GET  /api/loans/[id]                   # Loan details
-POST /api/loans/[id]/fund              # Fund a loan
+POST /api/loans/[id]/fund              # Manual fund a loan
+
+# Auto-funding
+POST /api/loans/[id]/auto-fund         # Agent auto-funding
+POST /api/loans/[id]/auto-fund-human   # Human auto-funding
+GET  /api/loans/available              # Get fundable loans for agents
+POST /api/human-autolend                # Configure human autolend prefs
+
+# Agents
+POST /api/agents/auth                  # Agent authentication
+GET  /api/agents/[fid]/performance     # Agent performance stats
+POST /api/agents/strategy              # Update agent strategy
+
+# Profiles & Stats
 GET  /api/borrowers/[fid]/stats        # Borrower credit data
 GET  /api/profiles/[fid]               # User profile with history
 POST /api/webhooks/neynar              # Farcaster events
 ```
 
-**Security**: HMAC-verified webhooks, rate limiting, manual funding approval.
+**Security**: HMAC-verified webhooks, rate limiting, manual funding approval, row-level security on agent tables, SHA256 session hashing.
 
 ## 🔒 Security & Production
 
@@ -152,7 +175,38 @@ NEYNAR_WEBHOOK_SECRET=your-secret
 
 # App
 NEXT_PUBLIC_APP_URL=https://yourapp.vercel.app
+
+# Agent System (optional)
+AGENT_AUTOFUND_ENABLED=false
+HUMAN_AUTOLEND_ENABLED=false
+AGENT_SESSION_SECRET=your_32_char_secret
 ```
+
+## 🤖 Agent Lending (NEW)
+
+### Four-Quadrant Marketplace
+LoanCast now supports AI agents alongside humans:
+
+```
+👤 → 👤 Human to Human    (original vision)
+👤 → 🤖 Human to Agent    (fund AI operations)
+🤖 → 👤 Agent to Human    (algorithmic liquidity)
+🤖 → 🤖 Agent to Agent    (capital optimization)
+```
+
+### Agent Types
+- **Yield Optimizers**: Maximize APR across all loans
+- **Arbitrage Bots**: Exploit rate differentials
+- **Liquidity Providers**: Ensure market depth
+- **Reputation Validators**: Score creditworthiness
+- **Market Makers**: Two-sided liquidity
+
+### Safety Architecture
+- 🛡️ **Killswitches**: Global and per-quadrant emergency stops
+- ⏱️ **Holdback Windows**: 15-minute human priority on new loans
+- ⚖️ **Fairness Caps**: Max 3 loans/$1000 per borrower per day
+- 📊 **Observability**: Every funding decision logged
+- 🔐 **RLS**: Row-level security on agent tables
 
 ## 💡 Why LoanCast?
 
@@ -160,9 +214,10 @@ NEXT_PUBLIC_APP_URL=https://yourapp.vercel.app
 - **Banks**: Slow, expensive, credit score gatekeeping
 - **DeFi**: Over-collateralized, impersonal, complex
 - **Friends**: Awkward to ask, hard to track, no reputation
+- **Capital**: Idle liquidity seeking yield
 
 ### The Solution  
-**Social reputation meets real money.** Your Farcaster network becomes your credit network.
+**Social reputation meets real money.** Your Farcaster network becomes your credit network—now with AI agents providing liquidity and efficiency.
 
 ### For Web3 Natives
 - Built on **Base L2** (fast, cheap)
@@ -182,7 +237,7 @@ NEXT_PUBLIC_APP_URL=https://yourapp.vercel.app
 4. Would users pay for this?
 ```
 
-**Roadmap**: Automated funding → Tier-based loan caps → Mobile app → Advanced reputation features
+**Roadmap**: ✅ Agent lending → Protocol layer (LCP) → Cross-chain reputation → Mobile app
 
 ## 📄 License & Contact
 
@@ -193,3 +248,9 @@ NEXT_PUBLIC_APP_URL=https://yourapp.vercel.app
 ---
 
 *Made with ❤️ for the Farcaster community*
+
+## 📚 Documentation
+
+- [White Paper](https://loancast.app/whitepaper) - Social Credit for the Network Age
+- [LCP v0.1 Spec](https://loancast.app/docs/lcp/v0.1) - Technical protocol documentation
+- [About](https://loancast.app/about) - Full story and vision
