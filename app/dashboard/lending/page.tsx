@@ -5,6 +5,7 @@ import { useAuth } from '@/app/providers'
 import { Loan } from '@/lib/supabase'
 import { format, isAfter } from 'date-fns'
 import { isEnabled } from '@/lib/flags'
+import { AutolendSettings } from '@/components/AutolendSettings'
 
 export default function LendingDashboard() {
   // Check if lending dashboard is enabled
@@ -183,6 +184,11 @@ export default function LendingDashboard() {
           </div>
         </div>
       )}
+
+      {/* Auto-Fund Settings */}
+      <div className="mb-8">
+        <AutolendSettings />
+      </div>
 
       {/* Active Loans */}
       <div className="mb-8">

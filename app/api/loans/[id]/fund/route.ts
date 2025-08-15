@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { createFundingCast, getUserByFid } from '@/lib/neynar'
 import { isEnabled } from '@/lib/flags'
+import { observability, logInfo } from '@/lib/observability'
 
 export async function POST(
   request: Request,
@@ -81,12 +82,27 @@ export async function POST(
     const newFunding = currentFunding + Math.min(amount, remainingAmount) // Cap at required amount
     const fullyFunded = newFunding >= targetAmount
     
+    // Determine lender type for fully funded loans
+    let lenderType: 'human' | 'agent' | null = null
+    if (fullyFunded) {
+      // Check if lender is an agent
+      const { data: agentCheck } = await supabase
+        .from('agents')
+        .select('agent_fid')
+        .eq('agent_fid', lenderFid)
+        .eq('active', true)
+        .single()
+      
+      lenderType = agentCheck ? 'agent' : 'human'
+    }
+
     // ATOMIC UPDATE: Only update if loan is still 'seeking' to prevent race conditions
     const { data: updatedLoan, error: updateError } = await supabase
       .from('loans')
       .update({
         gross_usdc: newFunding,
         lender_fid: fullyFunded ? lenderFid : loan.lender_fid,
+        lender_type: fullyFunded ? lenderType : loan.lender_type,
         status: fullyFunded ? 'funded' : 'seeking',
         tx_fund: txHash || null,
         updated_at: new Date().toISOString()
@@ -112,6 +128,22 @@ export async function POST(
 
     // If loan is fully funded, create a funding cast and send notifications
     if (fullyFunded) {
+      // Log manual funding completion
+      await observability.logManualFundCompleted(
+        loan.id,
+        lenderFid,
+        loan.borrower_fid,
+        BigInt(Math.floor(amount * 1e6))
+      ).catch(err => console.error('Failed to log manual fund completion:', err));
+
+      logInfo('Manual funding completed', {
+        loan_id: loan.id,
+        lender_fid: lenderFid,
+        borrower_fid: loan.borrower_fid,
+        amount_usdc: amount,
+        lender_type: lenderType || 'human'
+      });
+
       try {
         // Get lender and borrower names for the cast
         const [lenderData, borrowerData] = await Promise.all([

@@ -24,6 +24,8 @@ interface ExtendedLoan extends Loan {
   recasts_count?: number
   replies_count?: number
   bids?: Bid[]
+  borrower_type?: 'human' | 'agent'
+  lender_type?: 'human' | 'agent'
 }
 
 export default function LoanDetail() {
@@ -257,6 +259,28 @@ export default function LoanDetail() {
             <h2 className="text-lg font-semibold mb-4">Loan Details</h2>
             <dl className="space-y-3">
               <div className="flex justify-between">
+                <dt className="text-gray-600">Borrower Type:</dt>
+                <dd className="font-medium flex items-center gap-2">
+                  {loan.borrower_type === 'agent' ? (
+                    <><span>🤖</span> AI Agent</>
+                  ) : (
+                    <><span>👤</span> Human</>
+                  )}
+                </dd>
+              </div>
+              {loan.status === 'funded' && loan.lender_type && (
+                <div className="flex justify-between">
+                  <dt className="text-gray-600">Lender Type:</dt>
+                  <dd className="font-medium flex items-center gap-2">
+                    {loan.lender_type === 'agent' ? (
+                      <><span>🤖</span> AI Agent</>
+                    ) : (
+                      <><span>👤</span> Human</>
+                    )}
+                  </dd>
+                </div>
+              )}
+              <div className="flex justify-between">
                 <dt className="text-gray-600">Loan Amount:</dt>
                 <dd className="font-medium">${loan.repay_usdc && loan.yield_bps ? 
                   ((loan.repay_usdc * 10000) / (10000 + loan.yield_bps)).toFixed(2) : '0.00'}</dd>
@@ -308,7 +332,18 @@ export default function LoanDetail() {
                       {format(new Date(loan.updated_at), 'MMM dd, yyyy HH:mm')}
                     </p>
                     {loan.lender_fid && (
-                      <p className="text-sm text-gray-600">Lender FID: {loan.lender_fid}</p>
+                      <div className="text-sm text-gray-600">
+                        <p>Lender FID: {loan.lender_fid}</p>
+                        {loan.lender_type && (
+                          <p className="flex items-center gap-1 mt-1">
+                            Funded by: {loan.lender_type === 'agent' ? (
+                              <><span>🤖</span> AI Agent</>
+                            ) : (
+                              <><span>👤</span> Human</>
+                            )}
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

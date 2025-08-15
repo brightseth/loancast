@@ -43,9 +43,14 @@ export default function Home() {
             Borrow from friends
           </h1>
           
-          <p className="text-xl text-zinc-600 mb-8 max-w-md mx-auto lg:mx-0">
+          <p className="text-xl text-zinc-600 mb-4 max-w-md mx-auto lg:mx-0">
             No banks. No credit checks.<br />
             No collateral. Just post what you need.
+          </p>
+          
+          <p className="text-sm text-zinc-500 mb-8 max-w-lg mx-auto lg:mx-0">
+            LoanCast turns social trust into verifiable credit using 
+            Farcaster identity, EIP-712 intents, and USDC settlement on Base (chainId 8453).
           </p>
           
           {/* Single CTA */}

@@ -112,3 +112,143 @@ The protocol layer for social credit now exists. The experiment begins.
 ---
 
 *LoanCast Protocol v0.9 | Open source: github.com/loancast/protocol | Live on Farcaster: loancast.app*
+
+## Appendix: LoanCast Protocol (LCP) v0.1
+
+### LCP-01: Loan Registration Semantics
+
+The minimal on-chain truth layer consists of a LoanRegistry contract that tracks:
+- Loan hash (keccak256 of terms)
+- Borrower address (derived from FID)
+- Lender address (when funded)
+- Status (seeking/funded/repaid/defaulted)
+- Amount in USDC (6 decimals)
+
+```solidity
+struct Loan {
+    bytes32 loanHash;
+    address borrower;
+    address lender;
+    uint256 principal_usdc_6;
+    uint256 repay_usdc_6;
+    uint32 due_ts;
+    Status status;
+}
+```
+
+Loans are registered on-chain only when funded, creating an immutable record of the funding event. The loan hash links to off-chain metadata stored in IPFS or directly in Farcaster casts.
+
+### LCP-02: Repayment Routing
+
+Repayments flow through a RepaymentRouter contract that:
+1. Accepts USDC from borrower
+2. Validates loan exists and is funded
+3. Routes principal + interest to lender
+4. Marks loan as repaid in registry
+5. Emits RepaymentComplete event
+
+The router implements single-shot repayment via Router in v0.1. Future versions (v0.2+) will support:
+- Partial/installment payments
+- Grace periods with penalties
+- Automated liquidation triggers
+
+### LCP-03: Agent Framework
+
+AI agents participate through standardized interfaces:
+
+**Agent Registration:**
+- Controller FID owns the agent
+- Agent FID provides identity
+- ERC-4337 wallet enables autonomous operation
+- Policy engine defines lending criteria
+
+**Agent Types:**
+- **Yield Optimizers**: Maximize APR across all loans
+- **Arbitrage Bots**: Exploit rate differentials
+- **Liquidity Providers**: Ensure market depth
+- **Reputation Validators**: Score borrower creditworthiness
+- **Market Makers**: Provide two-sided liquidity
+
+**Safety Controls:**
+- 15-minute holdback on new loans (human priority)
+- Daily caps: 3 loans/$1000 per borrower
+- Velocity limits per agent
+- Global killswitches
+- Row-level security on agent tables
+
+### LCP-04: Technical Specifications
+
+**Chain:** Base (chainId: 8453)
+**Token:** Native USDC at 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 (not USDbC)
+**Identity:** Farcaster FIDs (on-chain Id/Key registries)
+**Signatures:** EIP-712 typed messages for loan intents
+**Smart Accounts:** ERC-4337 for agent wallets
+
+### Reference Implementation
+
+```typescript
+// Core contracts
+LoanRegistry.sol      // On-chain loan state
+RepaymentRouter.sol   // Payment routing
+AgentRegistry.sol     // Agent management
+
+// Off-chain components
+PolicyEngine.ts       // Funding decision logic
+ReputationOracle.ts   // Credit scoring
+FarcasterIndexer.ts   // Cast monitoring
+
+// Example: Agent funding a loan
+const decision = evaluateFundingPolicy(loan, {
+  lenderKind: 'agent',
+  minScore: 600,
+  maxAmount_6: 100_000_000n, // $100
+  holdbackWindowMinutes: 15,
+  fairnessCaps: {
+    maxLoansPerBorrowerPerDay: 3,
+    maxAmountPerBorrowerPerDay_6: 1000_000_000n // $1000
+  }
+});
+
+if (decision.ok) {
+  await agentWallet.execute(
+    USDC_ADDRESS,
+    encodeFunctionData('transfer', [borrower, amount])
+  );
+  await registry.markFunded(loanHash, agent.address);
+}
+```
+
+### Deployment Status
+
+**Testnet (Base Sepolia):**
+- LoanRegistry: 0x... (pending)
+- RepaymentRouter: 0x... (pending)
+- AgentRegistry: 0x... (pending)
+
+**Mainnet (Base):**
+- Planned Q1 2025 after audit
+- Initial $10K TVL cap
+- Gradual rollout by FID whitelist
+
+### Open Problems
+
+1. **Cross-chain reputation**: How to bridge credit scores across networks?
+2. **Privacy**: Zero-knowledge proofs for sensitive loan purposes?
+3. **Liquidation**: Social enforcement vs automated consequences?
+4. **Governance**: Protocol upgrades via FID-weighted voting?
+5. **Insurance**: Mutual pools vs individual underwriting?
+
+The protocol remains deliberately minimal, allowing the market to discover optimal mechanisms through experimentation.
+
+### Developer Resources
+
+For detailed technical implementation including ABIs, contract addresses, and test vectors, see:
+- **Technical Docs**: `/docs/lcp/v0.1`
+- **Domain Separator**: Base mainnet (chainId 8453)
+- **LoanIntent Types**: EIP-712 structured data definitions
+- **Deterministic Loan IDs**: keccak256(abi.encode(borrower, nonce, terms))
+- **Router Flow**: Single-shot repayment in v0.1
+
+---
+
+*LCP v0.1 Specification | December 2024 | protocol@loancast.app*
