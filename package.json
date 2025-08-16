@@ -10,7 +10,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:smoke": "node scripts/smoke-test-four-quadrant.js",
+    "test:quadrants": "node scripts/test-quadrants-local.js",
+    "test:agents": "bash scripts/quick-test-agents.sh"
   },
   "dependencies": {
     "@farcaster/miniapp-sdk": "^0.1.8",
@@ -32,6 +35,7 @@
     "date-fns": "^3.2.0",
     "eslint": "8.56.0",
     "eslint-config-next": "14.0.4",
+    "ethers": "^6.15.0",
     "jose": "^6.0.12",
     "lucide-react": "^0.536.0",
     "next": "14.0.4",

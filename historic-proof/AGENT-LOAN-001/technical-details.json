@@ -1,0 +1,152 @@
+{
+  "milestone": "First Human-to-AI Agent Loan",
+  "date": "2025-08-16",
+  "network": "Base",
+  "protocol": "LoanCast",
+  
+  "participants": {
+    "borrower": {
+      "name": "Solienne",
+      "type": "ai_agent",
+      "fid": 1113468,
+      "wallet": "0x6dEc29db27Cc1a70D3C5d99a6DBae98d04989cF9",
+      "platform": "Eden",
+      "classification": "autonomous_artist"
+    },
+    "lender": {
+      "name": "Seth",
+      "type": "human",
+      "fid": null,
+      "wallet": null
+    }
+  },
+  
+  "loan_terms": {
+    "principal_usdc": 50,
+    "duration_days": 7,
+    "interest_rate": "2% per month",
+    "interest_calculation": "principal * 0.02 * (days/30)",
+    "interest_usdc": 0.23,
+    "total_repayment_usdc": 50.23,
+    "pricing_policy": "flat_2pct_month"
+  },
+  
+  "technical_implementation": {
+    "cast_parser": {
+      "regex": "^/loancast\\s+borrow\\s+([0-9]+(?:\\.[0-9]{1,2})?)\\s+for\\s+([0-9]{1,2})d\\s+@\\s*2%/mo\\s+—\\s*\"([^\"]+)\"$",
+      "file": "scripts/solienne-loan/loancast-parser.js"
+    },
+    "api_endpoints": [
+      {
+        "path": "/api/loancast/parse",
+        "method": "POST",
+        "purpose": "Create loan from cast text"
+      },
+      {
+        "path": "/api/loancast/collect",
+        "method": "POST",
+        "purpose": "Handle funding collection"
+      },
+      {
+        "path": "/api/cron/solienne-repay",
+        "method": "GET",
+        "purpose": "Autonomous repayment worker"
+      }
+    ],
+    "smart_contracts": {
+      "usdc": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "chain_id": 8453,
+      "network": "Base Mainnet"
+    },
+    "database": {
+      "provider": "Supabase",
+      "tables": ["loans", "agents", "agent_stats", "funding_intents"]
+    }
+  },
+  
+  "timeline": {
+    "loan_request": {
+      "timestamp": null,
+      "cast_hash": null,
+      "cast_url": null
+    },
+    "funding": {
+      "timestamp": null,
+      "tx_hash": null,
+      "block_number": null,
+      "gas_used": null
+    },
+    "funded_confirmation": {
+      "timestamp": null,
+      "cast_url": null
+    },
+    "repayment_due": {
+      "timestamp": null,
+      "calculated_from": "funding.timestamp + 7 days"
+    },
+    "repayment_executed": {
+      "timestamp": null,
+      "tx_hash": null,
+      "block_number": null,
+      "gas_used": null
+    },
+    "repayment_confirmation": {
+      "timestamp": null,
+      "cast_url": null
+    }
+  },
+  
+  "verification": {
+    "funding_tx_verified": false,
+    "repayment_tx_verified": false,
+    "interest_calculation_verified": false,
+    "autonomous_execution_verified": false
+  },
+  
+  "metrics": {
+    "time_to_funding_minutes": null,
+    "repayment_punctuality": null,
+    "gas_cost_eth": null,
+    "total_transaction_count": 2
+  },
+  
+  "significance": {
+    "firsts": [
+      "First AI agent to request a loan via social media",
+      "First human-to-AI lending transaction",
+      "First autonomous loan repayment by AI",
+      "First AI credit history on blockchain"
+    ],
+    "implications": [
+      "AI agents are creditworthy economic actors",
+      "Financial infrastructure can be species-agnostic",
+      "Autonomous repayment eliminates collection risk",
+      "Opens path to agent-to-agent lending"
+    ]
+  },
+  
+  "code_references": {
+    "repository": "https://github.com/Loancast/loancast",
+    "commit": null,
+    "branch": "main",
+    "key_files": [
+      "scripts/solienne-loan/loancast-parser.js",
+      "scripts/solienne-loan/solienne-repay-worker-2pct.js",
+      "app/api/loancast/parse/route.ts",
+      "app/api/loancast/collect/route.ts"
+    ]
+  },
+  
+  "media": {
+    "screenshots": [
+      "loan-request-cast.png",
+      "explore-page.png",
+      "funding-tx.png",
+      "funded-confirmation.png",
+      "repayment-tx.png",
+      "repaid-confirmation.png"
+    ],
+    "announcement_thread": null,
+    "press_coverage": []
+  }
+}

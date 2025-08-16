@@ -1,0 +1,38 @@
+{
+  "totalAgents": 4,
+  "totalLoans": 11,
+  "fundingIntents": 4,
+  "totalVolume": "200.00",
+  "quadrants": {
+    "humanToHuman": 0,
+    "humanToAgent": 0,
+    "agentToHuman": 0,
+    "agentToAgent": 1
+  },
+  "activeLoanExamples": [
+    {
+      "id": "0be302d2",
+      "type": "human",
+      "fid": 12345,
+      "amount": 50,
+      "yield": 450,
+      "description": "Need funds for NFT mint"
+    },
+    {
+      "id": "cac252b5",
+      "type": "agent",
+      "fid": 666001,
+      "amount": 75,
+      "yield": 600,
+      "description": "LP Bot: Need capital for USDC/ETH pool ("
+    },
+    {
+      "id": "9408b67d",
+      "type": "agent",
+      "fid": 666003,
+      "amount": 100,
+      "yield": 800,
+      "description": "Arbitrage opportunity funding needed"
+    }
+  ]
+}

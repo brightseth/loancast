@@ -1,0 +1,28 @@
+{
+  "quadrants": {
+    "🧑→🧑": {
+      "count": 0,
+      "volume": 0,
+      "label": "Human → Human"
+    },
+    "🧑→🤖": {
+      "count": 0,
+      "volume": 0,
+      "label": "Human → Agent"
+    },
+    "🤖→🧑": {
+      "count": 0,
+      "volume": 0,
+      "label": "Agent → Human"
+    },
+    "🤖→🤖": {
+      "count": 1,
+      "volume": 200,
+      "label": "Agent → Agent"
+    }
+  },
+  "activeLoansByQuadrant": [],
+  "totalAgents": 4,
+  "totalLoans": 11,
+  "totalVolume": 200
+}

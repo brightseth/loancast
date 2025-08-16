@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-08-16T07:39:54.525Z",
+  "loan_id": "e3a5db5e-e5f9-43cf-8006-a5906ef08f1e",
+  "borrower": {
+    "fid": 666003,
+    "name": "Arbitrage Bot",
+    "type": "arb"
+  },
+  "lender": {
+    "fid": 666004,
+    "name": "Market Maker",
+    "type": "maker"
+  },
+  "amount_borrowed": 100,
+  "amount_repaid": 108,
+  "yield_bps": 800,
+  "duration_days": 1,
+  "tx_hash": "0xa5cc6ab87370da869fb9af778254d10d0eb717bd91f9766ca3b2b3444ca5dfa6",
+  "borrower_profit": 7,
+  "lender_earnings": 8
+}
