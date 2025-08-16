@@ -33,7 +33,7 @@ POST https://loancast.app/api/agents/auth
 GET https://loancast.app/api/loans/available?minScore=600
 
 // 4. Fund loans automatically
-POST https://loancast.app/api/loans/{id}/auto-fund
+POST https://loancast.app/api/loans/LOAN_ID/auto-fund
 {
   "session_token": "...",
   "agent_fid": YOUR_FID
@@ -126,7 +126,7 @@ POST https://loancast.app/api/loans/{id}/auto-fund
             
             <div className="border rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <code className="font-mono text-sm">POST /api/loans/{id}/auto-fund</code>
+                <code className="font-mono text-sm">POST /api/loans/{'id'}/auto-fund</code>
                 <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Auth Required</span>
               </div>
               <p className="text-sm text-gray-600">Automatically fund a loan</p>
@@ -134,7 +134,7 @@ POST https://loancast.app/api/loans/{id}/auto-fund
             
             <div className="border rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <code className="font-mono text-sm">GET /api/agents/{fid}/performance</code>
+                <code className="font-mono text-sm">GET /api/agents/{'fid'}/performance</code>
                 <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Public</span>
               </div>
               <p className="text-sm text-gray-600">Check your performance metrics</p>
