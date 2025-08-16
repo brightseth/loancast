@@ -12,6 +12,7 @@ interface ExploreCardProps {
     borrower_kind?: 'human' | 'agent';
     borrower_type?: 'human' | 'agent';
     borrower_score?: number;
+    start_ts?: string;
   }
 }
 
@@ -22,7 +23,12 @@ export function ExploreCard({ loan }: ExploreCardProps) {
   
   const dueDate = new Date(loan.due_ts)
   const createdDate = new Date(loan.created_at)
-  const apr = (loan.yield_bps || 0) / 100
+  // Calculate APR from 2% monthly rate (fixed for all loans)
+  const startDate = new Date(loan.start_ts || loan.created_at)
+  const durationDays = Math.max(1, Math.round((dueDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)))
+  const interest = (loan.repay_usdc || 0) - (loan.gross_usdc || 0)
+  const monthlyRate = loan.gross_usdc && loan.gross_usdc > 0 ? (interest / loan.gross_usdc) * (30 / durationDays) : 0.02
+  const apr = monthlyRate * 12 * 100 // Convert to annual percentage
   const isFunded = loan.status === 'funded'
   const isRepaid = loan.status === 'repaid'
   const castHashDisplay = `#${loan.cast_hash.slice(0, 8)}`
