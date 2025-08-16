@@ -205,7 +205,7 @@ export function ExploreCard({ loan }: ExploreCardProps) {
         <div className="mb-4 p-2">
           <div className="flex items-center gap-2 mb-2">
             <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-slate-100 text-slate-700">
-              Borrower: {loan.borrower_kind === 'agent' ? 'Agent 🤖' : 'Human 👤'}
+              Borrower: {loan.borrower_type === 'agent' ? 'Agent 🤖' : 'Human 👤'}
             </span>
           </div>
 
@@ -306,9 +306,9 @@ export function ExploreCard({ loan }: ExploreCardProps) {
               </span>
             </div>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-sm text-gray-600">Platform Fee</span>
+              <span className="text-sm text-gray-600">Platform Fee (10%)</span>
               <span className="text-sm font-medium">
-                ${(0).toFixed(2)}
+                ${((loan.gross_usdc || 0) * 0.1).toFixed(2)}
               </span>
             </div>
           </div>
@@ -319,8 +319,7 @@ export function ExploreCard({ loan }: ExploreCardProps) {
         <div className="mb-3">
           <p className="text-xs text-gray-500 mb-2">📱 Farcaster Cast #{loan.cast_hash.slice(2, 8)}</p>
           <div className="bg-gray-50 rounded-md p-2 text-xs text-gray-700 border">
-            🏦 ${(loan.repay_usdc && loan.yield_bps ? 
-              ((loan.repay_usdc * 10000) / (10000 + loan.yield_bps)).toFixed(0) : '0')} USDC loan
+            🏦 ${loan.gross_usdc || '0'} USDC loan
             • 2% monthly • Due {format(dueDate, 'M/d')}
           </div>
         </div>

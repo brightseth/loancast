@@ -5,7 +5,7 @@ import { useAuth } from '@/app/providers'
 import { Loan } from '@/lib/supabase'
 import { format, isAfter } from 'date-fns'
 import { isEnabled } from '@/lib/flags'
-import { AutolendSettings } from '@/components/AutolendSettings'
+// Removed AutolendSettings - keeping LoanCast pure: loans funded only by collecting casts
 
 export default function LendingDashboard() {
   // Check if lending dashboard is enabled
@@ -185,10 +185,7 @@ export default function LendingDashboard() {
         </div>
       )}
 
-      {/* Auto-Fund Settings */}
-      <div className="mb-8">
-        <AutolendSettings />
-      </div>
+      {/* Removed Auto-Fund Settings - loans funded only by collecting casts */}
 
       {/* Active Loans */}
       <div className="mb-8">

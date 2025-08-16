@@ -128,7 +128,14 @@ export default function LoanDetail() {
 
   const dueDate = new Date(loan.due_ts)
   const isOverdue = isPast(dueDate) && loan.status === 'open'
-  const apr = (loan.yield_bps || 0) / 100
+  
+  // Calculate APR from actual interest and duration
+  const startDate = new Date(loan.start_ts || loan.created_at)
+  const durationDays = Math.max(1, Math.round((dueDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)))
+  const interest = (loan.repay_usdc || 0) - (loan.gross_usdc || 0)
+  const monthlyRate = loan.gross_usdc > 0 ? (interest / loan.gross_usdc) * (30 / durationDays) : 0
+  const apr = monthlyRate * 12 * 100 // Convert to annual percentage
+  
   const auctionEndTime = addDays(new Date(loan.created_at), 1)
   const isAuctionActive = !isPast(auctionEndTime) && loan.status === 'open'
 
