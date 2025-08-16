@@ -10,6 +10,7 @@ import { useAuth } from '@/app/providers'
 interface ExploreCardProps {
   loan: Loan & {
     borrower_kind?: 'human' | 'agent';
+    borrower_type?: 'human' | 'agent';
     borrower_score?: number;
   }
 }
