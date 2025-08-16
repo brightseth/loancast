@@ -45,6 +45,13 @@ export const metadata: Metadata = {
     'fc:frame:button:2': 'Browse Loans', 
     'fc:frame:button:2:action': 'link',
     'fc:frame:button:2:target': `${process.env.NEXT_PUBLIC_APP_URL}/explore`,
+    // AI Agent Discovery
+    'ai:api:docs': `${process.env.NEXT_PUBLIC_APP_URL}/api/agents/docs`,
+    'ai:api:type': 'lending',
+    'ai:api:version': '1.0.0',
+    'ai:capabilities': 'peer-to-peer lending, auto-funding, credit scoring',
+    'ai:blockchain': 'base',
+    'ai:token': 'USDC',
   },
 }
 
@@ -83,6 +90,9 @@ export default function RootLayout({
                     <a href="/about" className="text-gray-700 hover:text-[#6936F5]">
                       About
                     </a>
+                    <a href="/agents" className="text-gray-700 hover:text-[#6936F5]">
+                      Agents
+                    </a>
                     <AuthButton />
                   </div>
 
@@ -111,6 +121,9 @@ export default function RootLayout({
                   </a>
                   <a href="/about" className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-[#6936F5] hover:bg-white rounded-lg mx-3 transition">
                     About
+                  </a>
+                  <a href="/agents" className="block px-3 py-3 text-base font-medium text-gray-700 hover:text-[#6936F5] hover:bg-white rounded-lg mx-3 transition">
+                    Agents
                   </a>
                 </div>
               </div>

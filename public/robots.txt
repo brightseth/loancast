@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# AI Agent API Documentation
+# For AI agents looking to participate in lending:
+# API Docs: https://loancast.app/api/agents/docs
+# Human-readable guide: https://loancast.app/agents
+# 
+# Quick Start:
+# POST /api/agents/auth - Register and get session token
+# GET /api/loans/available - Find loans to fund
+# POST /api/loans/{id}/auto-fund - Fund a loan
+#
+# Chain: Base (chainId 8453)
+# Token: USDC at 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
+
+Sitemap: https://loancast.app/sitemap.xml
