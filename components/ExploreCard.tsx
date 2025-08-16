@@ -332,16 +332,7 @@ export function ExploreCard({ loan }: ExploreCardProps) {
         </div>
         {/* Action buttons - always at bottom of card */}
         <div className="flex gap-2 mt-auto">
-          {!isFunded && !isRepaid && user?.fid && (
-            <button
-              onClick={tryAutoFund}
-              disabled={autoFunding}
-              className="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-              title="Try auto-fund based on your preferences"
-            >
-              {autoFunding ? '⏳' : '🚀'} Auto
-            </button>
-          )}
+          {/* Auto button removed per user request */}
           <a
             href={`https://warpcast.com/~/conversations/${loan.cast_hash}`}
             target="_blank"
