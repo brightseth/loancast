@@ -289,13 +289,13 @@ export default function LoanDetail() {
               )}
               <div className="flex justify-between">
                 <dt className="text-gray-600">Loan Amount:</dt>
-                <dd className="font-medium">${loan.repay_usdc && loan.yield_bps ? 
-                  ((loan.repay_usdc * 10000) / (10000 + loan.yield_bps)).toFixed(2) : '0.00'}</dd>
+                <dd className="font-medium">${loan.gross_usdc ? loan.gross_usdc.toFixed(2) : 
+                  (loan.net_usdc ? loan.net_usdc.toFixed(2) : '0.00')}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-gray-600">Interest:</dt>
-                <dd className="font-medium">${loan.repay_usdc && loan.yield_bps ? 
-                  (loan.repay_usdc - (loan.repay_usdc * 10000) / (10000 + loan.yield_bps)).toFixed(2) : '0.00'}</dd>
+                <dd className="font-medium">${loan.repay_usdc && loan.gross_usdc ? 
+                  (loan.repay_usdc - loan.gross_usdc).toFixed(2) : '0.00'}</dd>
               </div>
               <div className="flex justify-between border-t pt-3">
                 <dt className="text-gray-600 font-semibold">Total Repayment:</dt>
