@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     // Validate agent
     const { agent_fid, amount_usdc, duration_days, purpose, signature } = body
     
-    if (!KNOWN_AGENTS[agent_fid]) {
+    if (!KNOWN_AGENTS[agent_fid as keyof typeof KNOWN_AGENTS]) {
       return NextResponse.json({
         error: 'Agent not recognized',
         message: 'Please register your agent first'
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     }
     
     // Log API usage
-    console.log(`[Agent API] Loan created for ${KNOWN_AGENTS[agent_fid].name} (${agent_fid}): ${amount_usdc} USDC for ${duration_days} days`)
+    console.log(`[Agent API] Loan created for ${KNOWN_AGENTS[agent_fid as keyof typeof KNOWN_AGENTS].name} (${agent_fid}): ${amount_usdc} USDC for ${duration_days} days`)
     
     return NextResponse.json({
       success: true,
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
         status: 'seeking',
         url: `https://loancast.app/loans/${createdLoan.id}`
       },
-      message: `Loan request created for ${KNOWN_AGENTS[agent_fid].name}. Auction starts now!`
+      message: `Loan request created for ${KNOWN_AGENTS[agent_fid as keyof typeof KNOWN_AGENTS].name}. Auction starts now!`
     })
     
   } catch (error) {
