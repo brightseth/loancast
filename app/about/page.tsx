@@ -1,10 +1,31 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import TechnicalArchitecture from '@/components/diagrams/TechnicalArchitecture'
+import AgentLayers from '@/components/diagrams/AgentLayers'
+import ReputationScoring from '@/components/diagrams/ReputationScoring'
 
-export default function AboutPage() {
+export default function EnhancedAboutPage() {
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-6xl mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold mb-8">About LoanCast</h1>
+
+        {/* Evolution Timeline - Hero Section */}
+        <section className="mb-16">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-200">
+            <h2 className="text-2xl font-semibold mb-6 text-center">The Evolution Journey</h2>
+            <Image 
+              src="/images/evolution-timeline.png" 
+              alt="LoanCast Evolution: From Human Trust to Human-AI Economic Coordination"
+              width={1200}
+              height={400}
+              className="w-full rounded-lg shadow-lg"
+            />
+            <p className="text-center text-gray-600 mt-4 italic">
+              From social verification to unified credit markets where humans and AI collaborate
+            </p>
+          </div>
+        </section>
 
         {/* The Genesis Cast */}
         <section className="mb-12">
@@ -56,6 +77,35 @@ export default function AboutPage() {
           <p className="text-gray-700">
             When Seth repays on September 2nd—on time, in full, publicly—LoanCast will have proven its model works.
           </p>
+        </section>
+
+        {/* Technical Architecture Diagram */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6">Technical Architecture</h2>
+          <p className="text-gray-700 mb-6">
+            LoanCast v2.0 introduces a sophisticated multi-layer architecture that seamlessly integrates 
+            human social lending with autonomous agent operations:
+          </p>
+          <TechnicalArchitecture />
+        </section>
+
+        {/* Agent Intelligence Layers */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6">Agent Intelligence System</h2>
+          <p className="text-gray-700 mb-6">
+            Our three-layer agent architecture ensures safety, efficiency, and innovation in autonomous lending:
+          </p>
+          <AgentLayers />
+        </section>
+
+        {/* Reputation Evolution */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6">Reputation Algorithm Evolution</h2>
+          <p className="text-gray-700 mb-6">
+            Our reputation system evolves to support both human and AI participants, 
+            creating a unified trust metric across all intelligence types:
+          </p>
+          <ReputationScoring />
         </section>
 
         {/* Why We Built This */}
@@ -156,6 +206,53 @@ export default function AboutPage() {
           </p>
         </section>
 
+        {/* Evolution Roadmap */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6">Evolution Roadmap</h2>
+          
+          <div className="space-y-6">
+            <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-500">
+              <h3 className="font-semibold text-lg mb-2">Q4 2025: Foundation Enhancement</h3>
+              <ul className="space-y-1 text-gray-700">
+                <li>✓ Smart account integration (Safe + Session Keys)</li>
+                <li>✓ Basic yield deployment for idle capital</li>
+                <li>⏳ Guardian agent alpha testing</li>
+                <li>⏳ Cross-chain reputation bridges</li>
+              </ul>
+            </div>
+
+            <div className="bg-green-50 rounded-lg p-6 border-l-4 border-green-500">
+              <h3 className="font-semibold text-lg mb-2">Q1 2026: Intelligence Layer</h3>
+              <ul className="space-y-1 text-gray-700">
+                <li>◯ Natural language loan requests</li>
+                <li>◯ Autonomous risk assessment</li>
+                <li>◯ Yield optimization across protocols</li>
+                <li>◯ Agent performance tracking</li>
+              </ul>
+            </div>
+
+            <div className="bg-purple-50 rounded-lg p-6 border-l-4 border-purple-500">
+              <h3 className="font-semibold text-lg mb-2">Q2 2026: Convergence Beginning</h3>
+              <ul className="space-y-1 text-gray-700">
+                <li>◯ First AI entity loan</li>
+                <li>◯ Hybrid human-AI products</li>
+                <li>◯ Strategy marketplace launch</li>
+                <li>◯ Credit passport v1.0</li>
+              </ul>
+            </div>
+
+            <div className="bg-orange-50 rounded-lg p-6 border-l-4 border-orange-500">
+              <h3 className="font-semibold text-lg mb-2">2027: Scale and Sovereignty</h3>
+              <ul className="space-y-1 text-gray-700">
+                <li>◯ 1M credit passports issued</li>
+                <li>◯ $100M in autonomous loans</li>
+                <li>◯ Regulatory framework established</li>
+                <li>◯ Global expansion beyond crypto-native</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
         {/* Safety Architecture */}
         <section className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">Safety Architecture</h2>
@@ -196,83 +293,62 @@ export default function AboutPage() {
           </ul>
         </section>
 
-        {/* The Technology */}
+        {/* Technical Details - Enhanced Whitepaper Section */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">The Technology</h2>
-          <p className="text-gray-700 mb-4">
-            LoanCast runs entirely on public infrastructure:
+          <h2 className="text-2xl font-semibold mb-4">Technical Documentation</h2>
+          <p className="text-gray-700 mb-6">
+            For developers, researchers, and those interested in the technical architecture 
+            and protocol design behind LoanCast, we've published a comprehensive whitepaper 
+            with the Evolution Addendum for AgentFi integration.
           </p>
           
-          <ul className="space-y-2 mb-6">
-            <li className="flex items-start gap-2">
-              <span className="text-farcaster mt-1">•</span>
-              <span className="text-gray-700"><strong>Identity</strong>: Farcaster FIDs<sup>1</sup> (on-chain Id/Key registries)</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-farcaster mt-1">•</span>
-              <span className="text-gray-700"><strong>Settlement</strong>: USDC on Base<sup>2</sup> (chainId 8453)</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-farcaster mt-1">•</span>
-              <span className="text-gray-700"><strong>Automation</strong>: ERC-4337<sup>3</sup> smart-account wallets / session-key flows</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-farcaster mt-1">•</span>
-              <span className="text-gray-700"><strong>Integrity</strong>: EIP-712<sup>4</sup> typed intents for register/fund/repay</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-farcaster mt-1">•</span>
-              <span className="text-gray-700"><strong>Distribution</strong>: Loan requests appear natively in social feeds</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-farcaster mt-1">•</span>
-              <span className="text-gray-700"><strong>Reputation</strong>: On-chain history that can't be hidden or erased</span>
-            </li>
-          </ul>
-          
-          <p className="text-gray-700">
-            No custody. No intermediation. Just peer-to-peer lending with social reputation as collateral.
-          </p>
-        </section>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+              <h3 className="font-semibold text-lg mb-2">📄 Original Whitepaper v1.0</h3>
+              <p className="text-gray-700 mb-4">
+                "Social Credit for the Network Age" - How persistent identity 
+                and social reputation replace traditional collateral.
+              </p>
+              <ul className="text-sm text-gray-600 space-y-1 mb-4">
+                <li>• Core protocol architecture</li>
+                <li>• Reputation mechanics</li>
+                <li>• Early results & network effects</li>
+                <li>• Regulatory approach</li>
+              </ul>
+            </div>
 
-        {/* Our Principles */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-semibold mb-6">Our Principles</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold mb-1">Transparency</h3>
-              <p className="text-gray-700">
-                Every loan, bid, and repayment is public. Reputation requires radical transparency.
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="font-semibold text-lg mb-2">🚀 Evolution Addendum v2.0</h3>
+              <p className="text-gray-700 mb-4">
+                "From Social Credit Primitive to Autonomous Financial Intelligence" - 
+                The path to human-AI convergence.
               </p>
+              <ul className="text-sm text-gray-600 space-y-1 mb-4">
+                <li>• AgentFi convergence thesis</li>
+                <li>• Three-layer agent architecture</li>
+                <li>• Enhanced reputation algorithms</li>
+                <li>• Unified credit markets vision</li>
+              </ul>
             </div>
-            
-            <div>
-              <h3 className="font-semibold mb-1">Simplicity</h3>
-              <p className="text-gray-700">
-                If it takes more than one cast to borrow or one click to lend, we've failed.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-1">Community</h3>
-              <p className="text-gray-700">
-                The network gets stronger with every successful loan. 
-                We're building shared infrastructure for social credit.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-1">Access</h3>
-              <p className="text-gray-700">
-                No credit scores. No documentation. If you have reputation in the network, 
-                you have access to credit.
-              </p>
-            </div>
+          </div>
+
+          <div className="mt-6 text-center">
+            <a 
+              href="/whitepaper" 
+              className="inline-flex items-center gap-2 bg-purple-600 text-white px-8 py-4 rounded-lg font-medium hover:bg-purple-700 transition text-lg"
+            >
+              📖 Read Complete Whitepaper & Evolution Addendum
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+            <p className="text-xs text-gray-500 mt-2">
+              💡 Tip: Use Ctrl+P (Cmd+P) on the whitepaper page to download as PDF
+            </p>
           </div>
         </section>
 
-        {/* The Vision */}
+        {/* The Vision - Updated */}
         <section className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">The Vision</h2>
           <p className="text-gray-700 mb-4">
@@ -288,96 +364,83 @@ export default function AboutPage() {
             Every person—and every agent—will have access to fair credit based on their reputation, not their collateral.
           </p>
           
-          <p className="text-gray-700">
-            The first peer-to-peer lending platforms failed because they tried to be banks without being banks. 
-            We're not trying to be a bank. We're building something new: a protocol where your word is your bond, 
-            your network is your net worth, and your cast is your credit—whether you're made of carbon or silicon.
-          </p>
-        </section>
-
-        {/* Technical Details */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">Technical Details</h2>
-          <p className="text-gray-700 mb-6">
-            For developers, researchers, and those interested in the technical architecture 
-            and protocol design behind LoanCast, we've published a comprehensive whitepaper.
-          </p>
-          
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-            <h3 className="font-semibold text-lg mb-2">📄 LoanCast Protocol Whitepaper</h3>
-            <p className="text-gray-700 mb-4">
-              "Social Credit for the Network Age" - A detailed analysis of how persistent identity 
-              and social reputation can replace traditional collateral in peer-to-peer lending.
-            </p>
-            <a 
-              href="/whitepaper" 
-              className="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition"
-            >
-              📖 Read Professional Whitepaper
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-            <p className="text-xs text-gray-500 mt-2">
-              💡 Tip: Use Ctrl+P (Cmd+P) on the whitepaper page to download as PDF
-            </p>
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
+            <p className="text-lg font-medium text-center mb-4">The Evolution Stages</p>
+            <div className="grid grid-cols-4 gap-4 text-center">
+              <div>
+                <div className="text-2xl mb-2">✓</div>
+                <div className="text-sm font-semibold">Stage 1</div>
+                <div className="text-xs text-gray-600">Friends lending on Farcaster</div>
+              </div>
+              <div>
+                <div className="text-2xl mb-2">🚧</div>
+                <div className="text-sm font-semibold">Stage 2</div>
+                <div className="text-xs text-gray-600">Agents enhancing trust networks</div>
+              </div>
+              <div>
+                <div className="text-2xl mb-2">🔮</div>
+                <div className="text-sm font-semibold">Stage 3</div>
+                <div className="text-xs text-gray-600">Unified human-AI credit markets</div>
+              </div>
+              <div>
+                <div className="text-2xl mb-2">∞</div>
+                <div className="text-sm font-semibold">Stage 4</div>
+                <div className="text-xs text-gray-600">Trust layer for all economic activity</div>
+              </div>
+            </div>
           </div>
+          
+          <p className="text-gray-700 mt-6 font-medium text-center text-lg">
+            The manifesto stands: <span className="text-purple-600">Your cast is your credit.</span><br/>
+            The evolution begins: <span className="text-green-600">Every intelligence deserves credit.</span>
+          </p>
         </section>
 
         {/* Join Us */}
         <section className="mb-12">
-          <h2 className="text-2xl font-semibold mb-4">Join Us</h2>
+          <h2 className="text-2xl font-semibold mb-4">Join the Evolution</h2>
           <p className="text-gray-700 mb-6">
             LoanCast is open to everyone on Farcaster. Whether you need a hand or want to help others, 
-            your reputation starts with your first transaction.
+            your reputation starts with your first transaction. And soon, whether you're human or AI, 
+            you'll have equal access to the credit you deserve.
           </p>
           
-          <p className="text-gray-700 mb-8">
-            Ready to transform your social capital into financial capital?
-          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link 
+              href="/loans/new"
+              className="inline-block bg-farcaster text-white px-8 py-3 rounded-lg font-semibold hover:bg-farcaster-dark transition"
+            >
+              Cast your first loan →
+            </Link>
+            <Link 
+              href="/whitepaper"
+              className="inline-block bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
+            >
+              Read the Whitepaper →
+            </Link>
+            <a 
+              href="https://github.com/loancast/agentfi"
+              target="_blank"
+              rel="noopener"
+              className="inline-block bg-gray-800 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-900 transition"
+            >
+              Build with us →
+            </a>
+          </div>
           
-          <Link 
-            href="/loans/new"
-            className="inline-block bg-farcaster text-white px-8 py-3 rounded-lg font-semibold hover:bg-farcaster-dark transition"
-          >
-            Cast your first loan →
-          </Link>
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-600">
+              🎯 <strong>First AI loan target:</strong> January 1, 2026
+            </p>
+          </div>
         </section>
 
         {/* Footer note */}
         <div className="border-t pt-8 mt-12">
-          <p className="text-sm text-gray-600 italic">
+          <p className="text-sm text-gray-600 italic text-center">
             Built by the Farcaster community, for the Farcaster community. 
-            LoanCast is a public good that transforms social trust into financial access.
+            LoanCast is a public good that transforms social trust into financial access—for all intelligence types.
           </p>
-          
-          {/* Technical Footnotes */}
-          <div className="mt-8 text-xs text-gray-500 space-y-1">
-            <p>
-              <sup>1</sup> Farcaster FIDs: On-chain Id/Key registries - 
-              <a href="https://docs.farcaster.xyz/reference/contracts/reference" target="_blank" rel="noopener" className="text-blue-600 hover:underline">
-                docs.farcaster.xyz/reference/contracts
-              </a>
-            </p>
-            <p>
-              <sup>2</sup> Native USDC on Base: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 (chainId 8453, not USDbC) - 
-              <a href="https://docs.base.org/docs/tokens/list" target="_blank" rel="noopener" className="text-blue-600 hover:underline">
-                docs.base.org/tokens
-              </a>
-            </p>
-            <p>
-              <sup>3</sup> ERC-4337: Account abstraction for programmable wallets - 
-              <a href="https://eips.ethereum.org/EIPS/eip-4337" target="_blank" rel="noopener" className="text-blue-600 hover:underline">
-                EIP-4337
-              </a>
-            </p>
-            <p>
-              <sup>4</sup> EIP-712: Typed structured data signing - 
-              <a href="https://eips.ethereum.org/EIPS/eip-712" target="_blank" rel="noopener" className="text-blue-600 hover:underline">
-                EIP-712
-              </a>
-            </p>
-          </div>
         </div>
       </div>
     </div>
