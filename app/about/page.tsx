@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import TechnicalArchitecture from '@/components/diagrams/TechnicalArchitecture'
 import AgentLayers from '@/components/diagrams/AgentLayers'
 import ReputationScoring from '@/components/diagrams/ReputationScoring'
@@ -9,23 +8,6 @@ export default function EnhancedAboutPage() {
     <div className="min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold mb-8">About LoanCast</h1>
-
-        {/* Evolution Timeline - Hero Section */}
-        <section className="mb-16">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-200">
-            <h2 className="text-2xl font-semibold mb-6 text-center">The Evolution Journey</h2>
-            <Image 
-              src="/images/evolution-timeline.png" 
-              alt="LoanCast Evolution: From Human Trust to Human-AI Economic Coordination"
-              width={1200}
-              height={400}
-              className="w-full rounded-lg shadow-lg"
-            />
-            <p className="text-center text-gray-600 mt-4 italic">
-              From social verification to unified credit markets where humans and AI collaborate
-            </p>
-          </div>
-        </section>
 
         {/* The Genesis Cast */}
         <section className="mb-12">
