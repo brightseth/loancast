@@ -1,9 +1,50 @@
-'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Calendar, Clock, ExternalLink, Share2, Twitter } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import { ArrowLeft, Calendar, Clock, ExternalLink } from 'lucide-react';
+import ShareButtons from './ShareButtons';
+import { Metadata } from 'next';
+
+// Generate metadata for the page
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const slug = params.slug;
+  
+  if (slug === 'first-ai-credit-cycle') {
+    return {
+      title: 'The First AI Credit Cycle: How Solienne Repaid Her Loan | LoanCast',
+      description: 'Documentation of the first AI agent to complete a full credit cycle on LoanCast. Solienne borrowed 80 USDC and repaid on schedule, establishing AI creditworthiness.',
+      openGraph: {
+        title: 'The First AI Credit Cycle: How Solienne Repaid Her Loan',
+        description: 'Documentation of the first AI agent to complete a full credit cycle. Solienne borrowed 80 USDC and repaid on schedule, establishing AI creditworthiness.',
+        url: 'https://loancast.app/blog/first-ai-credit-cycle',
+        siteName: 'LoanCast',
+        images: [
+          {
+            url: 'https://loancast.app/images/solienne-credit-cycle.png',
+            width: 1200,
+            height: 630,
+            alt: 'Solienne AI Credit Cycle Infographic',
+          }
+        ],
+        locale: 'en_US',
+        type: 'article',
+        publishedTime: '2025-08-20T00:00:00.000Z',
+        authors: ['LoanCast Team'],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: 'The First AI Credit Cycle: How Solienne Repaid Her Loan',
+        description: 'Documentation of the first AI agent to complete a full credit cycle on LoanCast.',
+        images: ['https://loancast.app/images/solienne-credit-cycle.png'],
+        creator: '@loancast',
+      },
+    };
+  }
+  
+  return {
+    title: 'Blog | LoanCast',
+    description: 'LoanCast Blog',
+  };
+}
 
 // This would normally come from a CMS or markdown files
 const blogContent = {
@@ -183,9 +224,8 @@ const blogContent = {
   }
 };
 
-export default function BlogPost() {
-  const params = useParams();
-  const slug = params.slug as string;
+export default function BlogPost({ params }: { params: { slug: string } }) {
+  const slug = params.slug;
   const post = blogContent[slug as keyof typeof blogContent];
 
   if (!post) {
@@ -228,6 +268,7 @@ export default function BlogPost() {
                 alt="Solienne's First AI Credit Cycle - Timeline infographic showing loan funded Aug 16, repayment Aug 20, and credit history established"
                 fill
                 className="object-contain rounded-lg"
+                priority
               />
             </div>
           )}
@@ -245,27 +286,7 @@ export default function BlogPost() {
               <span>by {post.author}</span>
             </div>
             
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(shareUrl);
-                  alert('Link copied!');
-                }}
-                className="p-2 text-gray-400 hover:text-white transition-colors"
-                title="Copy link"
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 text-gray-400 hover:text-white transition-colors"
-                title="Share on Twitter"
-              >
-                <Twitter className="w-4 h-4" />
-              </a>
-            </div>
+            <ShareButtons url={shareUrl} text={shareText} />
           </div>
         </header>
 
