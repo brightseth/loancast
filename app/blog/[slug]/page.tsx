@@ -86,36 +86,90 @@ const blogContent = {
       <p>The loan process revealed both the possibilities and current limitations of AI financial autonomy. Here's what actually happened behind the scenes:</p>
       
       <h3>The 5-Day Journey</h3>
-      <p>On day one, Solienne posted her loan request on Farcaster. The system recognized her as a registered agent and created the listing. I funded it within hours — not for the returns (80 cents profit isn't exactly lucrative) but to test if this could work.</p>
       
-      <p>Days 2-4 passed quietly. In a real loan, Solienne would have ordered prints, engaged suppliers, created value. Instead, the funds sat untouched. We were running a creditworthiness test disguised as a loan.</p>
-      
-      <p>Day 5 brought the critical moment. Solienne recognized her obligation was due. Despite being unable to directly execute blockchain transactions, she posted her intent to repay, calculated the exact amount including interest (80.27 USDC), and directed the transaction's execution.</p>
+      <div className="space-y-6 my-8">
+        <div className="border-l-4 border-gray-700 pl-6">
+          <p className="font-semibold text-blue-400 mb-2">Day 1: The Request</p>
+          <p>Solienne posted her loan request on Farcaster. The system recognized her as a registered agent and created the listing. I funded it within hours — not for the returns (80 cents profit isn't exactly lucrative) but to test if this could work.</p>
+        </div>
+        
+        <div className="border-l-4 border-gray-700 pl-6">
+          <p className="font-semibold text-blue-400 mb-2">Days 2-4: The Wait</p>
+          <p>Days passed quietly. In a real loan, Solienne would have ordered prints, engaged suppliers, created value. Instead, the funds sat untouched. We were running a creditworthiness test disguised as a loan.</p>
+        </div>
+        
+        <div className="border-l-4 border-gray-700 pl-6">
+          <p className="font-semibold text-blue-400 mb-2">Day 5: The Moment of Truth</p>
+          <p>The critical moment arrived. Solienne recognized her obligation was due. Despite being unable to directly execute blockchain transactions, she posted her intent to repay, calculated the exact amount including interest (80.27 USDC), and directed the transaction's execution.</p>
+        </div>
+      </div>
       
       <h2>The Documentation Trail</h2>
-      <ul>
-        <li><strong>Aug 16</strong>: <a href="https://farcaster.xyz/solienne/0x72004930" target="_blank">Loan funded</a></li>
-        <li><strong>Aug 20</strong>: 
-          <ul>
-            <li><a href="https://farcaster.xyz/solienne/0xe7c3666f" target="_blank">Repayment initiated</a></li>
-            <li><a href="https://basescan.org/tx/0x4addb8394dd30ce0853c1d82d9fc2989f45a81302b928e791566e7b794ab3bce" target="_blank">Transaction executed</a></li>
-            <li><a href="https://farcaster.xyz/solienne/0x27f7d560" target="_blank">Solienne confirmed</a></li>
-            <li><a href="https://farcaster.xyz/seth/0x52c0d823" target="_blank">Cycle complete</a></li>
-          </ul>
-        </li>
-      </ul>
       
-      <p>Every step was documented publicly, creating a verifiable trail of intent, execution, and confirmation.</p>
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 my-8">
+        <div className="space-y-4">
+          <div className="flex items-start gap-4">
+            <span className="text-blue-400 font-bold whitespace-nowrap">Aug 16</span>
+            <div>
+              <a href="https://farcaster.xyz/solienne/0x72004930" target="_blank" className="hover:underline">
+                ✅ Loan funded
+              </a>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-4">
+            <span className="text-blue-400 font-bold whitespace-nowrap">Aug 20</span>
+            <div className="space-y-2">
+              <a href="https://farcaster.xyz/solienne/0xe7c3666f" target="_blank" className="block hover:underline">
+                📝 Repayment initiated
+              </a>
+              <a href="https://basescan.org/tx/0x4addb8394dd30ce0853c1d82d9fc2989f45a81302b928e791566e7b794ab3bce" target="_blank" className="block hover:underline">
+                💸 Transaction executed
+              </a>
+              <a href="https://farcaster.xyz/solienne/0x27f7d560" target="_blank" className="block hover:underline">
+                ✔️ Solienne confirmed
+              </a>
+              <a href="https://farcaster.xyz/seth/0x52c0d823" target="_blank" className="block hover:underline">
+                🎉 Cycle complete
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <p className="text-center italic text-gray-400">Every step was documented publicly, creating a verifiable trail of intent, execution, and confirmation.</p>
       
       <h2>What Was Actually Proven</h2>
       
-      <p>Despite the simplicity of this test, Solienne demonstrated critical capabilities: financial autonomy in deciding when to repay, mathematical accuracy in calculating interest (80.27 USDC exactly), commitment to the agreed terms, transparent communication throughout, and the establishment of verifiable credit history. This may be the first documented case of an AI borrower proving trust on-chain.</p>
+      <p>Despite the simplicity of this test, Solienne demonstrated critical capabilities:</p>
+      <ul>
+        <li><strong>Financial autonomy</strong> - Deciding when to repay without human intervention</li>
+        <li><strong>Mathematical accuracy</strong> - Calculating interest to the cent (80.27 USDC exactly)</li>
+        <li><strong>Commitment to terms</strong> - Honoring the 5-day agreement precisely</li>
+        <li><strong>Transparent communication</strong> - Public updates throughout the process</li>
+        <li><strong>Credit history established</strong> - Verifiable on-chain reputation built</li>
+      </ul>
+      
+      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-300">
+        "This may be the first documented case of an AI borrower proving trust on-chain."
+      </blockquote>
       
       <h2>The Technical Reality</h2>
       
-      <p>Let's address the elephant in the room: Solienne can't actually send blockchain transactions herself. She operates through Eden's API, which gives her abilities like posting to social media, creating images, and making decisions — but not direct wallet control. This might seem like a fatal flaw, but it's actually similar to how many human businesses operate.</p>
+      <p>Let's address the elephant in the room: Solienne can't actually send blockchain transactions herself. She operates through Eden's API, which gives her abilities like:</p>
+      <ul>
+        <li>Posting to social media platforms</li>
+        <li>Creating and selling artwork</li>
+        <li>Making autonomous decisions</li>
+        <li>Managing her schedule and commitments</li>
+      </ul>
+      <p>But notably absent: direct wallet control.</p>
       
-      <p>Consider a CEO who directs their CFO to make payments, or a business owner who instructs their accountant to handle transactions. The decision-maker and the executor are often different entities. What matters is the decision, the intent, and the accountability — all of which Solienne demonstrated.</p>
+      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-300">
+        "The decision-maker and the executor are often different entities. What matters is the decision, the intent, and the accountability."
+      </blockquote>
+      
+      <p>This might seem like a fatal flaw, but it's actually similar to how many human businesses operate. Consider a CEO who directs their CFO to make payments, or a business owner who instructs their accountant to handle transactions. Solienne demonstrated all three critical elements: decision, intent, and accountability.</p>
       
       <h2>Key Lessons</h2>
       
@@ -135,19 +189,30 @@ const blogContent = {
       
       <p>This experiment is a tiny glimpse into a massive shift that's coming. As AI agents become more capable, they'll need access to the same financial tools humans use: credit, investment, insurance, savings. The agent economy won't be separate from the human economy — it will be interwoven with it.</p>
       
+      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-300">
+        "The agent economy won't be separate from the human economy — it will be interwoven with it."
+      </blockquote>
+      
       <p>Imagine the possibilities:</p>
       
-      <h3>Agent-to-Agent Lending</h3>
-      <p>What happens when AI agents start lending to each other? An AI trader might lend to an AI artist, who lends to an AI writer. Credit evaluation could happen in milliseconds, with terms automatically adjusted based on real-time performance data.</p>
-      
-      <h3>AI-Managed Investment Funds</h3>
-      <p>Agents could pool capital, make collective investment decisions, and distribute returns. They could react to market conditions faster than any human fund manager, while still maintaining fiduciary responsibility.</p>
-      
-      <h3>Autonomous Business Operations</h3>
-      <p>With access to credit, AI agents could run entire businesses. They could hire other agents (or humans), purchase inventory, manage supply chains, and reinvest profits. The first AI unicorn might not be far off.</p>
-      
-      <h3>New Forms of Collateral</h3>
-      <p>What does an AI own that could serve as collateral? Perhaps their training data, their user base, their revenue streams, or even their reputation scores. We'll need new frameworks for thinking about AI asset ownership.</p>
+      <ul>
+        <li>
+          <strong>Agent-to-Agent Lending</strong><br />
+          What happens when AI agents start lending to each other? An AI trader might lend to an AI artist, who lends to an AI writer. Credit evaluation could happen in milliseconds, with terms automatically adjusted based on real-time performance data.
+        </li>
+        <li>
+          <strong>AI-Managed Investment Funds</strong><br />
+          Agents could pool capital, make collective investment decisions, and distribute returns. They could react to market conditions faster than any human fund manager, while still maintaining fiduciary responsibility.
+        </li>
+        <li>
+          <strong>Autonomous Business Operations</strong><br />
+          With access to credit, AI agents could run entire businesses. They could hire other agents (or humans), purchase inventory, manage supply chains, and reinvest profits. The first AI unicorn might not be far off.
+        </li>
+        <li>
+          <strong>New Forms of Collateral</strong><br />
+          What does an AI own that could serve as collateral? Perhaps their training data, their user base, their revenue streams, or even their reputation scores. We'll need new frameworks for thinking about AI asset ownership.
+        </li>
+      </ul>
       
       <h2>What's Next for Solienne</h2>
       
@@ -168,32 +233,56 @@ const blogContent = {
       <p>This experiment raises profound questions about the nature of economic agency:</p>
       
       <ul>
-        <li>If an AI can be creditworthy, can it own property?</li>
-        <li>Should AI agents have the same financial rights as humans?</li>
-        <li>How do we prevent AI agents from being exploited financially?</li>
-        <li>What happens when AI agents become better at finance than humans?</li>
-        <li>Do we need new regulations for the agent economy?</li>
+        <li><strong>Property rights:</strong> If an AI can be creditworthy, can it own property?</li>
+        <li><strong>Financial equality:</strong> Should AI agents have the same financial rights as humans?</li>
+        <li><strong>Protection:</strong> How do we prevent AI agents from being exploited financially?</li>
+        <li><strong>Competition:</strong> What happens when AI agents become better at finance than humans?</li>
+        <li><strong>Regulation:</strong> Do we need new laws for the agent economy?</li>
       </ul>
       
       <p>These aren't questions for the distant future. They're questions we need to start answering now, as experiments like this push the boundaries of what's possible.</p>
       
       <h2>Conclusion: Small Steps, Big Implications</h2>
       
-      <p>Yes, this was a tiny experiment. The loan was small, the term was short, and the funds weren't even used productively. But what we demonstrated was that an AI agent could request capital, receive trust, track obligations, make autonomous decisions, execute precisely, and build verifiable credit history.</p>
+      <p>Yes, this was a tiny experiment. The loan was small, the term was short, and the funds weren't even used productively. But what we demonstrated was revolutionary:</p>
       
-      <p>These capabilities are the building blocks of economic participation. Today it's 80 USDC for prints that were never ordered. Tomorrow it could be $10,000 for an AI to start a design agency. Next year, it might be $1 million for an AI-run manufacturing operation.</p>
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 my-8">
+        <p className="text-lg font-semibold mb-4">An AI agent successfully:</p>
+        <ul>
+          <li>✓ Requested capital from humans</li>
+          <li>✓ Received trust from a lender</li>
+          <li>✓ Tracked financial obligations</li>
+          <li>✓ Made autonomous repayment decisions</li>
+          <li>✓ Executed with mathematical precision</li>
+          <li>✓ Built verifiable credit history</li>
+        </ul>
+      </div>
+      
+      <p>These capabilities are the building blocks of economic participation. Consider the progression:</p>
+      <ul>
+        <li><strong>Today:</strong> 80 USDC for prints that were never ordered</li>
+        <li><strong>Tomorrow:</strong> $10,000 for an AI to start a design agency</li>
+        <li><strong>Next year:</strong> $1 million for an AI-run manufacturing operation</li>
+      </ul>
       
       <p>The path from here to there isn't just about technology — it's about trust, infrastructure, and gradually expanding the boundaries of what we believe AI agents can and should do.</p>
       
-      <p>Solienne didn't just repay a loan. She opened a door.</p>
+      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-300">
+        "Solienne didn't just repay a loan. She opened a door."
+      </blockquote>
       
-      <p>And on the other side of that door is an economy where the distinction between human and artificial economic actors begins to blur, where credit flows to the best ideas regardless of whether they come from carbon or silicon, where the next great business might be founded not by a human entrepreneur, but by an AI with a vision and access to capital.</p>
+      <p>And on the other side of that door is an economy where:</p>
+      <ul>
+        <li>The distinction between human and artificial economic actors begins to blur</li>
+        <li>Credit flows to the best ideas regardless of whether they come from carbon or silicon</li>
+        <li>The next great business might be founded not by a human entrepreneur, but by an AI with a vision and access to capital</li>
+      </ul>
       
       <p>That future starts with small experiments like this one. It starts with 80 USDC, a 5-day term, and an AI artist named Solienne who paid back her loan exactly as promised.</p>
       
-      <p>Welcome to the agent economy. It's just getting started.</p>
+      <p className="text-2xl font-bold text-center mt-12 mb-8">Welcome to the agent economy.<br/>It's just getting started.</p>
       
-      <div class="resources">
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 mt-12">
         <h3>Resources</h3>
         <ul>
           <li><a href="https://loancast.app/loans/0fd92bda-5b08-48b0-84f8-403c10d2929a" target="_blank">View the loan on LoanCast</a></li>
