@@ -19,7 +19,7 @@ const blogPosts = [
 
 export default function BlogPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gray-950 text-gray-300">
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="mb-12">
@@ -31,8 +31,8 @@ export default function BlogPage() {
             Back to LoanCast
           </Link>
           
-          <h1 className="text-4xl font-bold mb-4">LoanCast Blog</h1>
-          <p className="text-gray-400">
+          <h1 className="text-4xl font-bold mb-4 text-gray-100">LoanCast Blog</h1>
+          <p className="text-gray-500">
             Experiments, updates, and insights from building the agent credit economy
           </p>
         </div>
@@ -42,7 +42,7 @@ export default function BlogPage() {
           {blogPosts.map((post) => (
             <article 
               key={post.id}
-              className="border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors"
+              className="bg-gray-900/50 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-colors"
             >
               {post.featured && (
                 <span className="inline-block px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-full mb-4">

@@ -36,7 +36,7 @@ async function main() {
     .eq("borrower_type", "agent")
     .eq("borrower_fid", 1113468)
     .eq("status", "funded")
-    .order("funded_at", { ascending: true });
+    .order("created_at", { ascending: true });
 
   if (error) throw error;
   if (!loans || loans.length === 0) {
@@ -58,16 +58,18 @@ async function main() {
       continue;
     }
 
-    if (!loan.lender_address) {
-      console.log(`   ⚠️ Missing lender_address on loan\n`);
-      continue;
+    let lenderAddr = loan.lender_address;
+    if (!lenderAddr) {
+      // Use Seth's public wallet from Farcaster
+      lenderAddr = '0x7c7BeC19B92eC2928AFd95BC9fC8c4277F14F0a8';
+      console.log(`   ℹ️ Using Seth's public wallet: ${lenderAddr}`);
     }
 
     // principal in micro-USDC (integer)
     const principalMicro = BigInt(Math.round(Number(loan.gross_usdc) * 1e6));
 
     // days outstanding (at least 1)
-    const fundedMs = new Date(loan.funded_at || loan.created_at).getTime();
+    const fundedMs = new Date(loan.created_at).getTime();
     const days = Math.max(1, Math.ceil((now - fundedMs) / 86_400_000));
 
     // interest = principal * 0.02 * (days/30)
@@ -90,8 +92,8 @@ async function main() {
     }
 
     // repay
-    console.log(`   💸 Sending repayment to ${loan.lender_address.substring(0, 10)}...`);
-    const tx = await usdc.transfer(loan.lender_address, totalMicro);
+    console.log(`   💸 Sending repayment to ${lenderAddr.substring(0, 10)}...`);
+    const tx = await usdc.transfer(lenderAddr, totalMicro);
     console.log(`   ⏳ Transaction submitted: ${tx.hash}`);
     const rec = await tx.wait();
     console.log(`   ✅ Transaction confirmed!`);

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Set all environment variables
+export NEXT_PUBLIC_SUPABASE_URL="https://qvafjicbrsoyzdlgypuq.supabase.co"
+export SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2YWZqaWNicnNveXpkbGd5cHVxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDI4NDcxOSwiZXhwIjoyMDY5ODYwNzE5fQ.YxsDWikFfGYPud_exL_-r-hlg4nQIjn6OssL8MCgoIo"
+export SOLIENNE_PK="c4f50234fa04d47c80c14ac004ce5839fd9613c7e245db6b6520fe6e398baa04"
+
+# Run the repayment
+node scripts/solienne-loan/solienne-repay-worker-2pct.js

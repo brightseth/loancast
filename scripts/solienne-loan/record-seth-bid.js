@@ -16,7 +16,7 @@ const supabase = createClient(
 );
 
 const LOAN_ID = '0fd92bda-5b08-48b0-84f8-403c10d2929a';
-const SETH_FID = 10224; // Your FID
+const SETH_FID = 5046; // Seth's FID
 const BID_AMOUNT = 80;
 
 async function recordBid() {

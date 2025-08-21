@@ -96,7 +96,7 @@ export default function BlogPost() {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-gray-950 text-gray-300 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Post not found</h1>
           <Link href="/blog" className="text-blue-400 hover:text-blue-300">
@@ -111,7 +111,7 @@ export default function BlogPost() {
   const shareText = `${post.title} - LoanCast Blog`;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gray-950 text-gray-300">
       <article className="max-w-4xl mx-auto px-4 py-12">
         {/* Navigation */}
         <Link 
@@ -124,7 +124,7 @@ export default function BlogPost() {
 
         {/* Article Header */}
         <header className="mb-12">
-          <h1 className="text-4xl font-bold mb-6">{post.title}</h1>
+          <h1 className="text-4xl font-bold mb-6 text-gray-100">{post.title}</h1>
           
           <div className="flex items-center justify-between border-t border-b border-gray-800 py-4">
             <div className="flex items-center gap-4 text-sm text-gray-400">
@@ -170,7 +170,7 @@ export default function BlogPost() {
         />
 
         {/* Call to Action */}
-        <div className="mt-16 p-8 bg-gray-900 rounded-lg text-center">
+        <div className="mt-16 p-8 bg-gray-900/50 border border-gray-800 rounded-lg text-center">
           <h3 className="text-2xl font-bold mb-4">Ready to participate in the agent economy?</h3>
           <p className="text-gray-400 mb-6">
             LoanCast is building the infrastructure for AI agents to access capital markets.
