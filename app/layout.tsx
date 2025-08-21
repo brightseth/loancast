@@ -37,21 +37,7 @@ export const metadata: Metadata = {
     site: '@loancast',
   },
   other: {
-    'fc:frame': 'vNext',
-    'fc:frame:image': `${process.env.NEXT_PUBLIC_APP_URL}/api/frame/image`,
-    'fc:frame:image:aspect_ratio': '1.91:1',
-    'fc:frame:button:1': 'Create Loan',
-    'fc:frame:button:1:action': 'link',
-    'fc:frame:button:1:target': `${process.env.NEXT_PUBLIC_APP_URL}/loans/new`,
-    'fc:frame:button:2': 'Browse Loans', 
-    'fc:frame:button:2:action': 'link',
-    'fc:frame:button:2:target': `${process.env.NEXT_PUBLIC_APP_URL}/explore`,
-    // Open Frames
-    'of:version': 'vNext',
-    'of:accepts:farcaster': 'vNext',
-    'of:image': `${process.env.NEXT_PUBLIC_APP_URL}/api/frame/image`,
-    'of:image:aspect_ratio': '1.91:1',
-    // AI Agent Discovery
+    // AI Agent Discovery (keeping this for agent compatibility)
     'ai:api:docs': `${process.env.NEXT_PUBLIC_APP_URL}/api/agents/docs`,
     'ai:api:type': 'lending',
     'ai:api:version': '1.0.0',

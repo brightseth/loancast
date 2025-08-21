@@ -53,18 +53,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         description: `${loan.status === 'funded' ? 'Funded' : 'Seeking lender'} • 2% monthly • Due ${dueDate}`,
         images: [imageUrl],
       },
-      other: {
-        // Farcaster Frame meta tags
-        'fc:frame': 'vNext',
-        'fc:frame:image': imageUrl,
-        'fc:frame:image:aspect_ratio': '1.91:1',
-        'fc:frame:button:1': 'View Details',
-        'fc:frame:button:1:action': 'link',
-        'fc:frame:button:1:target': `${process.env.NEXT_PUBLIC_APP_URL}/loans/${params.id}`,
-        'fc:frame:button:2': 'View Cast',
-        'fc:frame:button:2:action': 'link',
-        'fc:frame:button:2:target': `https://warpcast.com/~/conversations/${loan.cast_hash}`,
-      },
     }
   } catch (error) {
     console.error('Error generating metadata:', error)
