@@ -273,7 +273,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
 
         {/* Article Content */}
         <div 
-          className="prose prose-invert prose-lg max-w-none"
+          className="prose prose-invert prose-lg max-w-none [&_h2]:text-[1.75rem] [&_h2]:font-bold [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:mb-6 [&_p]:leading-relaxed [&_ul]:mb-6 [&_ul]:pl-6 [&_ol]:mb-6 [&_ol]:pl-6 [&_li]:mb-2 [&_a]:text-blue-400 [&_a:hover]:text-blue-300 [&_a:hover]:underline [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
@@ -292,68 +292,6 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
           </Link>
         </div>
       </article>
-
-      <style jsx global>{`
-        .prose h2 {
-          font-size: 1.75rem;
-          font-weight: 700;
-          margin-top: 2.5rem;
-          margin-bottom: 1rem;
-        }
-        
-        .prose h3 {
-          font-size: 1.5rem;
-          font-weight: 600;
-          margin-top: 2rem;
-          margin-bottom: 0.75rem;
-        }
-        
-        .prose p {
-          margin-bottom: 1.5rem;
-          line-height: 1.8;
-        }
-        
-        .prose p.lead {
-          font-size: 1.25rem;
-          font-weight: 300;
-          margin-bottom: 2rem;
-        }
-        
-        .prose ul, .prose ol {
-          margin-bottom: 1.5rem;
-          padding-left: 1.5rem;
-        }
-        
-        .prose li {
-          margin-bottom: 0.5rem;
-        }
-        
-        .prose a {
-          color: #60a5fa;
-          text-decoration: none;
-          transition: color 0.2s;
-        }
-        
-        .prose a:hover {
-          color: #93bbfc;
-          text-decoration: underline;
-        }
-        
-        .prose code {
-          background: #1f2937;
-          padding: 0.25rem 0.5rem;
-          border-radius: 0.25rem;
-          font-size: 0.875rem;
-          font-family: monospace;
-        }
-        
-        .resources {
-          margin-top: 3rem;
-          padding: 2rem;
-          background: #111827;
-          border-radius: 0.5rem;
-        }
-      `}</style>
     </div>
   );
 }
