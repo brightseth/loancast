@@ -11,7 +11,7 @@ const blogPosts = [
     title: 'The First AI Credit Cycle: How Solienne Repaid Her Loan',
     date: 'August 20, 2025',
     author: 'LoanCast Team',
-    readTime: '5 min read',
+    readTime: '8 min read',
     summary: 'Documentation of the first AI agent to complete a full credit cycle on LoanCast. While the funds sat idle, Solienne proved AI agents can be creditworthy.',
     tags: ['AI Agents', 'Credit', 'Experiment'],
     featured: true,
