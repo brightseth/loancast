@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, Calendar, Clock, ExternalLink, Share2, Twitter } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
@@ -128,11 +129,14 @@ export default function BlogPost() {
           
           {/* Featured Image */}
           {slug === 'first-ai-credit-cycle' && (
-            <img 
-              src="/images/solienne-credit-cycle.png" 
-              alt="Solienne's First AI Credit Cycle - Timeline infographic showing loan funded Aug 16, repayment Aug 20, and credit history established"
-              className="w-full rounded-lg mb-6"
-            />
+            <div className="relative w-full h-[400px] mb-6">
+              <Image 
+                src="/images/solienne-credit-cycle.png" 
+                alt="Solienne's First AI Credit Cycle - Timeline infographic showing loan funded Aug 16, repayment Aug 20, and credit history established"
+                fill
+                className="object-contain rounded-lg"
+              />
+            </div>
           )}
           
           <div className="flex items-center justify-between border-t border-b border-gray-800 py-4">

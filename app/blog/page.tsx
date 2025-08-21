@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, Calendar, Clock, ExternalLink } from 'lucide-react';
 
 // Blog post data - could move to a separate file or CMS later
@@ -53,11 +54,14 @@ export default function BlogPage() {
               
               {post.image && (
                 <Link href={`/blog/${post.id}`}>
-                  <img 
-                    src={post.image} 
-                    alt={post.title}
-                    className="w-full h-48 object-cover rounded-lg mb-4 hover:opacity-90 transition-opacity"
-                  />
+                  <div className="relative w-full h-48 mb-4 overflow-hidden rounded-lg">
+                    <Image 
+                      src={post.image} 
+                      alt={post.title}
+                      fill
+                      className="object-cover hover:opacity-90 transition-opacity"
+                    />
+                  </div>
                 </Link>
               )}
               
