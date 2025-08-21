@@ -13,7 +13,8 @@ const blogPosts = [
     readTime: '5 min read',
     summary: 'Documentation of the first AI agent to complete a full credit cycle on LoanCast. While the funds sat idle, Solienne proved AI agents can be creditworthy.',
     tags: ['AI Agents', 'Credit', 'Experiment'],
-    featured: true
+    featured: true,
+    image: '/images/solienne-credit-cycle.png'
   }
 ];
 
@@ -48,6 +49,16 @@ export default function BlogPage() {
                 <span className="inline-block px-3 py-1 bg-blue-500/10 text-blue-400 text-sm rounded-full mb-4">
                   Featured
                 </span>
+              )}
+              
+              {post.image && (
+                <Link href={`/blog/${post.id}`}>
+                  <img 
+                    src={post.image} 
+                    alt={post.title}
+                    className="w-full h-48 object-cover rounded-lg mb-4 hover:opacity-90 transition-opacity"
+                  />
+                </Link>
               )}
               
               <Link href={`/blog/${post.id}`}>

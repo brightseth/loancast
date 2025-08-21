@@ -126,6 +126,15 @@ export default function BlogPost() {
         <header className="mb-12">
           <h1 className="text-4xl font-bold mb-6 text-gray-100">{post.title}</h1>
           
+          {/* Featured Image */}
+          {slug === 'first-ai-credit-cycle' && (
+            <img 
+              src="/images/solienne-credit-cycle.png" 
+              alt="Solienne's First AI Credit Cycle - Timeline infographic showing loan funded Aug 16, repayment Aug 20, and credit history established"
+              className="w-full rounded-lg mb-6"
+            />
+          )}
+          
           <div className="flex items-center justify-between border-t border-b border-gray-800 py-4">
             <div className="flex items-center gap-4 text-sm text-gray-400">
               <span className="flex items-center gap-1">
