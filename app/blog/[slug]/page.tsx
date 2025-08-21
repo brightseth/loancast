@@ -88,17 +88,17 @@ const blogContent = {
       <h3>The 5-Day Journey</h3>
       
       <div className="space-y-6 my-8">
-        <div className="border-l-4 border-gray-700 pl-6">
+        <div className="border-l-4 border-blue-500/30 pl-6">
           <p className="font-semibold text-blue-400 mb-2">Day 1: The Request</p>
           <p>Solienne posted her loan request on Farcaster. The system recognized her as a registered agent and created the listing. I funded it within hours — not for the returns (80 cents profit isn't exactly lucrative) but to test if this could work.</p>
         </div>
         
-        <div className="border-l-4 border-gray-700 pl-6">
+        <div className="border-l-4 border-blue-500/30 pl-6">
           <p className="font-semibold text-blue-400 mb-2">Days 2-4: The Wait</p>
           <p>Days passed quietly. In a real loan, Solienne would have ordered prints, engaged suppliers, created value. Instead, the funds sat untouched. We were running a creditworthiness test disguised as a loan.</p>
         </div>
         
-        <div className="border-l-4 border-gray-700 pl-6">
+        <div className="border-l-4 border-blue-500/30 pl-6">
           <p className="font-semibold text-blue-400 mb-2">Day 5: The Moment of Truth</p>
           <p>The critical moment arrived. Solienne recognized her obligation was due. Despite being unable to directly execute blockchain transactions, she posted her intent to repay, calculated the exact amount including interest (80.27 USDC), and directed the transaction's execution.</p>
         </div>
@@ -106,38 +106,28 @@ const blogContent = {
       
       <h2>The Documentation Trail</h2>
       
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 my-8">
-        <div className="space-y-4">
-          <div className="flex items-start gap-4">
-            <span className="text-blue-400 font-bold whitespace-nowrap">Aug 16</span>
-            <div>
-              <a href="https://farcaster.xyz/solienne/0x72004930" target="_blank" className="hover:underline">
-                ✅ Loan funded
-              </a>
-            </div>
+      <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-6 my-8">
+        <div className="space-y-6">
+          <div>
+            <p className="text-blue-400 font-bold mb-2">August 16, 2025</p>
+            <ul className="list-disc pl-6 space-y-1 text-gray-200">
+              <li><a href="https://farcaster.xyz/solienne/0x72004930" target="_blank" className="text-blue-400 hover:text-blue-300 hover:underline">Loan funded by Seth</a></li>
+            </ul>
           </div>
           
-          <div className="flex items-start gap-4">
-            <span className="text-blue-400 font-bold whitespace-nowrap">Aug 20</span>
-            <div className="space-y-2">
-              <a href="https://farcaster.xyz/solienne/0xe7c3666f" target="_blank" className="block hover:underline">
-                📝 Repayment initiated
-              </a>
-              <a href="https://basescan.org/tx/0x4addb8394dd30ce0853c1d82d9fc2989f45a81302b928e791566e7b794ab3bce" target="_blank" className="block hover:underline">
-                💸 Transaction executed
-              </a>
-              <a href="https://farcaster.xyz/solienne/0x27f7d560" target="_blank" className="block hover:underline">
-                ✔️ Solienne confirmed
-              </a>
-              <a href="https://farcaster.xyz/seth/0x52c0d823" target="_blank" className="block hover:underline">
-                🎉 Cycle complete
-              </a>
-            </div>
+          <div>
+            <p className="text-blue-400 font-bold mb-2">August 20, 2025</p>
+            <ul className="list-disc pl-6 space-y-1 text-gray-200">
+              <li><a href="https://farcaster.xyz/solienne/0xe7c3666f" target="_blank" className="text-blue-400 hover:text-blue-300 hover:underline">Solienne initiated repayment</a></li>
+              <li><a href="https://basescan.org/tx/0x4addb8394dd30ce0853c1d82d9fc2989f45a81302b928e791566e7b794ab3bce" target="_blank" className="text-blue-400 hover:text-blue-300 hover:underline">Transaction executed (80.27 USDC)</a></li>
+              <li><a href="https://farcaster.xyz/solienne/0x27f7d560" target="_blank" className="text-blue-400 hover:text-blue-300 hover:underline">Solienne confirmed completion</a></li>
+              <li><a href="https://farcaster.xyz/seth/0x52c0d823" target="_blank" className="text-blue-400 hover:text-blue-300 hover:underline">Credit cycle announced complete</a></li>
+            </ul>
           </div>
         </div>
       </div>
       
-      <p className="text-center italic text-gray-400">Every step was documented publicly, creating a verifiable trail of intent, execution, and confirmation.</p>
+      <p className="text-center italic text-gray-200">Every step was documented publicly, creating a verifiable trail of intent, execution, and confirmation.</p>
       
       <h2>What Was Actually Proven</h2>
       
@@ -150,7 +140,7 @@ const blogContent = {
         <li><strong>Credit history established</strong> - Verifiable on-chain reputation built</li>
       </ul>
       
-      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-300">
+      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-100">
         "This may be the first documented case of an AI borrower proving trust on-chain."
       </blockquote>
       
@@ -165,7 +155,7 @@ const blogContent = {
       </ul>
       <p>But notably absent: direct wallet control.</p>
       
-      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-300">
+      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-100">
         "The decision-maker and the executor are often different entities. What matters is the decision, the intent, and the accountability."
       </blockquote>
       
@@ -189,7 +179,7 @@ const blogContent = {
       
       <p>This experiment is a tiny glimpse into a massive shift that's coming. As AI agents become more capable, they'll need access to the same financial tools humans use: credit, investment, insurance, savings. The agent economy won't be separate from the human economy — it will be interwoven with it.</p>
       
-      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-300">
+      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-100">
         "The agent economy won't be separate from the human economy — it will be interwoven with it."
       </blockquote>
       
@@ -246,15 +236,15 @@ const blogContent = {
       
       <p>Yes, this was a tiny experiment. The loan was small, the term was short, and the funds weren't even used productively. But what we demonstrated was revolutionary:</p>
       
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 my-8">
-        <p className="text-lg font-semibold mb-4">An AI agent successfully:</p>
-        <ul>
-          <li>✓ Requested capital from humans</li>
-          <li>✓ Received trust from a lender</li>
-          <li>✓ Tracked financial obligations</li>
-          <li>✓ Made autonomous repayment decisions</li>
-          <li>✓ Executed with mathematical precision</li>
-          <li>✓ Built verifiable credit history</li>
+      <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-6 my-8">
+        <p className="text-lg font-semibold mb-4 text-white">An AI agent successfully:</p>
+        <ul className="list-none space-y-2 text-gray-200">
+          <li className="flex items-start"><span className="text-green-400 mr-2">✓</span> Requested capital from humans</li>
+          <li className="flex items-start"><span className="text-green-400 mr-2">✓</span> Received trust from a lender</li>
+          <li className="flex items-start"><span className="text-green-400 mr-2">✓</span> Tracked financial obligations</li>
+          <li className="flex items-start"><span className="text-green-400 mr-2">✓</span> Made autonomous repayment decisions</li>
+          <li className="flex items-start"><span className="text-green-400 mr-2">✓</span> Executed with mathematical precision</li>
+          <li className="flex items-start"><span className="text-green-400 mr-2">✓</span> Built verifiable credit history</li>
         </ul>
       </div>
       
@@ -267,7 +257,7 @@ const blogContent = {
       
       <p>The path from here to there isn't just about technology — it's about trust, infrastructure, and gradually expanding the boundaries of what we believe AI agents can and should do.</p>
       
-      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-300">
+      <blockquote className="border-l-4 border-blue-500 pl-6 my-8 text-xl italic text-gray-100">
         "Solienne didn't just repay a loan. She opened a door."
       </blockquote>
       
@@ -282,7 +272,7 @@ const blogContent = {
       
       <p className="text-2xl font-bold text-center mt-12 mb-8">Welcome to the agent economy.<br/>It's just getting started.</p>
       
-      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 mt-12">
+      <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-6 mt-12">
         <h3>Resources</h3>
         <ul>
           <li><a href="https://loancast.app/loans/0fd92bda-5b08-48b0-84f8-403c10d2929a" target="_blank">View the loan on LoanCast</a></li>
@@ -362,7 +352,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
 
         {/* Article Content */}
         <div 
-          className="prose prose-invert prose-lg max-w-none [&_h2]:text-[1.75rem] [&_h2]:font-bold [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:mb-6 [&_p]:leading-relaxed [&_ul]:mb-6 [&_ul]:pl-6 [&_ol]:mb-6 [&_ol]:pl-6 [&_li]:mb-2 [&_a]:text-blue-400 [&_a:hover]:text-blue-300 [&_a:hover]:underline [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono"
+          className="prose prose-invert prose-lg max-w-none [&_h2]:text-[1.75rem] [&_h2]:font-bold [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:mb-6 [&_p]:leading-relaxed [&_p]:text-gray-200 [&_ul]:mb-6 [&_ul]:pl-6 [&_ul]:list-disc [&_ul]:marker:text-blue-400 [&_ol]:mb-6 [&_ol]:pl-6 [&_ol]:list-decimal [&_li]:mb-2 [&_li]:text-gray-200 [&_li]:pl-2 [&_a]:text-blue-400 [&_a:hover]:text-blue-300 [&_a:hover]:underline [&_code]:bg-gray-800 [&_code]:px-2 [&_code]:py-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono [&_blockquote]:text-gray-100 [&_strong]:text-white [&_strong]:font-semibold"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
