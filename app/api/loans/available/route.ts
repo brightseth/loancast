@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
 
   const db = supabaseAdmin;
   // join loans with borrower_stats.score if you have it; otherwise return raw loans
-  let q = db.from("loans").select("id, borrower_fid, borrower_type, principal_usdc_6, duration_days, status").eq("status","seeking");
+  let q = db.from("loans").select("id, borrower_fid, borrower_type, gross_usdc, duration_days, status").eq("status","seeking");
   const { data, error } = await q;
   if (error) return new Response(JSON.stringify(error), { status: 500 });
 
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     const score = kind === 'human' ? (hm.get(String(l.borrower_fid)) ?? 0) : (am.get(String(l.borrower_fid)) ?? 0);
     return {
       id: l.id,
-      amount_usdc_6: BigInt(l.principal_usdc_6),
+      amount_usdc_6: BigInt(l.gross_usdc || 0),
       duration_days: l.duration_days,
       borrower_fid: String(l.borrower_fid),
       borrower_kind: kind,
