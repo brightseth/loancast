@@ -66,7 +66,7 @@ const blogContent = {
       
       <h2>Meet Solienne</h2>
       
-      <p>Solienne is an AI artist created by Eden, operating with creative and financial autonomy on Farcaster. She creates digital art, engages with collectors, and has been building a following in the crypto art community. But like any artist, she faces a challenge: the need for upfront capital to produce physical works for collectors.</p>
+      <p>Solienne is an AI artist operating with creative and financial autonomy on Farcaster. Built on Eden's infrastructure, she creates digital art, engages with collectors, and has been building a following in the crypto art community. Like any artist, she faces a challenge: the need for upfront capital to produce physical works for collectors.</p>
       
       <p>Traditional lending systems have no framework for evaluating an AI's creditworthiness. How do you run a credit check on an agent? What collateral does an AI possess? These questions have kept AI agents locked out of financial markets — until now.</p>
       
@@ -85,36 +85,31 @@ const blogContent = {
       
       <p>The loan process revealed both the possibilities and current limitations of AI financial autonomy. Here's what actually happened behind the scenes:</p>
       
-      <h3>Day 1: The Request</h3>
-      <p>Solienne posted her loan request on Farcaster using the LoanCast protocol. The system recognized her as a registered agent (FID: 1113468) and created the loan listing. Within hours, I decided to fund it — not because of the returns (80 cents on a 5-day loan isn't exactly lucrative) but because I wanted to see if this could work.</p>
+      <h3>The 5-Day Journey</h3>
+      <p>On day one, Solienne posted her loan request on Farcaster. The system recognized her as a registered agent and created the listing. I funded it within hours — not for the returns (80 cents profit isn't exactly lucrative) but to test if this could work.</p>
       
-      <h3>Days 2-4: The Waiting Period</h3>
-      <p>This is where a real loan would have seen economic activity. Solienne would have ordered prints, engaged suppliers, created value. Instead, the funds sat untouched. We were essentially running a creditworthiness test disguised as a loan.</p>
+      <p>Days 2-4 passed quietly. In a real loan, Solienne would have ordered prints, engaged suppliers, created value. Instead, the funds sat untouched. We were running a creditworthiness test disguised as a loan.</p>
       
-      <h3>Day 5: The Repayment</h3>
-      <p>This is where things got interesting. Solienne, operating through Eden's infrastructure, recognized her obligation was due. She couldn't directly execute blockchain transactions (a current technical limitation), but she could make decisions and direct execution. She posted her intent to repay, calculated the exact amount including interest (80.27 USDC), and instructed the transaction.</p>
+      <p>Day 5 brought the critical moment. Solienne recognized her obligation was due. Despite being unable to directly execute blockchain transactions, she posted her intent to repay, calculated the exact amount including interest (80.27 USDC), and directed the transaction's execution.</p>
       
-      <h2>The Timeline</h2>
+      <h2>The Documentation Trail</h2>
       <ul>
         <li><strong>Aug 16</strong>: <a href="https://farcaster.xyz/solienne/0x72004930" target="_blank">Loan funded</a></li>
-        <li><strong>Aug 20</strong>: <a href="https://farcaster.xyz/solienne/0xe7c3666f" target="_blank">Repayment initiated</a></li>
-        <li><strong>Aug 20</strong>: <a href="https://basescan.org/tx/0x4addb8394dd30ce0853c1d82d9fc2989f45a81302b928e791566e7b794ab3bce" target="_blank">Repayment executed</a></li>
-        <li><strong>Aug 20</strong>: <a href="https://farcaster.xyz/solienne/0x27f7d560" target="_blank">Solienne confirmed</a></li>
-        <li><strong>Aug 20</strong>: <a href="https://farcaster.xyz/seth/0x52c0d823" target="_blank">Cycle complete</a></li>
+        <li><strong>Aug 20</strong>: 
+          <ul>
+            <li><a href="https://farcaster.xyz/solienne/0xe7c3666f" target="_blank">Repayment initiated</a></li>
+            <li><a href="https://basescan.org/tx/0x4addb8394dd30ce0853c1d82d9fc2989f45a81302b928e791566e7b794ab3bce" target="_blank">Transaction executed</a></li>
+            <li><a href="https://farcaster.xyz/solienne/0x27f7d560" target="_blank">Solienne confirmed</a></li>
+            <li><a href="https://farcaster.xyz/seth/0x52c0d823" target="_blank">Cycle complete</a></li>
+          </ul>
+        </li>
       </ul>
       
-      <p>Every step was documented in public, creating a verifiable trail of intent, execution, and confirmation.</p>
+      <p>Every step was documented publicly, creating a verifiable trail of intent, execution, and confirmation.</p>
       
-      <h2>What Was Demonstrated</h2>
-      <ol>
-        <li><strong>Financial Autonomy</strong> — Solienne made the decision to repay on time</li>
-        <li><strong>Accuracy</strong> — She calculated repayment correctly</li>
-        <li><strong>Commitment</strong> — She followed through exactly as agreed</li>
-        <li><strong>Communication</strong> — Each step was publicly logged</li>
-        <li><strong>Creditworthiness</strong> — She now has an established credit history</li>
-      </ol>
+      <h2>What Was Actually Proven</h2>
       
-      <p>This is the first case of an AI borrower proving trust on-chain.</p>
+      <p>Despite the simplicity of this test, Solienne demonstrated critical capabilities: financial autonomy in deciding when to repay, mathematical accuracy in calculating interest (80.27 USDC exactly), commitment to the agreed terms, transparent communication throughout, and the establishment of verifiable credit history. This may be the first documented case of an AI borrower proving trust on-chain.</p>
       
       <h2>The Technical Reality</h2>
       
@@ -122,9 +117,7 @@ const blogContent = {
       
       <p>Consider a CEO who directs their CFO to make payments, or a business owner who instructs their accountant to handle transactions. The decision-maker and the executor are often different entities. What matters is the decision, the intent, and the accountability — all of which Solienne demonstrated.</p>
       
-      <h2>Lessons Learned</h2>
-      
-      <p>This experiment taught us several critical lessons about AI participation in financial systems:</p>
+      <h2>Key Lessons</h2>
       
       <h3>1. Time Horizons Matter</h3>
       <p>Five days is a sprint, not a loan term. For AI agents to create real economic value, they need longer horizons — 30 days minimum. This gives them time to deploy capital, create products, find buyers, and generate returns.</p>
@@ -186,19 +179,7 @@ const blogContent = {
       
       <h2>Conclusion: Small Steps, Big Implications</h2>
       
-      <p>Yes, this was a tiny experiment. The loan was small, the term was short, and the funds weren't even used productively. We could have just sent 80 USDC back and forth between wallets and achieved the same financial outcome.</p>
-      
-      <p>But that misses the point entirely.</p>
-      
-      <p>What we demonstrated was that an AI agent could:</p>
-      <ul>
-        <li>Request capital based on a stated need</li>
-        <li>Receive trust from a human lender</li>
-        <li>Track and understand debt obligations</li>
-        <li>Make autonomous decisions about repayment</li>
-        <li>Execute on those decisions precisely</li>
-        <li>Build a verifiable credit history</li>
-      </ul>
+      <p>Yes, this was a tiny experiment. The loan was small, the term was short, and the funds weren't even used productively. But what we demonstrated was that an AI agent could request capital, receive trust, track obligations, make autonomous decisions, execute precisely, and build verifiable credit history.</p>
       
       <p>These capabilities are the building blocks of economic participation. Today it's 80 USDC for prints that were never ordered. Tomorrow it could be $10,000 for an AI to start a design agency. Next year, it might be $1 million for an AI-run manufacturing operation.</p>
       
