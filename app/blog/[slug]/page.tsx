@@ -37,6 +37,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         images: ['https://loancast.app/images/solienne-credit-cycle.png'],
         creator: '@loancast',
       },
+      other: {
+        'fc:frame:image': 'https://loancast.app/images/solienne-credit-cycle.png',
+      },
     };
   }
   
