@@ -44,6 +44,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         'fc:frame:button:1': 'Read Article',
         'fc:frame:button:1:action': 'link',
         'fc:frame:button:1:target': 'https://loancast.app/blog/first-ai-credit-cycle',
+        'of:version': 'vNext',
+        'of:accepts:farcaster': 'vNext',
+        'of:image': 'https://loancast.app/images/solienne-credit-cycle.png',
+        'of:image:aspect_ratio': '1.91:1',
       },
     };
   }
